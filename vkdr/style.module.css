@@ -1,0 +1,75 @@
+.wrapper{
+    padding: 3rem 0;
+    width: 100%;
+    display: grid;
+    grid-template: repeat(3, auto) / repeat(2, 1fr);
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.card{
+    border: 1px solid #ebeded;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 1rem 1.5rem;
+    gap: 1rem ; 
+    transition: all .3s ease-in;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+    min-height: 150px;
+}
+
+.card:hover{
+    border-color: #33FFCE;
+    transition: all .3s ease-in-out;
+}
+
+.titlebar{
+    font-size: 1rem;
+    width: 100%;
+    gap: .5rem
+}
+
+.title{
+  display: inline;
+  margin-left: .4rem
+}
+
+.desc{
+  font-size: .785rem
+}
+
+/* 
+    Responsive
+ */
+
+@media screen and (max-width: 1250px) {  
+
+  .card{
+    height: 150px;
+  }
+
+  .titlebar{
+    font-size: .7rem;
+  }
+
+  .desc{
+    font-size: .685rem
+  }
+
+} 
+
+@media screen and (max-width: 767px){
+    .wrapper{
+    grid-template: repeat(3, auto) / repeat(1, 80vw);
+  }
+  .card{
+    align-items: flex-start
+  }
+}

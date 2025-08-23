@@ -1,0 +1,101 @@
+.wrapper{
+    padding: 3rem 0;
+    width: 100%;
+    display: grid;
+    grid-template: repeat(3, auto) / repeat(2, 1fr);
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.card{
+    border: 1px solid #ebeded;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 1rem 1.5rem;
+    gap: 1rem ; 
+    transition: all .3s ease-in;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+    min-height: 150px;
+}
+
+.card:hover{
+    border-color: #33FFCE;
+    transition: all .3s ease-in-out;
+}
+
+.titlebar{
+    font-size: 1rem;
+    width: 100%;
+    gap: .5rem
+}
+
+.title{
+  display: inline;
+  margin-left: .4rem
+}
+
+.desc{
+  font-size: .785rem
+}
+
+.image-container {
+  display: inline-block;
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background: var(--ifm-background-surface);
+  text-align: center; /* center the caption */
+  margin-bottom: 1rem;
+}
+
+.image-container img {
+  border-radius: 8px;
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto; /* keeps image centered */
+}
+
+/* Caption styling */
+.caption {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-600); /* adapts to theme */
+  font-style: italic;
+}
+
+/* 
+    Responsive
+ */
+
+@media screen and (max-width: 1250px) {  
+
+  .card{
+    height: 150px;
+  }
+
+  .titlebar{
+    font-size: .7rem;
+  }
+
+  .desc{
+    font-size: .685rem
+  }
+
+} 
+
+@media screen and (max-width: 767px){
+    .wrapper{
+    grid-template: repeat(3, auto) / repeat(1, 80vw);
+  }
+  .card{
+    align-items: flex-start
+  }
+}

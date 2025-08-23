@@ -1,0 +1,23 @@
+[
+    {
+        "id":0,
+        "title":"Catalog",
+        "icon":"img/assets/image1.png",
+        "image":"/img/assets/catalog.gif",
+        "desc":"The Devportal by VeeCode Platform is the ideal platform for centralizing and efficiently cataloging your APIs. With Devportal, you can view, test, and manage all your APIs in one place, while also having access to documentation and plugins needed for your project development."
+    },
+    {
+        "id":1,
+        "title":"Software Templates",
+        "icon":"/img/assets/image2.png",
+        "image":"/img/assets/template.gif",
+        "desc":"With Devportal, you can customize your work environment with templates for both development and infrastructure, as well as the freedom to personalize pipelines. The platform offers a variety of pre-configured templates that accelerate the development process and ensure consistency in your product."
+    },
+    {
+        "id":2,
+        "title":"Kong Service Manager",
+        "icon":"/img/assets/kong.png",
+        "image":"/img/assets/kong.gif",
+        "desc":"Manage and administer information about Kong services. List and manipulate routes. Manage plugins without leaving DevPortal. Access comprehensive service details. Ensure seamless integration and efficient workflow."
+    }
+]

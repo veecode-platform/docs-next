@@ -1,0 +1,42 @@
+:root {
+    --color-light: #F5F5F5;
+    --color-primary: #33FFCE;
+  }
+
+.features{
+    width: 100vw;
+    padding: 7rem 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap:5rem;
+    background-image: url('/img/assets/background-main.png');
+}
+
+.features :nth-child(odd){
+    flex-direction: row;
+    /* align-self:flex-start; */
+    text-align: right;
+}
+
+
+/* Responsive */
+@media screen and (max-width: 1300px) {
+    .features{
+        padding: 10rem 0;
+    }
+} 
+
+@media screen and (max-width: 767px) {
+    .features :nth-child(odd){
+        flex-direction: column;
+        align-self:auto;
+        text-align: center;
+    }
+} 
+@media screen and (max-width: 500px){
+    .features{
+        padding: 4rem 0;
+    }
+}
