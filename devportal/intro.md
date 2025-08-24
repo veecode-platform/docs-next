@@ -6,7 +6,6 @@ title: Intro to DevPortal
 
 import style from './style.module.css';
 
-
 # Intro
 
 Welcome to VeeCode Developer Portal documentation! This document will guide you through our Developer Portal, which is a modern and open-source Platform Engineering solution designed to help organizations better manage their API and service ecosystems.
@@ -25,10 +24,14 @@ This documentation guide aims to help you understand the workings of the Develop
 
 export const Card = ({children, title, link}) => (
    <div className={style.card}
-      onClick={() => window.location = link }>
-      <span className={style.titlebar}>
-         <h3 className="{style.title}">{title}</h3>
-      </span>
+      onClick={() => window.location = link }
+      onKeyDown={(e) => e.key === 'Enter' && (window.location = link)}
+      tabIndex={0}
+      role="button"
+      aria-label={`Navigate to ${title}`}>
+      <div className={style.titlebar}>
+         <h3 className={style.title}>{title}</h3>
+      </div>
       <p className={style.desc}>
          {children}
       </p>

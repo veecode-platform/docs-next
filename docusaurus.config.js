@@ -97,6 +97,17 @@ const config = {
         // ... other options
       },
     ],
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        redirects: [
+          { 
+            from: '/devportal/installation-guide/VKDR',
+            to: '/devportal/installation-guide/local-setup'
+          },
+        ],
+      },
+    ],
   ],
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */

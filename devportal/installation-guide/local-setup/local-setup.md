@@ -1,10 +1,10 @@
 ---
-sidebar_position: 1
-sidebar_label: How to Install
-title: How to Install and Configure DevPortal Locally (VKDR)
+sidebar_position: 0
+sidebar_label: Local Install
+title: Install DevPortal Locally
 ---
 
-This guide offers a straightforward installation of VeeCode DevPortal in a local, containerized, and isolated environment. It's perfect for those who want to quickly test the platform in a cost-effective manner and evaluate its features without requiring a full-scale cluster. In just under 5 minutes, you'll have your own DevPortal instance up and running, providing you with a swift, hands-on experience with our product.
+This guide offers a straightforward installation of VeeCode DevPortal in a local, containerized and isolated environment. It's perfect for those who want to quickly test the platform in a cost-effective manner and evaluate its features without requiring a full-scale cluster. In just under 5 minutes, you'll have your own DevPortal instance up and running, providing you with a swift, hands-on experience with our product.
 
 **What you will learn in this guide:**
 
