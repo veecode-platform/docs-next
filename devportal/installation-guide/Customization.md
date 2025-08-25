@@ -1,4 +1,7 @@
 
+:::warning
+The information in this section needs updating and should be ignored. We have adopted another form of customization, easier and more user-friendly. Please have patience while we take care of updating these docs.
+:::
 
 In this tutorial, we will show you how to customize your DevPortal theme through two different methods: In one, we will edit the theme.json file and use a configmap to store the settings. In the other option, after customization, we will make the file available at a URL.
 

@@ -1,27 +1,18 @@
 ---
 sidebar_position: 4
-sidebar_label: Github Tokens
-title: Github Tokens and Secrets
+sidebar_label: Github Token
+title: Github Personal Token
 ---
 
-In this step you will obtain Github tokens and secrets that are necessary prerequisites for the DevPortal to connect to Github. Take note of them as they will be used in the DevPortal configuration.
+In this step you will obtain a Github personal token for the DevPortal to connect to Github.
 
-## Create an OAuth Application on GitHub (optional but recommended)
-
-If you don't have the required information mentioned in the prerequisites, follow these steps:
-1. Go to GitHub and create a new [OAuth application](https://github.com/settings/applications/new).:
-    - **Application Name:** Choose an identifiable name, such as "devportal".
-    - **Homepage URL:** `http://devportal.localhost:8000`
-    - **Description:** (Optional) Add a brief description.
-    - **Authorization Callback URL:** `http://devportal.localhost:8000/api/auth/github/handler/frame`
-
-2. Save the Client ID, generate a new Client Secret and take note of it as well.
-
-**Important:** We are using "devportal.localhost" as a local setup domain, a real environment would use a real domain name. Note down the Client ID and Client Secret, as they will be used later on during DevPortal configuration.
+:::warning
+Configuring a Github App in adition to a token is not required for local setup, but it is recommended for real environments. Relying only on a token will have you hit GitHub API's rate limits very quickly.
+:::
 
 ## Create an Access Token on GitHub
 
-Follow these steps necessary [Github access token](https://github.com/settings/tokens):
+Access the [Github access token](https://github.com/settings/tokens) page and follow these steps:
 
 1. Create a new "classic" access token on GitHub (for simplicity):
 
@@ -31,11 +22,15 @@ Follow these steps necessary [Github access token](https://github.com/settings/t
 
 2. Take note of the generated token.
 
-The token will only be displayed once, so make sure to store it in a safe place. 
+The token will only be displayed once, so make sure to store it in a safe place to use later on. You may keep it for now in an environment variable:
 
-## Alternative: Create a Fine-grained Access Token on GitHub
+```bash
+export GITHUB_TOKEN=ghp_...
+```
 
-You may prefer to use fine grained tokens instead, so you can restrict access to specific repositories or organizations.
+## Alternative: Create a Fine-grained Access Token instead
+
+You may prefer to use safer and less-privileged fine grained tokens instead, so you can restrict access to specific repositories or organizations.
 
 1. Create a new "fine grained" access token on GitHub (more secure):
 

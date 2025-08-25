@@ -21,7 +21,7 @@ After gathering all the necessary information (token, Client ID, and Client Secr
 
 ```sh
 vkdr devportal install \
-  --github-token=$GH_TOKEN \
+  --github-token=$GITHUB_TOKEN \
   --install-samples
 ```
 
@@ -32,6 +32,10 @@ Access DevPortal locally at:
 ```sh
 http://devportal.localhost:8000/
 ```
+
+:::warning
+You may need to add `devportal.localhost` to your `/etc/hosts` file resolving to `127.0.0.1`.
+:::
 
 Upon completing the installation of DevPortal, navigate on its web interface to explore the available features and functionalities. A couple of sample applications and APIs were deployed and catalogued for you to test and interact with.
 

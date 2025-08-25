@@ -1,8 +1,12 @@
 ---
-sidebar_position: 3
+sidebar_position: 5
 sidebar_label: Production Setup
 title: Production Setup
 ---
+
+:::warning
+The information in this section needs updating and should be ignored. Please have patience while we take care of it.
+:::
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';

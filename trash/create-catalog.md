@@ -1,7 +1,7 @@
 ---
-sidebar_position: 2
-sidebar_label: Simple setup
-title: Simple setup
+sidebar_position: 20
+sidebar_label: Create a catalog
+title: Create a catalog repository
 ---
 
 import Tabs from '@theme/Tabs';

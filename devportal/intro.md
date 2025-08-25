@@ -8,6 +8,10 @@ import style from './style.module.css';
 
 # Intro
 
+:::tip
+This documentation is being updated to our latest release supporting dynamic plugins. Keep in touch and, by all means, file PRs to help us improve it.
+:::
+
 Welcome to VeeCode Developer Portal documentation! This document will guide you through our Developer Portal, which is a modern and open-source Platform Engineering solution designed to help organizations better manage their API and service ecosystems.
 
 ### Here are some key points about the Developer Portal
