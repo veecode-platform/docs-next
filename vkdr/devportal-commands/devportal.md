@@ -19,3 +19,7 @@ vkdr devportal install
 ```
 
 ## vkdr devportal remove
+
+```bash
+vkdr devportal remove
+```

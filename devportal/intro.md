@@ -14,13 +14,18 @@ This documentation is being updated to our latest release supporting dynamic plu
 
 Welcome to VeeCode Developer Portal documentation! This document will guide you through our Developer Portal, which is a modern and open-source Platform Engineering solution designed to help organizations better manage their API and service ecosystems.
 
+### What is VeeCode DevPortal?
+
+VeeCode DevPortal is an open-source platform built on top of [Backstage](https://backstage.io), an open-source developer portal framework created by Spotify. Backstage has a growing community and is being used by many organizations, including large technology companies like Google, Microsoft, and Verizon.
+
+VeeCode DevPortal is a Backstage distro that provides a production-grade portal on day one: catalog, software templates, tech docs, search, and SSO already wired.
+
 ### Here are some key points about the Developer Portal
 
 - It is a powerful tool that helps developers' self-service experience when developing APIs and services
 - It is a catalog of software and IaC templates for autonomous teams to use
 - It is an API showcase and governance tool for both developers and business partners
 - It simplifies DevOps adoption and scaling, removing cognitive load from average teams
-- It is an open-source platform built on top of [Backstage](https://backstage.io), an open-source developer portal platform created by Spotify. Backstage has a growing community and is being used by many organizations, including large technology companies like Google, Microsoft, and Verizon.
 
 This documentation guide aims to help you understand the workings of the Developer Portal, how to use it, and how to customize it to meet your specific needs. Here are some of the topics covered in this guide:
 

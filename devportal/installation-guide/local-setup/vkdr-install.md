@@ -4,7 +4,7 @@ sidebar_label: VKDR Installation
 title: VKDR Installation
 ---
 
-In this section you will learn how to install and initialize `vkdr`, a lightweight CLI tool that allows safely running VeeCode DevPortal in a local containerized and isolated environment.
+In this section you will learn how to install and initialize `vkdr`, an [open-source](https://github.com/veecode-platform/vkdr) lightweight CLI tool that allows safely running VeeCode DevPortal in a local containerized and isolated environment.
 
 :::info VKDR is quite cool!
 VKDR stands for "VeeCode Kubernetes Development Runtime", a simple command-line tool that aids on running a local Kubernetes cluster and a few tools that otherwise are quite a bit cumbersome to get them right. The VKDR environment is entirely expendable, allowing you to experiment freely without worrying about long-term impacts — perfect for testing and development purposes. 

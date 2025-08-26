@@ -97,3 +97,7 @@ upstream:
         domain: grafana.localhost
         unifiedAlerting: true
 ```
+
+### About the Helm chart
+
+Please check [Understand the Helm Chart](./understand-chart) for more information.
