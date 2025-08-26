@@ -6,7 +6,7 @@ title: upgrade
 
 # vkdr upgrade
 
-This commands upgrades `vkdr` command-line tool to the latest version.
+This commands upgrades `vkdr` command-line tool to the latest version. You must run `vkdr init` after upgrading in order to update your local tools and scripts.
 
 ```bash
 vkdr upgrade

@@ -28,9 +28,9 @@ You may find below a sample `values.yaml` file that you can use as a starting po
 
 ```yaml
 global:
-  host: localhost # change to your domain
-  protocol: http # usually https
-  port: '8000' # need quotes, defaults to empty
+  host: yourhost.yourdomain.com # change to your domain
+  protocol: https # usually https
+  port: '' # must start with ':', defaults to empty
 upstream:
   enabled: true
   fullnameOverride: veecode-devportal # do not change
@@ -43,8 +43,6 @@ upstream:
         session:
           secret: "${BACKEND_AUTH_SECRET_KEY}"
         providers:
-          #guest:
-          #  dangerouslyAllowOutsideDevelopment: true
           github:
             development:
               clientId: ${GITHUB_CLIENT_ID}

@@ -54,3 +54,17 @@ This is just a shortcut for `vkdr infra stop` with all defaults.
 # no ingress controller, default ports are 8000/8001
 vkdr infra down
 ```
+
+## vkdr infra expose
+
+This command will expose the local `vkdr` cluster admin port to the internet, using a public cloudflare tunnel:
+
+```bash
+vkdr infra expose
+```
+
+Notice that a temporary "kubeconfig" file for this endpoint will be available at `~/.vkdr/tmp/kconfig`.
+
+:::warning
+Please understand the risk of exposing your cluster to the internet and the potential security implications of doing so. This is a good hack for testing remote access to your cluster, but please be aware of the risks.
+:::
