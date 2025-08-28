@@ -1,3 +1,8 @@
+---
+sidebar_position: 7
+sidebar_label: Customizing DevPortal
+title: Customizing DevPortal
+---
 
 :::warning
 The information in this section needs updating and should be ignored. We have adopted another form of customization, easier and more user-friendly. Please have patience while we take care of updating these docs.

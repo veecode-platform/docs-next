@@ -100,4 +100,4 @@ upstream:
 
 ### About the Helm chart
 
-Please check [Understand the Helm Chart](./understand-chart) for more information.
+Please check [Understand the Helm Chart](./understand-chart) for more information on the chart structure and available settings. You can also check the chart page on [ArtifactHub](https://artifacthub.io/packages/helm/veecode-platform/devportal).
