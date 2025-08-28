@@ -34,16 +34,25 @@ The source code for the current DevPortal header is at [VeeCode Homepage](https:
 There are a few simple properties in the `appConfig` section of the `values.yaml` file that can help you with very simple branding options:
 
 ```yaml
-app:
-  branding:
-    fullLogo: https://veecode-platform.github.io/support/logos/logo.svg
-    fullLogoDark: https://veecode-platform.github.io/support/logos/logo-black.svg
-    iconLogo: https://veecode-platform.github.io/support/logos/logo-mobile.png
-    fullLogoWidth: 380
-    # iconLogo: <url to favIcon>
+upstream:
+  backstage:
+    appConfig:
+      app:
+        branding:
+          fullLogo: https://veecode-platform.github.io/support/logos/logo.svg
+          fullLogoDark: https://veecode-platform.github.io/support/logos/logo-black.svg
+          iconLogo: https://veecode-platform.github.io/support/logos/logo-mobile.png
+          fullLogoWidth: 380
+          # iconLogo: <url to favIcon>
+      backend:
+        csp:
+          img-src: ["'self'","data:","https://raw.githubusercontent.com/","https://avatars.githubusercontent.com/","https://veecode-platform.github.io","https://platform.vee.codes"]
 ```
 
-You can provide URLs to your custom resources, but remember those must be available to end users' browsers.
+A few points to remember:
+
+- You can provide URLs to your custom resources, but remember those must be available to end users' browsers.
+- You must add the base URL of those resources to the `img-src` list.
 
 ### Custom theme replace/merge
 
