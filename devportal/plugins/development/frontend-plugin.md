@@ -30,3 +30,8 @@ Wire the plugin route into the app UI so it becomes accessible:
 4. Optionally add a link (e.g., to the sidebar/nav) so users can discover it.
 
 Restart the dev server if needed and visit `/my-plugin` to see your page.
+
+Next:
+
+- Add UI elements (cards, widgets) using [Backstage components](https://backstage.io/storybook/) and [Material UI](https://mui.com/material-ui/).
+- Add routes, entity pages, or catalog integrations as needed.

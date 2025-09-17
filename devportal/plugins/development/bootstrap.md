@@ -74,29 +74,18 @@ yarn new --select scaffolder-backend-module --option moduleId=my-scaffold-plugin
 
 You get for every created plugin a new package at `plugins/your-plugin-id/`.
 
+## Develop locally
 
+- Run `yarn start` at the repo root to start Backstage runtime hosting all plugins.
+- Edit your plugin sources under `plugins/<your-plugin>/src`.
 
-## 3) Scaffold a backend plugin (optional)
+## Next steps
 
-
-
-## 4) Develop locally
-
-- Run `yarn dev` at the repo root to start the frontend and backend together.
-- Edit your plugin source under `packages/my-plugin/` (frontend) and rerun the page.
-- For backend code, edit under `packages/backend/plugins/my-backend-plugin/` and watch the backend reload.
-
-## 5) Next steps
-
-- Add UI elements (cards, widgets) using [Backstage components](https://backstage.io/storybook/) and [Material UI](https://mui.com/material-ui/).
-- Add routes, entity pages, or catalog integrations as needed.
-- If your plugin will be distributed, plan for two packages: a static plugin and a dynamic plugin variant. See the distribution and dynamic plugin docs in this section.
+Proceed to the next steps based on the type of plugin you created. At the end of this guide we will cover packahging and distribution of your plugin.
 
 ## Troubleshooting tips
 
-- If `yarn backstage-cli` is not found, ensure `node_modules/.bin` is on your PATH or invoke via `yarn backstage-cli` from the repo root.
-- Version mismatches can cause scaffolded code to differ. Use the latest Backstage app and CLI when starting a new project.
-- Clear `node_modules` and reinstall (`yarn install`) if you encounter odd build errors.
+- With time the "vanilla" backstage created to host the plugins may drift too much from current backstage version. You can always update the project following the "[Keeping Backstage Updated](https://backstage.io/docs/getting-started/keeping-backstage-updated)" guide.
 
 ## References
 
