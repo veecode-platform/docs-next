@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 12
 sidebar_label: Grafana 
 title: Grafana Plugin Tutorial
 ---

@@ -8,3 +8,6 @@ title: Intro to Admin-UI
 
 The `admin-ui` serves as the administrative interface for the system, providing a web-based UI for system administrators to manage and configure various aspects of the application. It is deployed as a part of the system's Kubernetes infrastructure, ensuring scalable and manageable access to administrative functions.
 
+:::warning
+The Admin-UI is currently being updated to the latest DevPortal chart and is not functional yet. Please check back later.
+:::

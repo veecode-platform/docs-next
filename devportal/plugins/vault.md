@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 14
 sidebar_label: Vault
 title: Vault Plugin Tutorial
 ---

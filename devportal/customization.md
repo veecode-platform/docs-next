@@ -9,7 +9,7 @@ VeeCode DevPortal follows Backstage's standards for customizing the UI:
 - **Custom home page plugin:** the entire home page can be customized by using the Backstage plugin system (https://backstage.io/docs/getting-started/homepage)
 - **Custom header plugin:** the header shared by all pages can also be customized by using the Backstage plugin system (https://backstage.io/docs/getting-started/header)
 - **Simple branding:** a few simple properties in the `appConfig` section of the `values.yaml` file can help you with very simple branding options
-- **Custom themes:** a few simple properties in the `appConfig` section of the `values.yaml` file can help you with simple branding options
+- **Custom themes:** a few simple properties in the `appConfig` section of the `values.yaml` file can help you with custom colors
 
 ### Custom home page plugin
 
