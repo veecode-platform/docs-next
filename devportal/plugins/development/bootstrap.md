@@ -72,10 +72,11 @@ yarn new --select backend-plugin --option pluginId=my-back-plugin
 yarn new --select scaffolder-backend-module --option moduleId=my-scaffold-plugin
 ```
 
-You get for every created plugin a new package at `plugins/your-plugin-id/`.
+You get for every created plugin a new package at `plugins/your-plugin-id` folder.
 
 ## Develop locally
 
+- Rename the `@internal/...` prefix for your plugin to a name you control in your npm registry (like `@myorg/...`). Do not use `@internal/...` if you plan to publish the plugin later on.
 - Run `yarn start` at the repo root to start Backstage runtime hosting all plugins.
 - Edit your plugin sources under `plugins/<your-plugin>/src`.
 
