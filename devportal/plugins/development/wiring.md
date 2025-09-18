@@ -100,4 +100,12 @@ vkdr devportal install --github-token $GITHUB_TOKEN \
 This command installs DebPortal with the extra plugin wiring. It also installs a few sample apps and configures DevPortal to rely on Verdaccio as an external npm registry.
 :::
 
+### Open DevPortal (VKDR)
+
+The local installation of DevPortal should be available at `http://devportal.localhost:8000`.
+
+![VKDR DevPortal with Dynamic Frontend Plugin](/img/assets/devportal-dyn-plugin.png)
+
+## Additional Documentation
+
 More info on frontend plugin wiring can be found on [RHDH wiring documentation](https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.7/html-single/installing_and_viewing_plugins_in_red_hat_developer_hub/index#assembly-front-end-plugin-wiring.adoc_rhdh-extensions-plugins).
