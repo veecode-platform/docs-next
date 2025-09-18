@@ -10,12 +10,26 @@ Frontend plugins must be wired to the DevPortal instance configuration during dy
 
 All frontend plugins **must** bring their own settings in the `pluginConfig:` field, thus defining routes, sidebars, mount points, icons, APIs, etc.
 
-The sample frontend plugin we have just built and [packaged](packaging.md) defined a page and a sidebar link, so it can be wired to DevPortal with the following configuration:
+The sample frontend plugin we have just built and [packaged](packaging.md) defined a page and a sidebar link, so it can be wired to DevPortal by a configuration like the one below:
 
 ```yaml
 global:
   dynamic:
     plugins:
+      - package: '@your-org/plugin-my-front-plugin-dynamic@x.y.z'
+        disabled: false
+        integrity: sha512-xxxxxxxxx
+        pluginConfig:
+          dynamicPlugins:
+            frontend:
+              your-org.plugin-my-front-plugin:
+                dynamicRoutes:
+                  - path: /my-front-plugin
+                    importName: MyFrontPluginPage
+                    menuItem:
+                      icon: SomeIcon
+                      text: My Plugin Page
+                      enabled: true
 ```
 
 ## Testing with VKDR
