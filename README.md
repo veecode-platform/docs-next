@@ -53,3 +53,4 @@ Upgrade docusaurus version:
 ```bash
 yarn up @docusaurus/core@latest @docusaurus/preset-classic@latest @docusaurus/module-type-aliases@latest @docusaurus/types@latest
 ```
+
