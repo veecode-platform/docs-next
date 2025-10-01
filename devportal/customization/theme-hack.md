@@ -1,60 +1,12 @@
 ---
-sidebar_position: 7
-sidebar_label: Customizing DevPortal
-title: Customizing DevPortal
+sidebar_position: 4
+sidebar_label: Theme hacking
+title: Theme hacking
 ---
 
-VeeCode DevPortal follows Backstage's standards for customizing the UI:
+A more obscure way to override theme settings despite the chosen variant is to use the `global.theme.customJson` value to override just the ones you want to change.
 
-- **Custom home page plugin:** the entire home page can be customized by using the Backstage plugin system (https://backstage.io/docs/getting-started/homepage)
-- **Custom header plugin:** the header shared by all pages can also be customized by using the Backstage plugin system (https://backstage.io/docs/getting-started/header)
-- **Simple branding:** a few simple properties in the `appConfig` section of the `values.yaml` file can help you with very simple branding options
-- **Custom themes:** a few simple properties in the `appConfig` section of the `values.yaml` file can help you with custom colors
-
-### Custom home page plugin
-
-The entire DevPortal “home” can be replaced by a custom static or dynamic plugin.
-
-:::info
-Please understand this is a development effort that involves coding a custom plugin and packaging it as an NPM package (or two, for dynamic loading).
-:::
-
-The process for creating a “plugin-home” is described in the official Backstage documentation at [Backstage homepage - Setup and Customization](https://backstage.io/docs/getting-started/homepage)
-
-The source code for the current DevPortal home is at [VeeCode Header Plugin](https://github.com/veecode-platform/dynamic-plugins/tree/main/plugins/veecode-global-header)
-
-### Custom header plugin
-
-Similarly to “home” customizations, the shared Backstage header can also be customized via a plugin (static or dynamic).
-
-The source code for the current DevPortal header is at [VeeCode Homepage](https://github.com/veecode-platform/dynamic-plugins/tree/main/plugins/veecode-homepage)
-
-### Simple branding
-
-There are a few simple properties in the `appConfig` section of the `values.yaml` file that can help you with very simple branding options:
-
-```yaml
-upstream:
-  backstage:
-    appConfig:
-      app:
-        branding:
-          fullLogo: https://veecode-platform.github.io/support/logos/logo.svg
-          fullLogoDark: https://veecode-platform.github.io/support/logos/logo-black.svg
-          iconLogo: https://veecode-platform.github.io/support/logos/logo-mobile.png
-          fullLogoWidth: 380
-          # iconLogo: <url to favIcon>
-      backend:
-        csp:
-          img-src: ["'self'","data:","https://raw.githubusercontent.com/","https://avatars.githubusercontent.com/","https://veecode-platform.github.io","https://platform.vee.codes"]
-```
-
-A few points to remember:
-
-- You can provide URLs to your custom resources, but remember those must be available to end users' browsers.
-- You must add the base URL of those resources to the `img-src` list.
-
-### Custom theme replace/merge
+## How it works
 
 At runtime the theme is defined by an internal JSON file at `/opt/app-root/src/packages/app/dist/theme.json`. We allow overring it completely or partially by using the `global.theme` values for the Helm chart:
 
@@ -99,18 +51,18 @@ The `global.theme` changes require (for now) that `readOnlyRootFilesystem` is se
 :::
 
 Below, you'll find a table with references to the main graphical elements of the portal:
-    
-  | background | DevPortal background color |
-  | --- | --- |
-  | paper | background overlays |
-  | status | tags and alerts |
-  | primary | primary app color used in components |
-  | page theme | top bar gradient theme |
+
+| background | DevPortal background color |
+| --- | --- |
+| paper | background overlays |
+| status | tags and alerts |
+| primary | primary app color used in components |
+| page theme | top bar gradient theme |
 
 ![1.jpg](/img/customization/1.jpg)
 ![2.png](/img/customization/2.png)
 
-### Internal `theme.json` file
+## Internal `theme.json` file
 
 You can find below a copy of the default content of the internal theme file, but you can find it online at [theme.json](https://veecode-platform.github.io/support/references/devportal/theme.json). You can edit all the colors in this file, but remember you can use the `global.theme.customJson` value to override just the ones you want to change.
 
@@ -262,4 +214,3 @@ You can find below a copy of the default content of the internal theme file, but
   }
 }
 ```
-
