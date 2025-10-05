@@ -14,31 +14,38 @@ In this section, you will:
 
 1. Verify that a Unix-like shell is available.
 1. Check that Docker is installed and running.
-1. Ensure Git CLI is installed and configured.
 1. Confirm you have a GitHub account.
 
 By the end, all prerequisites will be ready for setting up your local DevPortal environment.
 
 ## Step 1: Linux or macOS Shell
 
-You need a Unix-like shell environment to run the installation commands.
+You need a Unix-like shell to run the installation commands. The shell you are currently using doesn’t need to be Bash, but **Bash must be available** on your system.
 
-- On **Linux** or **macOS**, you already have one by default (Bash, Zsh, etc.). No action needed.
-- On **Windows**, install [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install) to get a proper Linux shell inside Windows.
+- On **Linux** or **macOS**, Bash is usually installed by default.
+- On **Windows**, install [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install) to get a proper Linux shell with Bash.
 
-The installation scripts and CLI commands assume a Unix-like shell. Using the right shell ensures compatibility and avoids errors during setup.
+Using Bash ensures compatibility with the installation scripts and CLI commands.
 
-### Check Installation
+### Check if Bash is Available
 
-Run the following command:
+Run the following command to verify:
 
 ```bash
-echo $SHELL
+command -v bash && echo "Bash is available" || echo "Bash is NOT available"
 ```
 
-Expected output: `/bin/bash` or `/bin/zsh`.
+Expected output:
 
-> Note: The exact shell path may vary depending on your system. You only need to confirm that a Unix-like shell is available.
+```
+Bash is available
+```
+
+> Note: The command only checks if Bash is installed somewhere on your system. You do not need to switch your current shell to Bash.
+
+Aqui está a seção revisada, incluindo instruções para **rodar o Docker** de forma simples e didática:
+
+---
 
 ## Step 2: Docker Engine
 
@@ -46,11 +53,11 @@ Docker is required because DevPortal runs inside containers. You will also use D
 
 Choose the version appropriate for your OS:
 
-- [Install Docker Engine](https://docs.docker.com/engine/install/): The native runtime for Linux. It is the core service that creates and manages containers. Or,
-- [Install Docker Desktop](https://docs.docker.com/get-docker/): The default option for macOS and Windows. It is an application that bundles Docker Engine with a graphical interface, Kubernetes integration, and extra tools. Or,
-- [Install Orbstack](https://orbstack.dev): An alternative runtime for macOS users who prefer faster performance.performance.
+- [Install Docker Engine](https://docs.docker.com/engine/install/): The native runtime for Linux. It is the core service that creates and manages containers.
+- [Install Docker Desktop](https://docs.docker.com/get-docker/): The default option for macOS and Windows. It bundles Docker Engine with a graphical interface, Kubernetes integration, and extra tools.
+- [Install Orbstack](https://orbstack.dev): An alternative runtime for macOS users who prefer faster performance.
 
-:::info In practice:
+:::info In practice
 
 - On **Linux**, most users install **Docker Engine** only.
 - On **macOS/Windows**, **Docker Desktop** is the default and easiest option.
@@ -59,47 +66,63 @@ Choose the version appropriate for your OS:
 
 Docker provides the container runtime. Without it, Kubernetes and DevPortal cannot run locally.
 
-### Check Installation
+### Start Docker
+
+After installing, make sure Docker is running:
+
+- On **Linux**, run:
+
+```bash
+sudo systemctl start docker
+```
+
+- On **macOS/Windows**, open **Docker Desktop** from your Applications/Start menu and wait until it shows as running.
+
+You need Docker **running** before continuing with the DevPortal setup.
+
+### Check Installation and Running Status
 
 Run the following command:
 
 ```bash
-docker --version
+docker version
 ```
 
 Expected output (example):
 
 ```sh
-Docker version 28.1.1, build 4eba377`
+Client:
+ Version:           28.1.1
+ API version:       1.49
+ Go version:        go1.23.8
+ Git commit:        4eba377
+ Built:             Fri Apr 18 09:49:45 2025
+ OS/Arch:           darwin/arm64
+ Context:           desktop-linux
+
+Server: Docker Desktop 4.41.2 (191736)
+ Engine:
+  Version:          28.1.1
+  API version:      1.49 (minimum version 1.24)
+  Go version:       go1.23.8
+  Git commit:       01f442b
+  Built:            Fri Apr 18 09:52:08 2025
+  OS/Arch:          linux/arm64
+  Experimental:     false
+ containerd:
+  Version:          1.7.27
+  GitCommit:        05044ec0a9a75232cad458027ca83437aae3f4da
+ runc:
+  Version:          1.2.5
+  GitCommit:        v1.2.5-0-g59923ef
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
 ```
 
 > Note: Version numbers may vary depending on your installation. The important part is that Docker runs correctly.
 
-## Step 3: Git CLI
-
-Git is needed to clone repositories and interact with GitHub. Linux and macOS usually come with Git pre-installed, but updating to the latest version is recommended.
-
-- [Install Git](https://git-scm.com/downloads) for your OS.
-
-DevPortal relies on repositories hosted in GitHub. Git ensures you can fetch, update, and manage the source code.
-
-### Check Installation
-
-Run the following command:
-
-```sh
-git --version
-```
-
-Expected output (example):
-
-```sh
-git version 2.49.0
-```
-
-> Note: Version numbers may vary. The goal is to confirm Git is installed and accessible.
-
-## Step 4: GitHub Account
+## Step 3: GitHub Account
 
 A GitHub account is required to generate tokens and grant DevPortal access to your repositories.
 
