@@ -81,7 +81,7 @@ In this section, you will:
    - `Github Pages Simple Blog Template`
    - `Spec Project`
    - `NextJS Template`
-1. You can try creating a new component using one of these templates. Refer to the official Backstage documentation for detailed instructions: [https://backstage.io/docs/features/software-templates/creating-templates](https://backstage.io/docs/features/software-templates/creating-templates)
+1. You can try creating a new component using one of these templates. Refer to the official Backstage documentation for detailed instructions: [Backstage Software Templates](https://backstage.io/docs/features/software-templates/)
 
 ## Step 9: Explore the Settings Menu
 
