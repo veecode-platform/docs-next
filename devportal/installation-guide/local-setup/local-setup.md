@@ -34,7 +34,7 @@ The installation is divided into **six steps**, each building on the previous on
    Launch a lightweight Kubernetes cluster using `k3d` inside Docker. This cluster serves as the runtime environment for DevPortal.
 1. **[GitHub Access Configuration](github.md):**
    Generate and configure the required GitHub token and secrets. These credentials allow DevPortal to securely access your repositories and services.
-1. **[DevPortal Deployment](install-devportal.md):**
+1. **[DevPortal Deployment](deployment.md):**
    Deploy your DevPortal instance locally using `vkdr`. The tool takes care of the entire installation process in just a few commands.
 1. **[Access and Verification](access-and-testing.md):**
    Open DevPortal in your browser and confirm everything is running correctly. You’ll also learn how to verify the setup and troubleshoot common issues.
