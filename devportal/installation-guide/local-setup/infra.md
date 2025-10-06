@@ -45,41 +45,30 @@ After this step, the following will be available:
 - Ports **8000** and **8001** bound to HTTP and HTTPS of the first LoadBalancer in the cluster (DevPortal will configure this automatically).
 - Local **registry mirrors** (starting from port 6001) to speed up Docker image downloads, even when recycling the cluster.
 
-### Check Cluster Status (Optional)
+### Check Cluster Status
 
-If you have [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl) already installed locally, you can use it to verify that the cluster is running correctly. If you don’t have it — or aren’t sure — you can safely skip this step and continue to configuring host entries; the setup will still work.
+Verify that the local Kubernetes cluster is running by listing the k3d containers.
 
 Run the following command:
 
 ```sh
-kubectl cluster-info
+docker ps --filter "name=vkdr"
 ```
 
 Expected output (example):
 
 ```sh
-Kubernetes control plane is running at https://cumbuca.apps.vee.codes:6443
-CoreDNS is running at https://cumbuca.apps.vee.codes:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
-Metrics-server is running at https://cumbuca.apps.vee.codes:6443/api/v1/namespaces/kube-system/services/https:metrics-server:https/proxy
+CONTAINER ID   IMAGE                            COMMAND                  CREATED       STATUS       PORTS                                                                  NAMES
+f91279d084f1   ghcr.io/k3d-io/k3d-proxy:5.8.3   "/bin/sh -c nginx-pr…"   5m ago        Up 2m        0.0.0.0:8000->80/tcp, 0.0.0.0:8001->443/tcp, 0.0.0.0:60068->6443/tcp   k3d-vkdr-local-serverlb
+5b93055b88cf   rancher/k3s:v1.31.5-k3s1         "/bin/k3d-entrypoint…"   5m ago        Up 2m                                                                               k3d-vkdr-local-server-0
 
-To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
 
-Check the nodes:
-
-```sh
-kubectl get nodes
-```
-
-Expected output:
-
-```sh
-NAME                            STATUS   ROLES                  AGE   VERSION
-ip-172-31-90-240.ec2.internal   Ready    control-plane,master   1m    v1.33.3+k3s1
-```
-
-> Note: Output may vary depending on your environment (IPs, node names, Kubernetes versions, etc.).
-> The important part is that the cluster is running and nodes are ready.
+> - Output may vary depending on your environment (container IDs, ports, or node names).
+> - You should see at least one container named `k3d-vkdr-local-server-0` (or similar) — this is the master node, and it must be running.
+> - Other containers, like the load balancer (`k3d-vkdr-local-serverlb`), may also appear. The total number of containers can vary.
+> - The key thing to check: all cluster containers have `STATUS` as `Up`. This confirms your local Kubernetes cluster is running correctly.
+> - At this point, the DevPortal itself is not running yet; this step only verifies the infrastructure is ready for deployment.
 
 ## Step 2: Create Host Entries
 
