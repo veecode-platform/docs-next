@@ -3,7 +3,7 @@
 
 //const lightCodeTheme = require("prism-react-renderer/themes/github");
 //const darkCodeTheme = require("prism-react-renderer/themes/dracula");
-import {themes as prismThemes} from 'prism-react-renderer';
+import { themes as prismThemes } from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -101,13 +101,22 @@ const config = {
       '@docusaurus/plugin-client-redirects',
       {
         redirects: [
-          { 
+          {
             from: '/devportal/installation-guide/VKDR',
-            to: '/devportal/installation-guide/local-setup'
+            to: '/devportal/installation-guide/vkdr-local/vkdr-setup'
+          },
+          {
+            from: '/devportal/installation-guide/local-setup/vkdr-setup',
+            to: '/devportal/installation-guide/vkdr-local/vkdr-setup'
+          },
+          {
+            from: '/devportal/installation-guide/local-setup/docker-setup',
+            to: '/devportal/installation-guide/docker-local/intro'
           },
         ],
       },
     ],
+    'docusaurus-plugin-image-zoom',
   ],
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
@@ -196,6 +205,18 @@ const config = {
         additionalLanguages: ["bash"],
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
+      },
+      zoom: {
+        selector: '.markdown img.zoomable',
+        background: {
+          light: 'rgb(255, 255, 255)',
+          dark: 'rgb(50, 50, 50)'
+        },
+        config: {
+          // options you can specify via https://github.com/francoischalifour/medium-zoom#usage
+          margin: 24,        // Space around zoomed image
+          scrollOffset: 0,   // Scroll offset
+        }
       },
     }),
 };

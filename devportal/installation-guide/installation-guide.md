@@ -4,7 +4,7 @@ sidebar_label: Installation Guides
 title: Installation Guides
 ---
 
-You can use VeeCode DevPortal for free in many possible ways. Find here a few setup guides to get started.
+You can use VeeCode DevPortal for free in many possible ways. Find here a few setup guides to get started. We definitely recommend you going through them to learn a few concepts along the way.
 
 :::info
 **VeeCode DevPortal** is "[free as in speech](https://www.gnu.org/philosophy/free-sw.html)" software. It preserves the same OSS license of Backstage itself ([Apache License](https://www.apache.org/licenses/LICENSE-2.0)), so you are free to use, modify and distribute it.
@@ -30,7 +30,9 @@ export const Card = ({children, title, link}) => (
    </div>
 );
 
-<Card title="Local Setup" link="./local-setup">Learn how to install the Developer Portal locally on your own development machine.</Card>
+<Card title="Docker Run (Quickstart)" link="./docker-local/intro">Quickly run DevPortal locally using Docker. Ideal for testing and exploration without Kubernetes.</Card>
+
+<Card title="VKDR (Local Kubernetes)" link="./vkdr-local/vkdr-setup">Install DevPortal locally on a lightweight Kubernetes cluster using VKDR. Best for reproducing production scenarios.</Card>
 
 <Card title="Simple Setup" link="./simple-setup">Learn how to install a self-hosted Developer Portal with a simple setup (trial, demo or small production environment).</Card>
 

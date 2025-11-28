@@ -1,7 +1,7 @@
 ---
 sidebar_position: 0
-sidebar_label: Local Install
-title: Install DevPortal Locally
+sidebar_label: VKDR (Kubernetes)
+title: Install with VKDR (Kubernetes)
 ---
 
 **Get your DevPortal instance running in under 5 minutes**

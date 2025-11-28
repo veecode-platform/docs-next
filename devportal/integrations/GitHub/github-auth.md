@@ -16,7 +16,7 @@ Useful links to follow (you can include these links in the page):
 DO NOT ERASE THIS BLOCK COMMENT
 -->
 
-# GitHub Authentication Provider
+## GitHub Authentication Provider
 
 The GitHub Authentication Provider enables users to sign in to VeeCode DevPortal using their GitHub accounts. This integration provides a secure and familiar authentication experience.
 

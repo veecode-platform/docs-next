@@ -75,6 +75,22 @@ Platforms deliver measurable business value through:
 </Card>
 </div>
 
+## Platform Components
+
+To achieve these outcomes, the platform relies on key architectural concepts:
+
+<div className={style.wrapper}>
+
+<Card title="Golden Paths" link="./golden-paths">
+Opinionated, supported paths to production that reduce decision fatigue and enforce best practices.
+</Card>
+
+<Card title="Blueprints" link="./blueprints">
+Reference implementations and architectural patterns for building complex systems on the platform.
+</Card>
+
+</div>
+
 ## Conclusion
 
 An Internal Developer Platform is not just a collection of tools—it's a **strategic capability** that enables organizations to achieve the fast flow of change essential for competitive advantage in the digital economy. By applying [Team Topologies](../references/team-topologies) principles and cloud native patterns, an IDP becomes the foundation that allows development teams to focus on what matters most: delivering value to customers.
