@@ -14,7 +14,20 @@ Profiles are pre-configured setups that automatically configure:
 
 - **Authentication**: Login integration against your Git provider
 - **Catalog Integration**: Automatic discovery of repositories and catalog files
+- **Organizational Data**: Replicate your organization's users and groups structure in DevPortal
 - **Default Settings**: Sensible defaults for common use cases
+
+A profile is activated by setting the `VEECODE_PROFILE` environment variable to one of the supported profile names:
+
+| Profile | Auth | Org Data | Discovery |
+|---------|------|----------|-----------|
+| github  | GitHub Auth | Teams and members | Repos in org |
+| gitlab  | GitLab Auth | Groups and members | Repos in group |
+| azure   | Azure Entra | Groups and members | Repos in org/project |
+
+These settings are somewhat opinionated to provide a good starting point. They are somewhat cumbersome to get right manually (specially on the first time), so using profiles can save time and effort.
+
+These settings can also be further customized or overridden by providing a custom `app-config.local.yaml` file if needed.
 
 ## Available Profiles
 
@@ -30,51 +43,39 @@ services:
       - "7007:7007"
     environment:
       - VEECODE_PROFILE=github
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
-      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
-      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
-      - GITHUB_ORG=my-organization  # optional
-```
-
-Create a `.env` file:
-
-```bash
-GITHUB_TOKEN=ghp_xxxxxxxxxxxx
-GITHUB_CLIENT_ID=Iv1.xxxxxxxxxxxx
-GITHUB_CLIENT_SECRET=xxxxxxxxxxxx
+      - GITHUB_ORG
+      - GITHUB_APP_ID
+      - GITHUB_CLIENT_ID
+      - GITHUB_CLIENT_SECRET
+      - GITHUB_PRIVATE_KEY
+      - GITHUB_TOKEN
 ```
 
 Then run:
 
 ```bash
-docker compose up -d
-```
-
-Alternatively, using `docker run`:
-
-```bash
-docker run --rm --name devportal -d \
-  -p 7007:7007 \
-  -e VEECODE_PROFILE=github \
-  -e GITHUB_TOKEN=your_github_token \
-  -e GITHUB_CLIENT_ID=your_oauth_client_id \
-  -e GITHUB_CLIENT_SECRET=your_oauth_client_secret \
-  veecode/devportal:latest
+docker compose up --no-log-prefix
 ```
 
 **What it configures:**
-- GitHub OAuth authentication
+- GitHub App authentication
 - GitHub catalog provider for automatic repository discovery
-- GitHub integration for fetching repository data
+- GitHub integration for actions, issues, pull requests, and more
 
 **Required environment variables:**
-- `GITHUB_TOKEN`: Personal access token or GitHub App token
+
+- `GITHUB_ORG`: Organization name
+- `GITHUB_APP_ID`: GitHub App ID (for authentication)
 - `GITHUB_CLIENT_ID`: OAuth App client ID (for authentication)
 - `GITHUB_CLIENT_SECRET`: OAuth App client secret (for authentication)
+- `GITHUB_PRIVATE_KEY`: GitHub App private key (for authentication)
+- `GITHUB_TOKEN`: Personal access token or GitHub App token
 
 **Optional environment variables:**
 - `GITHUB_ORG`: Organization name (defaults to all accessible orgs)
 - `GITHUB_HOST`: GitHub Enterprise hostname (defaults to `github.com`)
+
+Check a complete configuration on our [GitHub Profile example](https://github.com/veecode-platform/devportal-samples/tree/main/github).
 
 ### GitLab Profile
 
@@ -94,30 +95,10 @@ services:
       - GITLAB_GROUP=my-group  # optional
 ```
 
-Create a `.env` file:
-
-```bash
-GITLAB_TOKEN=glpat-xxxxxxxxxxxx
-GITLAB_CLIENT_ID=xxxxxxxxxxxx
-GITLAB_CLIENT_SECRET=xxxxxxxxxxxx
-```
-
 Then run:
 
 ```bash
-docker compose up -d
-```
-
-Alternatively, using `docker run`:
-
-```bash
-docker run --rm --name devportal -d \
-  -p 7007:7007 \
-  -e VEECODE_PROFILE=gitlab \
-  -e GITLAB_TOKEN=your_gitlab_token \
-  -e GITLAB_CLIENT_ID=your_oauth_client_id \
-  -e GITLAB_CLIENT_SECRET=your_oauth_client_secret \
-  veecode/devportal:latest
+docker compose up --no-log-prefix
 ```
 
 **What it configures:**
@@ -146,33 +127,18 @@ services:
       - "7007:7007"
     environment:
       - VEECODE_PROFILE=azure
-      - AZURE_TOKEN=${AZURE_TOKEN}
-      - AZURE_ORG=${AZURE_ORG}
-      - AZURE_PROJECT=my-project  # optional
-```
-
-Create a `.env` file:
-
-```bash
-AZURE_TOKEN=xxxxxxxxxxxx
-AZURE_ORG=my-organization
+      - AZURE_TENANT_ID
+      - AZURE_CLIENT_ID
+      - AZURE_CLIENT_SECRET
+      - AZURE_ORGANIZATION
+      - AZURE_PROJECT
+      - AZURE_TOKEN
 ```
 
 Then run:
 
 ```bash
-docker compose up -d
-```
-
-Alternatively, using `docker run`:
-
-```bash
-docker run --rm --name devportal -d \
-  -p 7007:7007 \
-  -e VEECODE_PROFILE=azure \
-  -e AZURE_TOKEN=your_azure_token \
-  -e AZURE_ORG=your_organization \
-  veecode/devportal:latest
+docker compose up --no-log-prefix
 ```
 
 **What it configures:**
@@ -181,13 +147,15 @@ docker run --rm --name devportal -d \
 - Azure DevOps integration
 
 **Required environment variables:**
+
+- `AZURE_TENANT_ID`: Azure tenant ID for authentication
+- `AZURE_CLIENT_ID`: Azure application client ID
+- `AZURE_CLIENT_SECRET`: Azure application client secret
+- `AZURE_ORGANIZATION`: Azure DevOps organization name
 - `AZURE_TOKEN`: Personal access token
-- `AZURE_ORG`: Azure DevOps organization name
 
 **Optional environment variables:**
 - `AZURE_PROJECT`: Specific project name (defaults to all projects)
-
-
 
 ## Combining Profiles with Custom Config
 
@@ -209,7 +177,7 @@ services:
 The configuration is merged in this order:
 1. Default configuration (built into image)
 2. Profile configuration (from `VEECODE_PROFILE`)
-3. Custom configuration (from `app-config.local.yaml`)
+3. Custom configuration (from `/app/app-config.local.yaml`)
 
 ## Creating OAuth Apps
 

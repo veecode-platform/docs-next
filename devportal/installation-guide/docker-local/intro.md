@@ -38,7 +38,7 @@ docker stop devportal
 
 ## Quick Start (Docker Compose)
 
-Alternatively, you can use `docker compose` to start a DevPortal instance locally with exactky the same result:.
+Alternatively, you can use `docker compose` to start a DevPortal instance locally with exactly the same result:.
 
 Create a `docker-compose.yml` file:
 
