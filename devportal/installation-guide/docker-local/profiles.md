@@ -79,6 +79,8 @@ services:
     environment:
       - VEECODE_PROFILE=github
       - GITHUB_ORG
+      - GITHUB_AUTH_CLIENT_ID
+      - GITHUB_AUTH_CLIENT_SECRET
       - GITHUB_APP_ID
       - GITHUB_CLIENT_ID
       - GITHUB_CLIENT_SECRET
@@ -94,24 +96,30 @@ docker compose up --no-log-prefix
 
 **What it configures:**
 
-- GitHub App authentication
-- GitHub catalog provider for automatic repository discovery
-- GitHub integration for actions, issues, pull requests, and more
+- GitHub OAuth authentication
+- GitHub App integration for organization catalog sync
+- GitHub App for catalog discovery, actions, issues, pull requests, and more
 
 **Required environment variables:**
 
 - `GITHUB_ORG`: Organization name
 - `GITHUB_APP_ID`: GitHub App ID (for authentication)
-- `GITHUB_CLIENT_ID`: OAuth App client ID (for authentication)
-- `GITHUB_CLIENT_SECRET`: OAuth App client secret (for authentication)
-- `GITHUB_PRIVATE_KEY`: GitHub App private key (for authentication)
+- `GITHUB_AUTH_CLIENT_ID`: OAuth App client ID (for authentication)
+- `GITHUB_AUTH_CLIENT_SECRET`: OAuth App client secret (for authentication)
+- `GITHUB_CLIENT_ID`: GitHub App client ID (for integrations)
+- `GITHUB_CLIENT_SECRET`: GitHub App client secret (for integrations)
+- `GITHUB_PRIVATE_KEY`: GitHub App private key (for integrations)
 - `GITHUB_TOKEN`: Personal access token or GitHub App token
 
 **Optional environment variables:**
+
 - `GITHUB_ORG`: Organization name (defaults to all accessible orgs)
 - `GITHUB_HOST`: GitHub Enterprise hostname (defaults to `github.com`)
+- `GITHUB_AUTH_CLIENT_*`: If absent, will use `GITHUB_CLIENT_*` instead
 
 Check a complete configuration on our [GitHub Profile example](https://github.com/veecode-platform/devportal-samples/tree/main/github).
+
+Also please check our [GitHub](/devportal/integrations/github) guide for more information on how to obtain the required credentials to populate the environment variables.
 
 ### GitLab Profile
 
@@ -138,16 +146,19 @@ docker compose up --no-log-prefix
 ```
 
 **What it configures:**
+
 - GitLab OAuth authentication
 - GitLab catalog provider
 - GitLab integration
 
 **Required environment variables:**
+
 - `GITLAB_TOKEN`: Personal access token
 - `GITLAB_CLIENT_ID`: OAuth App client ID
 - `GITLAB_CLIENT_SECRET`: OAuth App client secret
 
 **Optional environment variables:**
+
 - `GITLAB_HOST`: GitLab instance hostname (defaults to `gitlab.com`)
 - `GITLAB_GROUP`: Group name for catalog discovery
 
@@ -178,6 +189,7 @@ docker compose up --no-log-prefix
 ```
 
 **What it configures:**
+
 - Azure DevOps authentication
 - Azure Repos catalog provider
 - Azure DevOps integration
@@ -191,7 +203,51 @@ docker compose up --no-log-prefix
 - `AZURE_TOKEN`: Personal access token
 
 **Optional environment variables:**
+
 - `AZURE_PROJECT`: Specific project name (defaults to all projects)
+
+### LDAP Profile
+
+For organizations still stuck with LDAP authentication (such as classic Active Directory), you can use the `ldap` profile.
+
+Use the following sample docker-compose.yml:
+
+```yaml
+services:
+  devportal:
+    image: veecode/devportal:latest
+    ports:
+      - "7007:7007"
+    environment:
+      - VEECODE_PROFILE=ldap
+      - LDAP_DN
+      - LDAP_SECRET
+      - LDAP_URL
+      - LDAP_USERS_BASE_DN
+      - LDAP_USERS_FILTER
+      - LDAP_GROUPS_BASE_DN
+      - LDAP_GROUPS_FILTER
+```
+
+**What it configures:**
+
+- LDAP authentication
+- LDAP integration for organization catalog sync
+
+**Required environment variables:**
+
+- `LDAP_DN`: login DN (distinguished name), such as "cn=admin,dc=vee,dc=codes"
+- `LDAP_SECRET`: connection password
+- `LDAP_URL`: LDAP server URL, such as "ldap://ldap.vee.codes"
+- `LDAP_USERS_BASE_DN`: users base DN, such as "ou=People,dc=vee,dc=codes"
+- `LDAP_GROUPS_BASE_DN`: groups base DN, such as "ou=Groups,dc=vee,dc=codes"
+- `LDAP_USERS_FILTER`: users filter
+- `LDAP_GROUPS_FILTER`: groups filter
+
+**Optional environment variables:**
+
+- `LDAP_USERS_FILTER`: defaults to "(uid=*)"
+- `LDAP_GROUPS_FILTER`: defaults to "(objectClass=groupOfNames)"
 
 ## Combining Profiles with Custom Config
 
@@ -205,24 +261,22 @@ services:
       - "7007:7007"
     environment:
       - VEECODE_PROFILE=github
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_TOKEN
     volumes:
       - ./app-config.local.yaml:/app/app-config.local.yaml:ro
 ```
 
 The configuration is merged in this order:
+
 1. Default configuration (built into image)
 2. Profile configuration (from `VEECODE_PROFILE`)
 3. Custom configuration (from `/app/app-config.local.yaml`)
 
-## Creating OAuth Apps
+## Getting OAuth Credentials
 
-### GitHub OAuth App
+### GitHub App / OAuth App / PAT
 
-1. Go to **Settings** → **Developer settings** → **OAuth Apps** → **New OAuth App**
-2. Set **Homepage URL**: `http://localhost:7007`
-3. Set **Authorization callback URL**: `http://localhost:7007/api/auth/github/handler/frame`
-4. Copy the **Client ID** and generate a **Client Secret**
+Please check our [GitHub](/devportal/integrations/github) guide for more information.
 
 ### GitLab OAuth App
 

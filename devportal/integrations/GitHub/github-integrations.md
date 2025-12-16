@@ -15,6 +15,10 @@ GitHub backend integrations enable VeeCode DevPortal to interact with GitHub API
 
 These integrations run server-side and use **service credentials** rather than end-user tokens.
 
+:::tip
+If you use the `github` or `github-pat` profiles, DevPortal will configure both authentication and integrations for you using bundled `app-config.yaml` files. You still need to obtain the GitHub App and PAT credentials manually and provide the environment variables, though.
+:::
+
 ## How Backend Integrations Work
 
 When VeeCode DevPortal needs to access GitHub APIs for backend operations, it relies on Backstage’s GitHub integration credential resolution flow:
@@ -34,12 +38,7 @@ This is the "backend integration" path shown in the [decision tree](./github.md#
 
 **Personal Access Tokens** are used by DevPortal to access GitHub resources when a GitHub App is not available or not installed for specific repositories.
 
-### PAT Types
-
-GitHub offers two types of PATs:
-
-- **Classic PATs**: Broad scopes (e.g., `repo`, `admin:org`), long-lived, organization-wide access
-- **Fine-grained PATs**: Limited to specific repositories/organizations, shorter-lived, more secure
+We explain PATs in more detail on the [GitHub Tokens](./github-tokens.md) page.
 
 ### PAT Integration
 
@@ -60,7 +59,7 @@ integrations:
 - **Scaffolder Actions**: Certain template actions may require PATs
 
 :::note
-Local and development setups usually rely solely on PATs and "guest mode" (no authentication).
+Local and development setups usually rely solely on PATs and "guest mode" (no authentication). We offer the `github-pat` profile to ease this setup.
 :::
 
 ## GitHub App Integration

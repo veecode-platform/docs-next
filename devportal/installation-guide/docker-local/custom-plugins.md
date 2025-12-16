@@ -96,7 +96,7 @@ The configuration is merged in this order (later overrides earlier):
 Dynamic plugins are a deep subject on their own. Please refer to the [Plugins](/devportal/plugins/) section for more information. The dynamic plugins feature is based on the same plugin system used by Red Hat Developer Hub, so Red Hat documentation is also a good resource on this topic.
 
 :::warning
-Dynamic plugins are a special kind of packaging. Our dynamic plugins are published on public NPM registry and pulled at build time into the container the `veecode/devportal` distro image. **Not all plugins are available as dynamic plugins**, so please check each plugin documentation to see if it is available as a dynamic plugin. There is usually a `-dynamic` suffix each dynamic plugin, and they exist in both forms in the NPM registry.
+Dynamic plugins require a special kind of packaging. All DevPortal pre-installled dynamic plugins are published on public NPM registry and pulled at build time into the `veecode/devportal` distro image. **Not all plugins are available as dynamic plugins**, so please check each plugin's documentation to see if it is available as such. There is usually a `-dynamic` suffix in a dynamic plugin package name, and they tend to exist in both forms in the NPM registry.
 :::
 
 ## Examples

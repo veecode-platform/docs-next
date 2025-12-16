@@ -97,6 +97,10 @@ auth:
         clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
 ```
 
+:::tip
+If you use the `github` profile, it will configure both authentication and integrations for you using a bundled `app-config.yaml` file.
+:::
+
 ## Option B: GitHub App Authentication
 
 A **GitHub App** provides enhanced security, better rate limits, and more granular permissions. When users sign in via a GitHub App:
@@ -142,13 +146,13 @@ auth:
         clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
 ```
 
-## A Word on VeeCode Profiles
+## About VeeCode Profiles
 
-We created VeeCode Profiles as a simple way to configure authentication and integrations for your VeeCode DevPortal instance. A profile relies on bundled configuration snippets that are activated by environment variables.
+We created VeeCode Profiles as a simple way to configure authentication and integrations for your VeeCode DevPortal instance. A profile relies on bundled configuration snippets that are activated by environment variables. Once you have the credentials and tokens you can use a profile to configure your DevPortal instance without the need to deal with the `app-config.yaml` configuration file syntax.
 
 You will find more information about VeeCode Profiles in:
 
-- TODO
+- [Quick Setup with Profiles](/devportal/installation-guide/docker-local/profiles)
 
 ## Troubleshooting
 
