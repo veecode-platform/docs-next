@@ -25,6 +25,7 @@ A profile is activated by setting the `VEECODE_PROFILE` environment variable to 
 | github  | GitHub Auth | Teams and members | Repos in org |
 | gitlab  | GitLab Auth | Groups and members | Repos in group |
 | azure   | Azure Entra | Groups and members | Repos in org/project |
+| ldap    | LDAP Auth | Users and groups | None |
 
 These settings are somewhat opinionated to provide a good starting point. They are somewhat cumbersome to get right manually (specially on the first time), so using profiles can save time and effort.
 
@@ -306,12 +307,14 @@ Look for profile-related messages during startup.
 ### Authentication fails
 
 Verify your OAuth callback URLs match exactly:
+
 - GitHub: `http://localhost:7007/api/auth/github/handler/frame`
 - GitLab: `http://localhost:7007/api/auth/gitlab/handler/frame`
 
 ### Catalog not populating
 
 Ensure your token has the correct permissions:
+
 - GitHub: `repo` scope for private repos, `public_repo` for public
 - GitLab: `read_repository` scope
 - Azure: `Code (Read)` scope
