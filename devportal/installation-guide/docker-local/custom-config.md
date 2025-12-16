@@ -4,9 +4,9 @@ sidebar_label: Custom Configuration
 title: Custom App Configuration
 ---
 
-# Custom App Configuration
+## Custom App Configuration
 
-You can use a combination of `docker compose`, configuration files, and environment variables to customize the behavior of the DevPortal instance.
+You can use a combination of `docker compose`, profiles, configuration files, and environment variables to customize the behavior of the DevPortal instance.
 
 You can customize your DevPortal by mounting a custom `app-config.local.yaml` file. This allows you to override default settings without modifying the container image.
 

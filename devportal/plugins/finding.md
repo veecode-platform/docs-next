@@ -6,7 +6,7 @@ title: Finding Plugins
 
 Currently there are a few online Backstage plugin catalogs today.
 
-- 🔥[VeeCode Backstage Plugins](https://plugins.vee.codes/)🔥: **this is our curated list of (mostly) VeeCode-mantained and some third-party Backstage plugins. It is intended to evolve into a marketplace-like experience, where we list both bundled and downloadable plugins and how to enable them in your DevPortal instance.**
+- 🔥[VeeCode Backstage Plugins](https://platform.vee.codes/en/resources/)🔥: **this is our curated list of (mostly) VeeCode-mantained and some third-party Backstage plugins. It is intended to evolve into a marketplace-like experience, where we list both bundled and downloadable plugins and how to enable them in your DevPortal instance.**
 
 - [Backstage Plugin Registry](https://backstage.io/plugins): this is the official Backstage plugin registry, but it is not exactly a marketplace-like experience. Some plugins are just links to GitHub repositories, others are not even published as a package. Almost all of them assume you will statically link them to your Backstage custom build as a developer.
 

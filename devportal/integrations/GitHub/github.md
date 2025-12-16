@@ -1,64 +1,41 @@
 ---
 sidebar_position: 1
-sidebar_label: GitHub Integrations
-title: GitHub Integrations
+sidebar_label: GitHub
+title: GitHub Auth & Integrations
 ---
 
-Some confusion comes up a lot when wiring up Backstage with GitHub. There are indeed many overlapping options and some choices also work as a fallback for others. This document breaks them down clearly and briefly before delving into the details of each option.
+GitHub is one of the most common integrations in VeeCode DevPortal (Backstage). Understanding how authentication and backend integrations work with GitHub is essential for a smooth setup.
 
-## Authentication (GitHub App / OAuth App)
+## Overview
 
-These options (**GitHub App** or **OAuth App**) are used as a primary authentication path: users will login into Backstage using their GitHub account, either through a GitHub App or OAuth App (both are OAuth 2.0).
+VeeCode DevPortal interacts with GitHub in two distinct ways:
 
-import styles from '../../style.module.css';
+- **[Authentication](./github-auth.md)**: How users sign in to DevPortal using their GitHub accounts (via GitHub App or OAuth App).
+- **[Backend Integrations](./github-integrations.md)**: How DevPortal's backend services (catalog, scaffolder, plugins) access GitHub APIs to fetch data and perform actions.
 
-<figure className={styles['image-container']}>
-  <img 
-    src="/img/github/login-github.png" 
-    alt="GitHub Login"
-    style={{ display: 'block', maxWidth: '100%', height: 'auto' }}
-  />
-  <figcaption className={styles['caption']}>
-    GitHub Login screen
-  </figcaption>
-</figure>
+These two aspects are configured separately but can sometimes share credentials or fall back to each other, which is a common source of confusion.
 
-## GitHub Personal Access Tokens (PATs)
+## Why it matters
 
-The **GitHub Personal Access Tokens (PATs)** are used by Backstage to access GitHub resources on your behalf:
+When configuring GitHub with DevPortal, you'll encounter multiple credential types:
 
-- Scaffolder actions (repo creation from templates).
-- Catalog ingestion (as a fallback when no GitHub App is configured).
+- **GitHub App** or **OAuth App** credentials for user authentication
+- **GitHub App** credentials for backend operations
+- **Personal Access Tokens (PATs)** as a fallback for backend operations
 
-PATs can be of two types:
-
-- Classic PATs: broad scopes (repo, admin:org) and long-lived.
-- Fine-grained PATs: limited to specific repos/orgs, shorter-lived.
-
-:::note
-Local and development setups usually rely solely on PATs and "guest mode" (no authentication).
-:::
-
-## Where confusion happens
-
-Backstage auth provider (login) and integrations (catalog, scaffolder, plugins) are configured separately but may share some settings.
-
-Even if you set up a GitHub App for user login, a plugin may still expect a token in app-config.yaml.
-
-If no GitHub App token is available in a given context, Backstage often falls back to a PAT if one is configured in `integrations.github[].token`.
-
-This can lead to inconsistent behavior:
-
-- Some calls use GitHub App credentials/tokens.
-- Some calls silently fall back to PAT.
-
-Developers sometimes think “auth is broken” when in fact a PAT is missing or expired.
+Understanding when each is used prevents common issues like "auth is broken" when actually something like a PAT is missing or expired.
 
 ## Rule of thumb
 
-For production: prefer GitHub App (for both login + backend). Keep a PAT only as a last-resort fallback (e.g., for repos the App isn’t installed in, for legacy plugins or for scaffolder actions).
+A few general tips:
 
-Be explicit in config: avoid mixing unless necessary, so you know which token type is in play.
+- **For development**: use guest auth (no real auth) and PAT for backend operations.
+
+- **For simple use cases (or PoCs)**: use a single GitHub App (for both login + backend). It's simpler and less prone to errors, but please understand the impact. Keep a PAT only as a last-resort fallback (e.g., for repos the App isn’t installed in, for legacy plugins or for scaffolder actions).
+
+- **For production setup**: use OAuth App (for login) + GitHub App (for backend). Keep a PAT only as a last-resort fallback too.
+
+This is a rich subject to understand, but it's not rocket science. Some production environments may require a more complex setup (e.g., using separate credentials for each organization), but for most cases the above tips should be enough.
 
 ## Decision tree
 
@@ -87,7 +64,7 @@ flowchart TD
     I5 --> Z[Call GitHub API]
 ```
 
-### How to read this:
+### How to read this
 
 - User login path: always OAuth. If you chose GitHub App, users get short-lived, app-scoped user tokens. If you chose a classic OAuth App, they get an OAuth token with the requested scopes.
 

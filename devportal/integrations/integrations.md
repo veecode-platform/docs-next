@@ -4,7 +4,11 @@ sidebar_label: Auth & Integrations
 title: Auth & Integrations
 ---
 
-An usually confusing topic in Backstage world are its backend integrations and authentication mechanisms. This section explain a bit of this and provides links to common senarios and deeper documentation.
+An usually confusing topic in Backstage world are its backend integrations and authentication mechanisms. This section explain a bit of this and prepares you to understand common senarios and to read deeper documentation.
+
+## Why should I read this?
+
+Even if you are using **VeeCode Profiles** to simplify your setup you still need to create tokens and credentials for authentication and integrations. DevPortal cannot do this for you and there are a few decisions you must take. This document will help you understand the options and make the right choices.
 
 ## Authentication overview
 
@@ -81,7 +85,7 @@ Integrations configuration are different than authentication configuration, even
 - **Integrations** answer “how can Backstage call external APIs?” and are typically used by both **core** and **third-party** plugins to fetch data, read repositories, validate URLs, enrich entities, or trigger actions.
 
 :::important
-Integrations are most likely to be reused by both core Backstage and multiple plugins, while authentication is mostly a one-time setup per identity provider.
+Integrations are most likely to be reused by both core Backstage and multiple plugins, while authentication is exclusively used by its identity provider.
 :::
 
 ## Understand service identity
@@ -91,3 +95,9 @@ Integrations are configured in the backend and used server-side, **usually assum
 There are exceptions to this rule, but they are less common and are always plugin-specific (for example: some plugins may support user token exchange to act on behalf of the signed-in user). A plugin that supports acting on behalf of the user will usually document how to set it up and mention such behavior.
 
 For example, the **Kubernetes plugin** can (depending on configuration) propagate the signed-in user identity when talking to the Kubernetes API, instead of always using only a single backend service credential.
+
+## Understand reuse implications
+
+You should understand the generic implications of reusing the same OAuth credentials for authentication and integrations. **This is supported** and pretty much ok in local development and PoCs, but not recommended for production.
+
+The main concern is that the shared client must be granted the combined set of scopes required for authentication and integrations. As a result, users are asked to consent to broader permissions than strictly necessary for sign-in, and the blast radius of those credentials is larger than it needs to be. Also consent screens and scopes will scare users and make them question the security of your Backstage instance.

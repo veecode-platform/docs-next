@@ -18,13 +18,28 @@ DO NOT ERASE THIS BLOCK COMMENT
 
 ## GitHub Authentication Provider
 
-The GitHub Authentication Provider enables users to sign in to VeeCode DevPortal using their GitHub accounts. This integration provides a secure and familiar authentication experience.
+The GitHub Authentication Provider enables users to sign in to VeeCode DevPortal using their GitHub accounts. This integration provides a secure and familiar authentication experience leveraging OAuth 2.0.
 
-## Features
+import styles from '../../style.module.css';
 
-- OAuth 2.0 based authentication and SSO
-- GitHub App and Github OAuth App authentication support
-- Better rate limits against GitHub APIs (GitHub App)
+<figure className={styles['image-container']}>
+  <img 
+    src="/img/github/login-github.png" 
+    alt="GitHub Login"
+    style={{ display: 'block', maxWidth: '100%', height: 'auto' }}
+  />
+  <figcaption className={styles['caption']}>
+    GitHub Login screen
+  </figcaption>
+</figure>
+
+## Authentication Options
+
+VeeCode DevPortal supports two methods for GitHub authentication: **GitHub App** and **GitHub OAuth App**.
+
+- Both are OAuth 2.0 based authentication and SSO
+- Both have better rate limits against GitHub APIs (GitHub App even better)
+- Both allow organization and team-based access control (see integrations)
 
 ## Prerequisites
 
@@ -33,7 +48,25 @@ The GitHub Authentication Provider enables users to sign in to VeeCode DevPortal
    - OAuth App (simpler)
    - GitHub App (better rate limits and organization access)
 
-## Option A: OAuth App Authentication
+## Option A: OAuth App Authentication (recommended)
+
+A **GitHub OAuth App** provides a simpler setup:
+
+- Users complete a classic OAuth flow
+- They receive user tokens with the requested scopes (e.g., `read:user`, `user:email`)
+- Scopes are good enough for authentication
+- Rate limits are also good
+
+<figure className={styles['image-container']}>
+  <img 
+    src="/img/github/consent-screen.png" 
+    alt="GitHub Login"
+    style={{ display: 'block', maxWidth: '100%', height: 'auto' }}
+  />
+  <figcaption className={styles['caption']}>
+    GitHub Login (OAuth consent screen)
+  </figcaption>
+</figure>
 
 ### Step 1: Create an OAuth App
 
@@ -41,12 +74,16 @@ The GitHub Authentication Provider enables users to sign in to VeeCode DevPortal
 2. Click on "New OAuth App"
 3. Fill in the application details:
    - **Application name**: VeeCode DevPortal
-   - **Homepage URL**: `https://your-veecode-instance.com`
+   - **Homepage URL**: `https://your-veecode-instance.com` (local setup is usually "http://localhost:7777")
    - **Authorization callback URL**: `https://your-veecode-instance.com/api/auth/github/handler/frame`
 4. Click "Register application"
 5. Note down the **Client ID** and generate a new **Client Secret**
 
-### Step 2. Configure VeeCode DevPortal
+:::note
+This can be done at organization level (recommended) or at user level (not recommended). Just use the "Developer Settings" link at organization settings instead.
+:::
+
+### Step 2. Configure OAuth App Authentication
 
 Add the following configuration to your `app-config.yaml`:
 
@@ -58,71 +95,60 @@ auth:
       development:
         clientId: ${AUTH_GITHUB_CLIENT_ID}
         clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
-        # Optional: Set to true to enable GitHub App authentication
-        # appAuth: ${AUTH_GITHUB_APP_AUTH}
-        # Optional: Set to true to require organization membership
-        # requireOrgMembership: true
-        # Optional: Restrict access to specific organizations
-        # allowedOrganizations: [your-org]
 ```
 
-:::note
-Please notice that the `app-config.yaml` file content is defined by the Helm "values-yaml" file, right under `upstream.backstage.appConfig`.
+## Option B: GitHub App Authentication
+
+A **GitHub App** provides enhanced security, better rate limits, and more granular permissions. When users sign in via a GitHub App:
+
+- Users complete an OAuth flow through the GitHub App
+- They receive short-lived user access tokens scoped by the App's permissions
+- The App can be installed organization-wide with fine-grained repository access
+- Rate limits are significantly higher
+
+:::important
+In production scenarios you will most likely use GitHub Apps for integrations and an OAuth App for authentication. Integrations not only need better rate limits but also organization access that you usually don't want in a consent screen at all.
 :::
-
-### Step 3: Advanced Configuration (Organization/Team Access)
-
-To restrict access to specific GitHub organizations or teams:
-
-```yaml
-# app-config.yaml
-auth:
-  providers:
-    github:
-      development:
-        # ... other config ...
-        allowedOrganizations: [your-org]
-        # Or for specific teams:
-        # allowedOrganizations: [your-org/team-name]
-```
-
-## Option B: GitHub App Authentication (recommended)
 
 ### Step 1: Create a GitHub App
 
-For enhanced security and rate limiting, use GitHub App authentication.
+To use GitHub App authentication:
 
 1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
 2. Click on "New Github App"
 3. Fill in the application details:
-   - **GitHub App name**: VeeCode DevPortal
+   - **GitHub App name**: VeeCode DevPortal Auth
    - **Homepage URL**: `https://your-veecode-instance.com`
    - **Authorization callback URL**: `https://your-veecode-instance.com/api/auth/github/handler/frame`
-   - **Webhook URL**: xxx
-   - **Webhook secret**: xxx
    - **Permissions**:
-     - TODO
+     - Account Permissions
+       - Email addresses: Read-only
    - **Where can this GitHub App be installed**: only your account or any organization
-     
 4. Click "Register application"
+5. Create a GitHub App in your organization
+6. Install the app to your organization
 
-1. Create a GitHub App in your organization
-2. Install the app to your organization
-3. Generate a private key
-4. Update your configuration:
+### Step 2. Configure GitHub App Authentication
+
+Add the following configuration to your `app-config.yaml`:
 
 ```yaml
-# app-config.yaml
 auth:
+  environment: development
   providers:
     github:
       development:
         clientId: ${AUTH_GITHUB_CLIENT_ID}
         clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
-        appId: ${AUTH_GITHUB_APP_ID}
-        privateKey: ${AUTH_GITHUB_PRIVATE_KEY}
-        appAuth: true
 ```
+
+## A Word on VeeCode Profiles
+
+We created VeeCode Profiles as a simple way to configure authentication and integrations for your VeeCode DevPortal instance. A profile relies on bundled configuration snippets that are activated by environment variables.
+
+You will find more information about VeeCode Profiles in:
+
+- TODO
 
 ## Troubleshooting
 

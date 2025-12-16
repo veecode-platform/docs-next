@@ -21,6 +21,7 @@ A profile is activated by setting the `VEECODE_PROFILE` environment variable to 
 
 | Profile | Auth | Org Data | Discovery |
 |---------|------|----------|-----------|
+| github-pat | Guest (none) | Built-in (or from catalog) | Repos in org |
 | github  | GitHub Auth | Teams and members | Repos in org |
 | gitlab  | GitLab Auth | Groups and members | Repos in group |
 | azure   | Azure Entra | Groups and members | Repos in org/project |
@@ -30,6 +31,40 @@ These settings are somewhat opinionated to provide a good starting point. They a
 These settings can also be further customized or overridden by providing a custom `app-config.local.yaml` file if needed.
 
 ## Available Profiles
+
+### GitHub PAT Profile
+
+This is the simplest possible GitHub-related profile, it only requires a GitHub PAT token for repo access.
+
+Use the following sample `docker-compose.yml`:
+
+```yaml
+services:
+  devportal:
+    image: veecode/devportal:latest
+    ports:
+      - "7007:7007"
+    environment:
+      - VEECODE_PROFILE=github-pat
+      - GITHUB_ORG
+      - GITHUB_TOKEN
+```
+
+Then run:
+
+```bash
+docker compose up --no-log-prefix
+```
+
+**What it configures:**
+
+- Guest authentication
+- GitHub catalog provider for automatic repository discovery
+- GitHub integration for actions, issues, pull requests, and more
+
+:::note
+PAT is a personal access token, you can generate one in your GitHub account settings. It is severely limited in API calls, check your logs for rate limiting errors when things break.
+:::
 
 ### GitHub Profile
 
@@ -58,6 +93,7 @@ docker compose up --no-log-prefix
 ```
 
 **What it configures:**
+
 - GitHub App authentication
 - GitHub catalog provider for automatic repository discovery
 - GitHub integration for actions, issues, pull requests, and more
