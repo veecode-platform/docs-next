@@ -1,44 +1,45 @@
-# Website
+# VeeCode Platform Documentation
 
 This website is built using [Docusaurus 3](https://docusaurus.io/), a modern static website generator.
 
+## Sites
+
+| Branch    | Site                                        | Purpose    |
+|-----------|---------------------------------------------|------------|
+| `develop` | `https://docs-next.platform.vee.codes/`     | Staging    |
+| `main`    | `https://docs.platform.vee.codes/`          | Production |
+
+## Development Workflow
+
+1. Create a feature branch off `develop`.
+2. Open a PR targeting `develop` — merging triggers an automatic deploy to the staging site.
+3. Review the changes on the staging site.
+4. Merge `develop` into `main` — triggers the production deploy.
+
+The staging deploy works by force-pushing the `develop` branch to the `main` branch of the [docs-next](https://github.com/veecode-platform/docs-next) mirror repo, which has its own GitHub Pages deploy. See [ADR-001](adr/001-preview-workflow.md) for details.
+
 ## Installation
 
-```
-$ yarn
+```bash
+corepack enable
+yarn install
 ```
 
 ## Local Development
 
-```
-$ yarn start
+```bash
+yarn start
 ```
 
 This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
 
 ## Build
 
-```
-$ yarn build
+```bash
+yarn build
 ```
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-## Deployment
-
-Using SSH:
-
-```
-$ USE_SSH=true yarn deploy
-```
-
-Not using SSH:
-
-```
-$ GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
 
 ## Upgrading
 
@@ -53,4 +54,3 @@ Upgrade docusaurus version:
 ```bash
 yarn up @docusaurus/core@latest @docusaurus/preset-classic@latest @docusaurus/module-type-aliases@latest @docusaurus/types@latest
 ```
-

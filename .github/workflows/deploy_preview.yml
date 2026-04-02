@@ -1,0 +1,22 @@
+name: Deploy to Preview
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  sync-preview:
+    runs-on: ubuntu-latest
+    if: github.repository == 'veecode-platform/docs'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to preview repo
+        env:
+          PREVIEW_TOKEN: ${{ secrets.PREVIEW_DEPLOY_TOKEN }}
+        run: |
+          git remote add preview https://x-access-token:${PREVIEW_TOKEN}@github.com/veecode-platform/docs-next.git
+          git push preview develop:main --force
