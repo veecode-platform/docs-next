@@ -43,6 +43,25 @@ describe("walkProduct", () => {
     ]);
   });
 
+  it("preserves lede content as the first section with empty anchor", async () => {
+    const docs = await walkProduct({
+      productId: "sample-product",
+      productRoot: join(root, "sample-product"),
+    });
+    const intro = docs.find((d) => d.path.endsWith("intro.md"));
+    expect(intro.sections[0]).toMatchObject({
+      anchor: "",
+      title: "",
+      depth: 2,
+      content: expect.stringContaining("Lede text"),
+    });
+    // Section titles after the lede are the real H2s
+    expect(intro.sections.slice(1).map((s) => s.title)).toEqual([
+      "First Section",
+      "Second Section",
+    ]);
+  });
+
   it("ignores non-markdown files and underscore-prefixed files", async () => {
     const docs = await walkProduct({
       productId: "sample-product",

@@ -39,7 +39,16 @@ async function walkProduct({ productId, productRoot }) {
   for (const absPath of files) {
     const raw = await fs.readFile(absPath, "utf8");
     const { data: frontmatter, content } = matter(raw);
-    const { sections, outline } = await chunkMarkdown(content);
+    const { lede, sections, outline } = await chunkMarkdown(content);
+    if (lede.content) {
+      sections.unshift({
+        anchor: "",
+        title: "",
+        depth: 2,
+        content: lede.content,
+        tokens: lede.tokens,
+      });
+    }
     const title =
       (typeof frontmatter.title === "string" && frontmatter.title) ||
       extractH1Title(content) ||
