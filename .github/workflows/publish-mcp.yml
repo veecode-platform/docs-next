@@ -39,14 +39,20 @@ jobs:
         run: |
           mkdir -p mcp-server/bundled
           cp build/mcp-snapshot.json mcp-server/bundled/snapshot.json
-      - name: MCP CI (typecheck + lint + test)
-        run: yarn mcp:ci
       - name: Build MCP server
         run: yarn mcp:build
+      - name: MCP CI (typecheck + lint + test)
+        run: yarn mcp:ci
       - name: Determine version bump
         id: bump
         run: |
-          changed=$(git diff --name-only HEAD~1 HEAD)
+          base="${{ github.event.before }}"
+          head="${{ github.event.after }}"
+          # Guard against zero-SHA before (new branch); fall back to HEAD~1
+          if [ "$base" = "0000000000000000000000000000000000000000" ] || [ -z "$base" ]; then
+            base="HEAD~1"
+          fi
+          changed=$(git diff --name-only "$base" "$head")
           if echo "$changed" | grep -q '^mcp-server/src/'; then
             echo "level=minor" >> "$GITHUB_OUTPUT"
           else
@@ -67,4 +73,6 @@ jobs:
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git add mcp-server/package.json
           git commit -m "chore(release): @veecode/docs-mcp $(node -p "require('./mcp-server/package.json').version")"
+          # Avoid non-FF on race with unrelated main pushes
+          git pull --rebase origin main
           git push

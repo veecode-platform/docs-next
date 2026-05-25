@@ -39,6 +39,8 @@ jobs:
           if (!validate(snap)) { console.error(validate.errors); process.exit(1); }
           console.log('snapshot OK; version=' + snap.version);
           "
+      - name: Build MCP server
+        run: yarn mcp:build
       - name: MCP server typecheck + lint + test
         run: yarn mcp:ci
       - name: Plugin tests
