@@ -30,8 +30,8 @@
         { "depth": 2, "title": "Self-hosted (dynamic plugin config)", "anchor": "self-hosted-dynamic-plugin-config" }
       ],
       "sections": [
-        { "anchor": "for-platform-teams", "title": "For platform teams", "depth": 2, "content": "Configure integrations via the platform UI.", "tokens": 8 },
-        { "anchor": "self-hosted-dynamic-plugin-config", "title": "Self-hosted (dynamic plugin config)", "depth": 2, "content": "Add the following to your dynamic-plugins.yaml file to enable.", "tokens": 12 }
+        { "anchor": "for-platform-teams", "title": "For platform teams", "depth": 2, "content": "## For platform teams\n\nConfigure integrations via the platform UI.", "tokens": 10 },
+        { "anchor": "self-hosted-dynamic-plugin-config", "title": "Self-hosted (dynamic plugin config)", "depth": 2, "content": "## Self-hosted (dynamic plugin config)\n\nAdd the following to your dynamic-plugins.yaml file to enable.", "tokens": 14 }
       ]
     }
   ]
