@@ -9,6 +9,4 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   banner: { js: "#!/usr/bin/env node" },
-  // server.js is created by T17; mark external so esbuild doesn't fail to resolve it now
-  external: ["./server.js"],
 });
