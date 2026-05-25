@@ -1,5 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { validateSnapshot } from "./validate.js";
+import {
+  loadCachedSnapshot,
+  readCachedMeta,
+  writeCachedSnapshot,
+} from "./cache.js";
+import { fetchIfNewer } from "./fetcher.js";
 import type { Snapshot } from "../schema.js";
 
 export type LoadSource = "bundled" | "cache";
@@ -15,40 +21,81 @@ export interface LoadResult {
   source: LoadSource;
   bundledVersion: string;
   refreshStatus: RefreshStatus;
+  refreshPromise: Promise<RefreshStatus>;
 }
 
 export interface LoadOptions {
   bundledPath: string;
   offline?: boolean;
+  cacheDir?: string | null;
+  remoteUrl?: string | null;
 }
 
-async function readJson(path: string, label: string): Promise<unknown> {
+async function readBundled(path: string): Promise<Snapshot> {
   let raw: string;
   try {
     raw = await readFile(path, "utf8");
   } catch (err) {
-    throw new Error(`${label} (${path}) could not be read: ${(err as Error).message}`);
+    throw new Error(`bundled snapshot (${path}) could not be read: ${(err as Error).message}`);
   }
+  let parsed: unknown;
   try {
-    return JSON.parse(raw);
+    parsed = JSON.parse(raw);
   } catch (err) {
-    throw new Error(`${label} (${path}) is not valid JSON: ${(err as Error).message}`);
+    throw new Error(`bundled snapshot (${path}) is not valid JSON: ${(err as Error).message}`);
   }
+  const result = validateSnapshot(parsed);
+  if (!result.ok) throw new Error(`bundled snapshot failed validation: ${result.error}`);
+  return result.snapshot;
 }
 
 export async function loadSnapshot(opts: LoadOptions): Promise<LoadResult> {
-  const bundledRaw = await readJson(opts.bundledPath, "bundled snapshot");
-  const bundledResult = validateSnapshot(bundledRaw);
-  if (!bundledResult.ok) {
-    throw new Error(`bundled snapshot failed validation: ${bundledResult.error}`);
-  }
-  const bundled = bundledResult.snapshot;
+  const bundled = await readBundled(opts.bundledPath);
 
-  // Bundled-only; cache + remote are added in T10.
+  let active: Snapshot = bundled;
+  let source: LoadSource = "bundled";
+
+  if (opts.cacheDir) {
+    const cachedRaw = await loadCachedSnapshot(opts.cacheDir);
+    if (cachedRaw) {
+      const validated = validateSnapshot(cachedRaw);
+      if (validated.ok && validated.snapshot.version > bundled.version) {
+        active = validated.snapshot;
+        source = "cache";
+      }
+    }
+  }
+
+  const refreshPromise: Promise<RefreshStatus> = opts.offline
+    ? Promise.resolve("disabled")
+    : !opts.remoteUrl || !opts.cacheDir
+    ? Promise.resolve("disabled")
+    : runRefresh(opts.remoteUrl, opts.cacheDir);
+
   return {
-    snapshot: bundled,
-    source: "bundled",
+    snapshot: active,
+    source,
     bundledVersion: bundled.version,
-    refreshStatus: opts.offline ? "disabled" : "offline",
+    refreshStatus: opts.offline ? "disabled" : "up-to-date",
+    refreshPromise,
   };
+}
+
+async function runRefresh(url: string, cacheDir: string): Promise<RefreshStatus> {
+  const meta = await readCachedMeta(cacheDir);
+  const outcome = await fetchIfNewer({ url, cachedEtag: meta?.etag ?? null });
+  switch (outcome.status) {
+    case "up-to-date":
+      return "up-to-date";
+    case "offline":
+      return "offline";
+    case "failed":
+      return "failed";
+    case "newer": {
+      const validated = validateSnapshot(outcome.snapshot);
+      if (!validated.ok) return "failed";
+      await writeCachedSnapshot(cacheDir, validated.snapshot, outcome.etag);
+      return "newer-downloaded";
+    }
+  }
 }
