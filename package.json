@@ -2,6 +2,10 @@
   "name": "platform-docs",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "plugins/*",
+    "mcp-server"
+  ],
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
@@ -13,7 +17,10 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "version": "docusaurus doc:version",
-    "detect-secrets": "detect-secrets scan --exclude-files 'yarn.*cjs'"
+    "detect-secrets": "detect-secrets scan --exclude-files 'yarn.*cjs'",
+    "mcp:ci": "yarn workspace @veecode/docs-mcp ci",
+    "mcp:build": "yarn workspace @veecode/docs-mcp build",
+    "snapshot:test": "yarn workspace mcp-snapshot test"
   },
   "dependencies": {
     "@docusaurus/core": "^3.9.2",
