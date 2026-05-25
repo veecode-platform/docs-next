@@ -43,11 +43,14 @@ describe("walkProduct", () => {
     ]);
   });
 
-  it("ignores non-markdown and underscore-prefixed files", async () => {
+  it("ignores non-markdown files and underscore-prefixed files", async () => {
     const docs = await walkProduct({
       productId: "sample-product",
       productRoot: join(root, "sample-product"),
     });
+    const paths = docs.map((d) => d.path);
+    expect(paths).not.toContain("sample-product/_draft.md");
+    expect(paths).not.toContain("sample-product/notes.txt");
     expect(docs.every((d) => d.path.endsWith(".md"))).toBe(true);
   });
 });
