@@ -36,8 +36,11 @@ describe("SnapshotSchema", () => {
     expect(() => SnapshotSchema.parse(valid)).not.toThrow();
   });
 
+  const [validDoc] = valid.docs;
+  const [validSection] = validDoc!.sections;
+
   it("rejects a snapshot with a wrong product id", () => {
-    const bad = { ...valid, docs: [{ ...valid.docs[0], product: "unknown" }] };
+    const bad = { ...valid, docs: [{ ...validDoc!, product: "unknown" }] };
     expect(() => SnapshotSchema.parse(bad)).toThrow();
   });
 
@@ -46,11 +49,33 @@ describe("SnapshotSchema", () => {
       ...valid,
       docs: [
         {
-          ...valid.docs[0],
-          sections: [{ ...valid.docs[0].sections[0], anchor: "orphan" }],
+          ...validDoc!,
+          sections: [{ ...validSection!, anchor: "orphan" }],
         },
       ],
     };
     expect(() => SnapshotSchema.parse(bad)).toThrow(/outline/i);
+  });
+
+  it("accepts a section with empty anchor (lede) even when not in the outline", () => {
+    const ledeOk = {
+      ...valid,
+      docs: [
+        {
+          ...validDoc!,
+          outline: [],
+          sections: [
+            {
+              anchor: "",
+              title: "Lede",
+              depth: 2 as const,
+              content: "intro",
+              tokens: 1,
+            },
+          ],
+        },
+      ],
+    };
+    expect(() => SnapshotSchema.parse(ledeOk)).not.toThrow();
   });
 });
