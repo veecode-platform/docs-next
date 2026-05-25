@@ -7,6 +7,9 @@ import {
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
+import { createRequire } from "node:module";
+const _require = createRequire(import.meta.url);
+const pkg = _require("../package.json") as { version: string };
 import { loadSnapshot, type LoadResult } from "./snapshot/loader.js";
 import { buildIndex } from "./search/index.js";
 import { searchDocs } from "./tools/search-docs.js";
@@ -83,6 +86,10 @@ function defaultBundledPath(): string {
   return join(here, "..", "bundled", "snapshot.json");
 }
 
+function resolveBundledPath(opt?: string): string {
+  return opt ?? process.env.VEECODE_DOCS_MCP_BUNDLED_PATH ?? defaultBundledPath();
+}
+
 function defaultCacheDir(): string {
   const xdg = process.env.XDG_CACHE_HOME;
   return xdg
@@ -101,7 +108,7 @@ export async function createServer(opts: CreateServerOptions = {}): Promise<{
   server: Server;
   dispose: () => Promise<void>;
 }> {
-  const bundledPath = opts.bundledPath ?? defaultBundledPath();
+  const bundledPath = resolveBundledPath(opts.bundledPath);
   const cacheDir =
     opts.cacheDir === null
       ? null
@@ -116,10 +123,12 @@ export async function createServer(opts: CreateServerOptions = {}): Promise<{
   const loaded: LoadResult = await loadSnapshot({ bundledPath, cacheDir, remoteUrl, offline });
   const index = buildIndex(loaded.snapshot);
   let refreshStatus = loaded.refreshStatus;
-  loaded.refreshPromise.then((status) => { refreshStatus = status; }).catch(() => {});
+  loaded.refreshPromise
+    .then((status) => { refreshStatus = status; })
+    .catch(() => { refreshStatus = "failed"; });
 
   const server = new Server(
-    { name: "veecode-docs-mcp", version: "0.0.0" },
+    { name: "veecode-docs-mcp", version: pkg.version },
     { capabilities: { tools: {} } },
   );
 
