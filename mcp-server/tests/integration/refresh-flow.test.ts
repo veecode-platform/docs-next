@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadSnapshot } from "../../src/snapshot/loader.js";
@@ -68,5 +68,31 @@ describe("loadSnapshot refresh integration", () => {
     const refresh = await result.refreshPromise;
     expect(refresh).toBe("offline");
     expect(result.snapshot.version).toBe(validBundled.version);
+  });
+
+  it("prefers cache when its generatedAt is newer than bundled", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "veecode-mcp-int-"));
+    const bundledPath = join(dir, "bundled.json");
+    const cacheDir = join(dir, "cache");
+    await writeFile(bundledPath, JSON.stringify(validBundled));
+
+    // Pre-populate cache with a newer snapshot
+    const newerCached = { ...validBundled, version: "2026.05.25-cccccc1", generatedAt: "2026-05-25T00:00:00Z" };
+    await mkdir(cacheDir, { recursive: true });
+    await writeFile(join(cacheDir, `snapshot-${newerCached.version}.json`), JSON.stringify(newerCached));
+    await writeFile(join(cacheDir, "meta.json"), JSON.stringify({ current: newerCached.version, etag: '"cache-etag"' }));
+
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(null, {
+      status: 200, headers: { etag: '"cache-etag"' },
+    })));
+
+    const result = await loadSnapshot({
+      bundledPath,
+      cacheDir,
+      remoteUrl: "https://example.test/mcp-snapshot.json",
+    });
+    expect(result.source).toBe("cache");
+    expect(result.snapshot.version).toBe(newerCached.version);
+    await result.refreshPromise;
   });
 });

@@ -10,6 +10,7 @@ import type { Snapshot } from "../schema.js";
 
 export type LoadSource = "bundled" | "cache";
 export type RefreshStatus =
+  | "pending"
   | "up-to-date"
   | "newer-downloaded"
   | "offline"
@@ -59,7 +60,7 @@ export async function loadSnapshot(opts: LoadOptions): Promise<LoadResult> {
     const cachedRaw = await loadCachedSnapshot(opts.cacheDir);
     if (cachedRaw) {
       const validated = validateSnapshot(cachedRaw);
-      if (validated.ok && validated.snapshot.version > bundled.version) {
+      if (validated.ok && validated.snapshot.generatedAt > bundled.generatedAt) {
         active = validated.snapshot;
         source = "cache";
       }
@@ -76,7 +77,7 @@ export async function loadSnapshot(opts: LoadOptions): Promise<LoadResult> {
     snapshot: active,
     source,
     bundledVersion: bundled.version,
-    refreshStatus: opts.offline ? "disabled" : "up-to-date",
+    refreshStatus: opts.offline ? "disabled" : "pending",
     refreshPromise,
   };
 }
