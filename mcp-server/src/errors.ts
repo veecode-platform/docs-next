@@ -1,6 +1,7 @@
 export interface StructuredError {
   error: string;
-  [key: string]: unknown;
+  suggestion?: string;
+  available?: string[];
 }
 
 export function notFound(suggestion: string | null): StructuredError {
