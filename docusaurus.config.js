@@ -117,6 +117,7 @@ const config = {
       },
     ],
     'docusaurus-plugin-image-zoom',
+    require.resolve('./plugins/mcp-snapshot'),
   ],
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
