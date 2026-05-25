@@ -1,0 +1,43 @@
+{
+  "name": "@veecode/docs-mcp",
+  "version": "0.0.0",
+  "description": "MCP server exposing VeeCode Platform documentation to CLI agents",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "veecode-docs-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "bundled",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src tests",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "emit-schema": "tsx scripts/emit-schema.ts",
+    "ci": "yarn typecheck && yarn lint && yarn test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "minisearch": "^7.1.0",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@typescript-eslint/eslint-plugin": "^8.5.0",
+    "@typescript-eslint/parser": "^8.5.0",
+    "eslint": "^9.10.0",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
