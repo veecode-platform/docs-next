@@ -14,6 +14,7 @@ on:
 
 jobs:
   ci:
+    if: github.repository == 'veecode-platform/docs'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
