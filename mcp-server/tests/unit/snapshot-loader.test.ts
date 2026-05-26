@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { writeFileSync } from "node:fs";
+import { writeFileSync, mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadSnapshot } from "../../src/snapshot/loader.js";
@@ -22,7 +23,8 @@ describe("loadSnapshot (bundled only)", () => {
   });
 
   it("rejects when the bundled file fails schema validation", async () => {
-    const bad = join(here, "..", "fixtures", "bad-snapshot.json");
+    const badDir = mkdtempSync(join(tmpdir(), "mcp-loader-bad-"));
+    const bad = join(badDir, "bad-snapshot.json");
     writeFileSync(bad, JSON.stringify({ version: "bad" }));
     await expect(loadSnapshot({ bundledPath: bad, offline: true })).rejects.toThrow(
       /validation/i,
