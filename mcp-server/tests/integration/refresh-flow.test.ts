@@ -70,6 +70,41 @@ describe("loadSnapshot refresh integration", () => {
     expect(result.snapshot.version).toBe(validBundled.version);
   });
 
+  it("invalidates cache when cached snapshot fails schema validation", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "veecode-mcp-int-"));
+    const bundledPath = join(dir, "bundled.json");
+    const cacheDir = join(dir, "cache");
+    await writeFile(bundledPath, JSON.stringify(validBundled));
+
+    // Pre-populate cache with a JSON-valid but schema-invalid snapshot
+    await mkdir(cacheDir, { recursive: true });
+    await writeFile(
+      join(cacheDir, "snapshot-broken.json"),
+      JSON.stringify({ version: "broken", products: [], docs: [] }),
+    );
+    await writeFile(
+      join(cacheDir, "meta.json"),
+      JSON.stringify({ current: "broken", etag: '"e1"' }),
+    );
+
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(null, {
+      status: 200, headers: { etag: '"e1"' },
+    })));
+
+    const result = await loadSnapshot({
+      bundledPath,
+      cacheDir,
+      remoteUrl: "https://example.test/mcp-snapshot.json",
+    });
+    expect(result.source).toBe("bundled");
+    await result.refreshPromise;
+
+    // Cache files should be gone now
+    const { readdir } = await import("node:fs/promises");
+    const remaining = await readdir(cacheDir).catch(() => []);
+    expect(remaining).toEqual([]);
+  });
+
   it("prefers cache when its generatedAt is newer than bundled", async () => {
     const dir = await mkdtemp(join(tmpdir(), "veecode-mcp-int-"));
     const bundledPath = join(dir, "bundled.json");

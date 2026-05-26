@@ -4,6 +4,7 @@ import {
   loadCachedSnapshot,
   readCachedMeta,
   writeCachedSnapshot,
+  invalidateCache,
 } from "./cache.js";
 import { fetchIfNewer } from "./fetcher.js";
 import type { Snapshot } from "../schema.js";
@@ -63,6 +64,8 @@ export async function loadSnapshot(opts: LoadOptions): Promise<LoadResult> {
       if (validated.ok && validated.snapshot.generatedAt > bundled.generatedAt) {
         active = validated.snapshot;
         source = "cache";
+      } else if (!validated.ok) {
+        await invalidateCache(opts.cacheDir);
       }
     }
   }
