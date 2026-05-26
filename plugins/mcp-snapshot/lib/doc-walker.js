@@ -10,6 +10,7 @@ async function listMarkdown(dir, acc = []) {
     if (err.code === "ENOENT") return acc;
     throw err;
   }
+  entries.sort((a, b) => a.name.localeCompare(b.name));
   for (const entry of entries) {
     if (entry.name.startsWith("_") || entry.name.startsWith(".")) continue;
     const full = path.join(dir, entry.name);

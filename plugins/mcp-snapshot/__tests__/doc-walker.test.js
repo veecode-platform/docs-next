@@ -62,6 +62,16 @@ describe("walkProduct", () => {
     ]);
   });
 
+  it("returns docs in lexicographic path order regardless of filesystem readdir order", async () => {
+    const docs = await walkProduct({
+      productId: "sample-product",
+      productRoot: join(root, "sample-product"),
+    });
+    const paths = docs.map((d) => d.path);
+    const sorted = [...paths].sort();
+    expect(paths).toEqual(sorted);
+  });
+
   it("ignores non-markdown files and underscore-prefixed files", async () => {
     const docs = await walkProduct({
       productId: "sample-product",
