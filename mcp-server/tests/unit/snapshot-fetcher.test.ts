@@ -46,4 +46,25 @@ describe("fetchIfNewer", () => {
     const result = await fetchIfNewer({ url, cachedEtag: null });
     expect(result.status).toBe("failed");
   });
+
+  it("returns failed when body read exceeds the timeout", async () => {
+    // HEAD succeeds, GET resolves quickly but .json() hangs forever
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, opts?: RequestInit) => {
+      if ((opts?.method ?? "GET") === "HEAD") {
+        return new Response(null, { status: 200, headers: { etag: '"x"' } });
+      }
+      // Create a Response whose .json() never resolves
+      return {
+        ok: true,
+        status: 200,
+        headers: { get: () => '"x"' } as unknown as Headers,
+        json: () => new Promise(() => {}),  // never resolves
+      } as unknown as Response;
+    }));
+    const result = await fetchIfNewer({ url, cachedEtag: null, timeoutMs: 50 });
+    expect(result.status).toBe("failed");
+    if (result.status === "failed") {
+      expect(result.reason).toMatch(/body read/i);
+    }
+  });
 });

@@ -50,9 +50,9 @@ export async function fetchIfNewer(input: FetcherInput): Promise<FetchOutcome> {
 
   let snapshot: unknown;
   try {
-    snapshot = await getRes.json();
+    snapshot = await withTimeout(getRes.json(), timeout);
   } catch (err) {
-    return { status: "failed", reason: `JSON parse: ${(err as Error).message}` };
+    return { status: "failed", reason: `body read: ${(err as Error).message}` };
   }
   return { status: "newer", snapshot, etag: getRes.headers.get("etag") };
 }
