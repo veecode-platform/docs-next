@@ -21,21 +21,13 @@ export interface GetDocInput {
   anchor?: string;
 }
 
-function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-");
-}
-
 /**
- * Slice the markdown body of a parent H2 section starting at the heading whose
- * slug matches `anchor` at `depth`, ending at the next heading of equal-or-shallower depth.
+ * Slice the markdown body of a parent section starting at the heading whose
+ * title text matches, ending at the next heading of equal-or-shallower depth.
  */
 function sliceByHeading(
   parentContent: string,
-  anchor: string,
+  title: string,
   depth: number,
 ): string | null {
   const lines = parentContent.split("\n");
@@ -44,8 +36,8 @@ function sliceByHeading(
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i] ?? "";
     if (line.startsWith(`${hashes} `)) {
-      const title = line.slice(hashes.length + 1).trim();
-      if (slugify(title) === anchor) {
+      const lineTitle = line.slice(hashes.length + 1).trim();
+      if (lineTitle === title) {
         startIdx = i;
         break;
       }
@@ -108,7 +100,7 @@ export function getDoc(
         ? doc.sections.find((s) => s.anchor === parentAnchor)
         : doc.sections.find((s) => s.anchor === "");
       if (parentSection) {
-        const sliced = sliceByHeading(parentSection.content, input.anchor, outlineEntry.depth);
+        const sliced = sliceByHeading(parentSection.content, outlineEntry.title, outlineEntry.depth);
         if (sliced) {
           return {
             ...base,

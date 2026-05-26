@@ -14,6 +14,7 @@ describe("loadSnapshot (bundled only)", () => {
     expect(result.source).toBe("bundled");
     expect(result.snapshot.version).toMatch(/^\d{4}\.\d{2}\.\d{2}-/);
     expect(result.snapshot.docs).toHaveLength(2);
+    expect(result.refreshStatus).toBe("disabled");
   });
 
   it("rejects when the bundled file does not exist", async () => {

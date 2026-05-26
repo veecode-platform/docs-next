@@ -11,6 +11,17 @@ const baseSnapshot: Snapshot = JSON.parse(
 );
 
 // Build an augmented snapshot with an H3 inside the parent H2 for slicing tests
+function snapshotWithH3Ampersand(): Snapshot {
+  const clone = JSON.parse(JSON.stringify(baseSnapshot)) as Snapshot;
+  const doc = clone.docs.find((d) => d.path === "devportal/integrations/mcp.md")!;
+  // github-slugger produces this anchor for "User Research & Continuous Improvement":
+  const anchor = "user-research--continuous-improvement";
+  doc.outline.push({ depth: 3, title: "User Research & Continuous Improvement", anchor });
+  const last = doc.sections[doc.sections.length - 1]!;
+  last.content = last.content + "\n\n### User Research & Continuous Improvement\n\nDetails here.";
+  return clone;
+}
+
 function snapshotWithH3(): Snapshot {
   const clone = JSON.parse(JSON.stringify(baseSnapshot)) as Snapshot;
   const doc = clone.docs.find((d) => d.path === "devportal/integrations/mcp.md")!;
@@ -61,6 +72,20 @@ describe("get_doc", () => {
       error: "not_found",
       suggestion: "devportal/integrations/mcp.md",
     });
+  });
+
+  it("resolves H3 anchors with ampersand-style slugs (github-slugger compatibility)", () => {
+    const snapshot = snapshotWithH3Ampersand();
+    const result = getDoc(snapshot, {
+      path: "devportal/integrations/mcp.md",
+      anchor: "user-research--continuous-improvement",
+    });
+    if ("error" in result) throw new Error("unexpected error");
+    expect("section" in result).toBe(true);
+    if ("section" in result) {
+      expect(result.section.content).toMatch(/^### User Research & Continuous Improvement/);
+      expect(result.section.content).toContain("Details here");
+    }
   });
 
   it("slices a parent section when anchor matches an H3 in the outline", () => {

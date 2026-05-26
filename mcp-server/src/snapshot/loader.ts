@@ -80,7 +80,10 @@ export async function loadSnapshot(opts: LoadOptions): Promise<LoadResult> {
     snapshot: active,
     source,
     bundledVersion: bundled.version,
-    refreshStatus: opts.offline ? "disabled" : "pending",
+    refreshStatus:
+      opts.offline || !opts.remoteUrl || !opts.cacheDir
+        ? "disabled"
+        : "pending",
     refreshPromise,
   };
 }
