@@ -1,0 +1,162 @@
+{
+  "$ref": "#/definitions/Snapshot",
+  "definitions": {
+    "Snapshot": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^\\d{4}\\.\\d{2}\\.\\d{2}-[a-f0-9]{7}$"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "enum": [
+                  "devportal",
+                  "platform",
+                  "admin-ui",
+                  "vkdr"
+                ]
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "docCount": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "description",
+              "docCount"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "docs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "product": {
+                "type": "string",
+                "enum": [
+                  "devportal",
+                  "platform",
+                  "admin-ui",
+                  "vkdr"
+                ]
+              },
+              "title": {
+                "type": "string"
+              },
+              "sidebarLabel": {
+                "type": "string"
+              },
+              "frontmatter": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "outline": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "depth": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 6
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "anchor": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "depth",
+                    "title",
+                    "anchor"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "sections": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "anchor": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "depth": {
+                      "type": "integer",
+                      "minimum": 2,
+                      "maximum": 2
+                    },
+                    "content": {
+                      "type": "string"
+                    },
+                    "tokens": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "anchor",
+                    "title",
+                    "depth",
+                    "content",
+                    "tokens"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "path",
+              "product",
+              "title",
+              "frontmatter",
+              "outline",
+              "sections"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "version",
+        "generatedAt",
+        "products",
+        "docs"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

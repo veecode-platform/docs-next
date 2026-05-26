@@ -1,0 +1,47 @@
+name: MCP CI
+
+on:
+  pull_request:
+    paths:
+      - mcp-server/**
+      - plugins/mcp-snapshot/**
+      - schemas/**
+      - devportal/**
+      - platform/**
+      - admin-ui/**
+      - vkdr/**
+      - .github/workflows/mcp-ci.yml
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install
+        run: yarn install --immutable
+      - name: Build site (generates snapshot)
+        run: yarn build
+      - name: Validate emitted snapshot
+        run: |
+          node -e "
+          const Ajv = require('ajv').default;
+          const addFormats = require('ajv-formats').default;
+          const schema = require('./schemas/mcp-snapshot.schema.json');
+          const snap = require('./build/mcp-snapshot.json');
+          const ajv = new Ajv({ strict: false });
+          addFormats(ajv);
+          const validate = ajv.compile(schema);
+          if (!validate(snap)) { console.error(validate.errors); process.exit(1); }
+          console.log('snapshot OK; version=' + snap.version);
+          "
+      - name: Build MCP server
+        run: yarn mcp:build
+      - name: MCP server typecheck + lint + test
+        run: yarn mcp:ci
+      - name: Plugin tests
+        run: yarn workspace mcp-snapshot test
