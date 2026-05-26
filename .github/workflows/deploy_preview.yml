@@ -14,9 +14,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Push to preview repo
+      - name: Configure SSH deploy key
         env:
-          PREVIEW_TOKEN: ${{ secrets.PREVIEW_DEPLOY_TOKEN }}
+          DEPLOY_KEY: ${{ secrets.PREVIEW_DEPLOY_KEY }}
         run: |
-          git remote add preview https://x-access-token:${PREVIEW_TOKEN}@github.com/veecode-platform/docs-next.git
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "$DEPLOY_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      - name: Push to preview repo
+        run: |
+          git remote add preview git@github.com:veecode-platform/docs-next.git
           git push preview develop:main --force
