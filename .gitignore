@@ -33,4 +33,5 @@ yarn-error.log*
 mcp-server/dist/
 mcp-server/bundled/snapshot.json
 mcp-server/node_modules/
-plugins/*/node_modules/.mcp.json
+plugins/*/node_modules/
+.mcp.json
