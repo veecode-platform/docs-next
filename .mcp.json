@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "veecode-docs": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/home/gio/projetos/docs/mcp-server/dist/index.js"],
+      "env": {
+        "VEECODE_DOCS_MCP_OFFLINE": "1"
+      }
+    }
+  }
+}
