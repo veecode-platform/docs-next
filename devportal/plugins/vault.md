@@ -1,51 +1,89 @@
 ---
 sidebar_position: 14
 sidebar_label: Vault
-title: Vault Plugin Tutorial
+title: Vault Plugin
 ---
 
-### How to Use the Vault Plugin in DevPortal
+# Vault Plugin
 
-The **Vault Plugin** in DevPortal is designed to securely store and manage sensitive data like passwords, API keys, and other secrets. This tutorial will guide you through the steps to effectively use this plugin.
+The Vault plugin for Backstage displays HashiCorp Vault secrets associated with a catalog entity, allowing developers to view secret paths and metadata directly from the DevPortal UI.
 
----
-
-### Benefits of Using the Vault Plugin
-
-1. **Enhanced Security:** Ensures sensitive data is encrypted and accessible only to authorized users.
-2. **Centralized Management:** Simplifies control and monitoring of secrets in a single interface.
-3. **Streamlined Distribution:** Provides an easy-to-use interface for securely sharing secrets with applications and team members.
+:::note
+The Vault plugin is **not bundled** in the DevPortal image. It must be added as an external dynamic plugin via `dynamic-plugins.yaml` or the Marketplace. No special support plan is required — the plugin is a standard Backstage community plugin available publicly.
+:::
 
 ---
 
-# Steps to Use the Vault Plugin
+## Adding the plugin
 
-### Step 1: Getting Started with the Vault Plugin
+### Via Marketplace
 
-1. **Set Up a Vault Instance:**
-    - Ensure a Vault instance is active. Follow Vault's official documentation to set one up if needed.
-2. **Verify Support Plan:**
-    - Access to the Vault Plugin requires a specific support level. Visit [VeeCode Plans](https://platform.vee.codes/compare-plans/) for more details or upgrades.
-3. **Integrate with DevPortal:**
-    - Install the Vault Plugin in your DevPortal project.
-    - Configure it by specifying the Vault endpoint and providing the necessary authentication credentials.
+Search for "Vault" in the DevPortal Marketplace and click **Enable**.
+
+### Via `dynamic-plugins.yaml`
+
+Check the [Marketplace](../plugins/finding) or the [Backstage Plugin Registry](https://backstage.io/plugins) for the current OCI reference and workspace tag that matches your DevPortal's Backstage version.
+
+A typical entry looks like:
+
+```yaml
+plugins:
+  - package: oci://quay.io/veecode/<workspace>:<tag>!backstage-community-plugin-vault
+    disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          backstage-community.plugin-vault:
+            mountPoints:
+              - mountPoint: entity.page.overview/cards
+                importName: EntityVaultCard
+                config:
+                  layout:
+                    gridColumn: "1 / -1"
+                  if:
+                    allOf:
+                      - isVaultAvailable
+```
+
+Replace `<workspace>` and `<tag>` with the values that match your instance. See [Adding Plugins](./adding) for details on the OCI artifact format.
 
 ---
 
-### Step 2: Using the Vault Plugin
+## Prerequisites
 
-1. **Create and Manage Secrets:**
-    - Use the plugin interface to add new secrets or update existing ones.
-    - Set up access control policies to define who can view or edit secrets.
-2. **Retrieve Secrets:**
-    - Access secrets securely via the plugin's interface or API.
-    - Distribute them to applications as needed while maintaining security.
-3. **Monitor Usage:**
-    - Leverage built-in logging and monitoring features to track access events.
-    - Identify unauthorized access attempts and optimize policies as required.
+- A running HashiCorp Vault instance with the HTTP API accessible from the DevPortal backend
+- A Vault token or AppRole credentials with read access to the secret paths used by your components
 
-The Vault Plugin in DevPortal is an essential tool for modern software development, providing robust security and centralized management for sensitive data. Following these steps ensures secure storage, controlled access, and efficient distribution of secrets.
+---
 
-For further assistance, contact the VeeCode Platform support team or explore their support plans on the [website](https://platform.vee.codes/compare-plans/).
+## App configuration
 
+```yaml
+vault:
+  baseUrl: ${VAULT_BASE_URL}        # e.g. https://vault.company.com
+  token: ${VAULT_TOKEN}             # service token with read permissions
+  # secretEngine: 'kv-v2'          # default; set to 'kv-v1' if needed
+  # kvVersion: 2                    # KV secrets engine version (1 or 2)
+```
 
+---
+
+## Required annotation
+
+Add the `vault.io/secrets-path` annotation to the component's `catalog-info.yaml`:
+
+```yaml
+metadata:
+  annotations:
+    vault.io/secrets-path: secret/data/my-service
+```
+
+The entity card only renders when this annotation is present.
+
+---
+
+## References
+
+- [Backstage Community Vault plugin](https://github.com/backstage/community-plugins/tree/main/workspaces/vault)
+- [HashiCorp Vault documentation](https://developer.hashicorp.com/vault/docs)
+- [Adding Plugins to DevPortal](./adding)

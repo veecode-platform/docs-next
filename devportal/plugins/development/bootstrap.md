@@ -82,7 +82,7 @@ You get for every created plugin a new package at `plugins/your-plugin-id` folde
 
 ## Next steps
 
-Proceed to the next steps based on the type of plugin you created. At the end of this guide we will cover packahging and distribution of your plugin.
+Proceed to the next steps based on the type of plugin you created. At the end of this guide we will cover packaging and distribution of your plugin.
 
 ## Troubleshooting tips
 
