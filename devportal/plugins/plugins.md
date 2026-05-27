@@ -8,6 +8,8 @@ Plugins are how the portal becomes useful beyond Day-0 setup. The base DevPortal
 
 VeeCode DevPortal is built on top of [Backstage](https://backstage.io/) and ships with a set of bundled plugins ready to enable. Understand what each plugin adds before enabling it — the value is in the workflow it removes, not in the YAML you write.
 
+Before choosing which plugins to enable, read [Composing a Portal](/platform/concepts/portal-composition) — it explains the three-layer activation model (load → annotation → backend) and maps plugin combinations to operational use cases.
+
 ## Plugin Types
 
 Backstage’s extensibility model is built around plugins that can contribute functionality either to the backend, the frontend, or as modules that extend other plugins or backend components (such as the scaffolder). VeeCode DevPortal extends this model to support dynamic plugins with reasonable defaults.

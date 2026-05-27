@@ -24,6 +24,20 @@ DevPortal ships seven **configuration profiles**, each enabling a different auth
 
 ---
 
+## What a profile configures
+
+A profile is not a mode or a switch — it is a YAML config file (`app-config.<profile>.yaml`) that gets merged into the configuration stack at startup. Each profile configures three things at once:
+
+1. **Authentication provider** — which sign-in page to show and which OAuth flow to use
+2. **Catalog discovery** — where to look for `catalog-info.yaml` files (GitHub org, GitLab group, etc.)
+3. **SCM integration** — credentials for the source control system so the catalog processor and scaffolder can read repositories
+
+This means that setting `VEECODE_PROFILE=github` and seeing "GitHub login works, catalog populated, templates executing in GitHub" is not magic — it is those three things being configured by a single file. To see exactly what was set, read `app-config.github.yaml` in the distro.
+
+If something works that you didn't explicitly configure, it came from the profile. If you need to override any of it, add the relevant key to your `app-config.local.yaml` — it loads after the profile and wins.
+
+---
+
 ## How Profiles Are Loaded
 
 At container startup, `entrypoint.sh` reads `VEECODE_PROFILE` and passes the matching config file as an extra `--config` argument to Backstage:
@@ -33,7 +47,8 @@ app-config.yaml
   → app-config.production.yaml
     → app-config.<profile>.yaml    ← loaded here
       → app-config.distro.yaml
-        → ...
+        → app-config.local.yaml    ← your overrides go here
+          → ...
 ```
 
 See [Configuration Hierarchy](./configuration-hierarchy.md) for the full 7-layer merge order.

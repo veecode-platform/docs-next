@@ -6,7 +6,9 @@ title: Grafana Plugin
 
 # Grafana Plugin
 
-The Grafana plugin for Backstage embeds Grafana dashboards and alert panels in entity pages, giving developers direct observability access from the catalog.
+Without this plugin, Grafana dashboards are a separate tab the developer has to remember to open — and without the service entity as context, they're dashboards, not "the dashboard for this service." Enable the plugin, add `grafana/dashboard-selector` to the entity with a tag expression matching that service's dashboards, and an observability card appears in the entity overview. Metrics are now anchored to the service, not floating in a separate tool.
+
+The Grafana plugin embeds Grafana dashboards and alert panels in entity pages, giving developers direct observability access from the catalog.
 
 :::note
 The Grafana plugin is **not bundled** in the DevPortal image. It must be added as an external dynamic plugin via `dynamic-plugins.yaml` or the Marketplace. No support plan is required — the plugin is a standard Backstage community plugin available publicly.
