@@ -11,7 +11,8 @@ In this step, you will deploy and access **VeeCode DevPortal** in your local env
 In this section, you will:
 
 1. **Check Requirements**: Ensure Docker, Kubernetes, DNS, and GitHub token are ready.
-1. **Deploy DevPortal** into your local cluster with a single `vkdr` command.
+2. **Install Kong Gateway** as the ingress controller.
+3. **Deploy DevPortal** into your local cluster.
 
 By the end, you will have a fully functional DevPortal instance running locally for testing, learning, and development.
 
@@ -26,16 +27,26 @@ Before deploying DevPortal, ensure the following prerequisites are ready:
 
 Once these requirements are in place, you’re ready to deploy DevPortal.
 
-## Step 2: Deploy DevPortal
+## Step 2: Install Kong Gateway
 
-The command `vkdr devportal install` not only installs DevPortal and its dependencies but also **deploys and starts all required services and sample applications** inside the Kubernetes cluster.
+DevPortal requires Kong Gateway as its ingress controller. Install it first:
+
+```sh
+vkdr kong install --default-ic
+```
+
+This installs Kong Gateway and sets it as the default ingress controller for the cluster.
+
+## Step 3: Deploy DevPortal
+
+The command `vkdr devportal install` installs DevPortal and **deploys all required services and sample applications** inside the Kubernetes cluster.
 
 Run:
 
 ```sh
 vkdr devportal install \
   --github-token=$GITHUB_TOKEN \
-  --install-samples
+  --samples
 ```
 
 Expected output (example):
@@ -91,7 +102,7 @@ Open the following URL in your browser:
 
 > http://devportal.localhost:8000
 
-The DevPortal interface should load, confirming that the deployment was successful and the applications are running.
+The DevPortal interface should load, confirming that the deployment was successful and the applications are running. The PetClinic sample app is available at [http://petclinic.localhost:8000](http://petclinic.localhost:8000).
 
 ---
 

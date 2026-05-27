@@ -17,12 +17,26 @@ GitHub offers two types of PATs:
 
 Follow this guide to create a **Classic PAT**:
 
-- [Classic PAT](/devportal/integrations/github/github-tokens#classic-pat)
+- [Classic PAT](/devportal/integrations/GitHub/github-tokens#classic-pat)
 
 Follow this guide to create a **Fine-grained PAT**:
 
-- [Fine-grained PAT](/devportal/integrations/github/github-tokens#fine-grained-pat)
+- [Fine-grained PAT](/devportal/integrations/GitHub/github-tokens#fine-grained-pat)
 
 :::tip
 While you are still struggling to understand the permissions and how they relate to core DevPortal features and plugins, you can always create a **Classic PAT**. It is the simplest option and will work for most cases. Make it work and later refine it to a **Fine-grained PAT** for better security and control or, even better, use a **GitHub App** approach.
+:::
+
+## Export the token
+
+Once you have your PAT, export it as an environment variable in your shell session. The deployment command in the next step reads it from `$GITHUB_TOKEN`.
+
+```bash
+export GITHUB_TOKEN=<your-token>
+```
+
+Replace `<your-token>` with the actual token value. This variable must be set in the same shell session where you run `vkdr devportal install`.
+
+:::caution
+Do not commit your token to version control. If you need this token to persist across shell sessions, add the `export` line to your shell profile (e.g., `~/.bashrc` or `~/.zshrc`) and restrict the file's read permissions.
 :::
