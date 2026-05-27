@@ -93,7 +93,7 @@ If you are using VKDR to manage your local DevPortal instance, add plugins using
 ```bash
 vkdr devportal install \
   --github-token=$GITHUB_TOKEN \
-  --install-samples \
+  --samples \
   --merge ./my-plugins.yaml
 ```
 
