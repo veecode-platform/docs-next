@@ -36,4 +36,8 @@ pluginConfig:
         dynamicRoutes:
           - path: /
             importName: VeecodeHomepagePage
+            config:
+              props:
+                width: 1500
+                height: 800
 ```
