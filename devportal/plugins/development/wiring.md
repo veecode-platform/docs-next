@@ -111,7 +111,7 @@ vkdr devportal install --github-token $GITHUB_TOKEN \
 ```
 
 :::note
-This command installs DebPortal with the extra plugin wiring. It also installs a few sample apps and configures DevPortal to rely on Verdaccio as an external npm registry.
+This command installs DevPortal with the extra plugin wiring. It also installs a few sample apps and configures DevPortal to rely on Verdaccio as an external npm registry.
 :::
 
 ### Open DevPortal (VKDR)

@@ -146,7 +146,7 @@ upstream:
             port: 5432
             database: platform_devportal
             user: <db-user>
-            password: <db-password>
+            password: ${POSTGRES_PASSWORD} # injected from the devportal-secrets Secret — do not inline a real password in values.yaml
       integrations:
         github:
           - host: github.com
@@ -202,7 +202,7 @@ upstream:
             port: 5432
             database: platform_devportal
             user: <db-user>
-            password: <db-password>
+            password: ${POSTGRES_PASSWORD} # injected from the devportal-secrets Secret — do not inline a real password in values.yaml
       integrations:
         gitlab:
           - host: gitlab.com    # or your self-hosted hostname
@@ -249,7 +249,7 @@ helm upgrade --install veecode-devportal \
 Once the rollout completes, open `https://devportal.example.com` in your browser. You should reach the DevPortal login screen.
 
 ```bash
-kubectl rollout status deployment/veecode-devportal -n platform
+kubectl rollout status deployment/veecode-devportal-backstage -n platform
 ```
 
 ---

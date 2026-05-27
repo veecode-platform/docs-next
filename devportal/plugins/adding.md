@@ -19,8 +19,8 @@ The in-portal Marketplace is the simplest path — no YAML editing required.
 1. Open your Backstage instance and click **Marketplace** in the sidebar
 2. Search for the plugin you want (e.g., GitLab, Tech Insights, AWS ECS)
 3. Click **Enable** on the plugin card
-4. A *Restart Pending* badge appears in the customer portal
-5. In the customer portal, click **Restart** — allow ~2 minutes for the pod to come back up
+4. A *Restart Pending* badge appears in the DevPortal header
+5. Restart the instance so the change takes effect — on self-hosted deployments restart the pod/container yourself (e.g. `kubectl rollout restart`); on the VeeCode SaaS the customer portal exposes a **Restart** button. Allow ~2 minutes for the instance to come back up.
 6. The plugin appears in its configured location (sidebar entry, entity tab, etc.)
 
 :::warning
@@ -123,7 +123,7 @@ Add the plugin to the `global.dynamic.plugins` array in your `values.yaml`:
 global:
   dynamic:
     plugins:
-      - package: 'oci://quay.io/veecode/gitlab:bs_1.49.4!immobiliarelabs-backstage-plugin-gitlab'
+      - package: 'oci://quay.io/veecode/gitlab:bs_1.48.4!immobiliarelabs-backstage-plugin-gitlab'
         disabled: false
         pluginConfig: {}
 ```

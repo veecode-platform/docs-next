@@ -83,7 +83,7 @@ To create a GitHub App for backend integrations:
 3. Fill in the application details:
    - **GitHub App name**: VeeCode DevPortal Integration
    - **Homepage URL**: `https://your-veecode-instance.com`
-   - **Authorization callback URL**: `https://your-veecode-instance.com/api/auth/github/handler/frame`
+   - **Authorization callback URL**: `https://your-veecode-instance.com/api/auth/github/handler/frame` — only required if this same GitHub App also handles sign-in. For an integration-only App (the recommended setup, where an OAuth App handles sign-in), this can be left blank.
    - **Permissions** (read more at [Required GitHub App Permissions](./github-integrations.md#required-github-app-permissions)):
      - Repository Permissions
         - Actions: Read and Write

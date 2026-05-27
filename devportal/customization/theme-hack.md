@@ -14,7 +14,7 @@ A more obscure way to override theme settings despite the chosen variant is to u
 
 ## How it works
 
-At runtime the theme is defined by an internal JSON file at `/opt/app-root/src/packages/app/dist/theme.json`. We allow overring it completely or partially by using the `global.theme` values for the Helm chart:
+At runtime the theme is defined by an internal JSON file at `/app/packages/app/dist/theme.json`. We allow overriding it completely or partially by using the `global.theme` values for the Helm chart:
 
 ```yaml
 global:

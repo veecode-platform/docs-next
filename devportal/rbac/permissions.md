@@ -32,7 +32,7 @@ Each permission in the RBAC system is structured as follows:
 
 | Name | Policy | Description | Requirements |
 | --- | --- | --- | --- |
-| scaffolder.action.execute | - | Allows execution of an action from a template | scaffolder.template.parameter.read, scaffolder.template.step.read |
+| scaffolder.action.execute | use | Allows execution of an action from a template | scaffolder.template.parameter.read, scaffolder.template.step.read |
 | scaffolder.template.parameter.read | read | Allows reading parameters of a template | scaffolder.template.step.read |
 | scaffolder.template.step.read | read | Allows reading steps of a template | scaffolder.template.parameter.read |
 | scaffolder.task.read | read | Allows reading scaffolder tasks | X |
@@ -56,6 +56,10 @@ Each permission in the RBAC system is structured as follows:
 ---
 
 ## **4. Platform Permissions**
+
+:::note
+These permissions are defined by optional add-on plugins (Kong, cluster explorer, API management, CI/CD, etc.). They are only enforced when the corresponding plugin is installed and enabled — they are **not** part of the default `rbac-policy.csv` shipped with the base image. Use them only if you have the relevant plugin enabled.
+:::
 
 | Name | Policy | Description | Requirements |
 | --- | --- | --- | --- |
