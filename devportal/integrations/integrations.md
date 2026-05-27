@@ -4,7 +4,21 @@ sidebar_label: Auth & Integrations
 title: Auth & Integrations
 ---
 
-An usually confusing topic in Backstage world are its backend integrations and authentication mechanisms. This section explain a bit of this and prepares you to understand common senarios and to read deeper documentation.
+An usually confusing topic in Backstage world are its backend integrations and authentication mechanisms. This section explains a bit of this and prepares you to understand common scenarios and to read deeper documentation.
+
+## Supported providers
+
+VeeCode DevPortal ships pre-configured profiles for the following identity and SCM providers. Each provider page covers the required env vars, auth config, sign-in resolvers, org-sync config, and a minimal deployment example.
+
+| Provider | Profile | Auth type | Org sync |
+|---|---|---|---|
+| [GitHub](./GitHub/github.md) | `github` | OAuth 2.0 (OAuth App or GitHub App) | GitHub Org / Teams |
+| [GitHub PAT](./GitHub/github-integrations.md) | `github-pat` | Guest (no auth) | GitHub Org catalog sync only |
+| [GitLab](./GitLab/gitlab.md) | `gitlab` | OAuth 2.0 | GitLab Groups |
+| [Azure / Microsoft](./Azure/azure.md) | `azure` | Microsoft OIDC | Microsoft Graph (Azure AD) |
+| [Keycloak](./Keycloak/keycloak-auth.md) | `keycloak` | OIDC | Keycloak Realm |
+| [LDAP / Active Directory](./LDAP/ldap.md) | `ldap` / `ldap-ad` | LDAP bind | LDAP org sync |
+| [MCP (AI Tooling)](./mcp.md) | any | OAuth 2.1 + DCR | n/a |
 
 ## Why should I read this?
 

@@ -16,7 +16,9 @@ GitHub backend integrations enable VeeCode DevPortal to interact with GitHub API
 These integrations run server-side and use **service credentials** rather than end-user tokens.
 
 :::tip
-If you use the `github` or `github-pat` profiles, DevPortal will configure both authentication and integrations for you using bundled `app-config.yaml` files. You still need to obtain the GitHub App and PAT credentials manually and provide the environment variables, though.
+If you use the `github` profile, DevPortal will configure both authentication and integrations for you using a bundled `app-config.yaml` file. You still need to obtain the GitHub App and PAT credentials manually and provide the environment variables, though.
+
+The `github-pat` profile configures **integrations and org sync only** (with guest/no authentication). It does not configure the auth provider and is intended for local development and PoCs. See [GitHub Tokens](./github-tokens.md) for the required `GITHUB_TOKEN` variable.
 :::
 
 ## How Backend Integrations Work
@@ -123,10 +125,9 @@ integrations:
         - appId: ${GITHUB_APP_ID}
           clientId: ${GITHUB_CLIENT_ID}
           clientSecret: ${GITHUB_CLIENT_SECRET}
-          webhookUrl: ${GITHUB_WEBHOOK_URL}
-          webhookSecret: ${GITHUB_WEBHOOK_SECRET}
           privateKey: |
             ${GITHUB_PRIVATE_KEY}
+          # webhookSecret: ${GITHUB_WEBHOOK_SECRET}  # optional — only for webhook event handling
 ```
 
 :::warning
@@ -143,8 +144,10 @@ integrations:
     - host: github.com
       apps:
         - appId: ${GITHUB_APP_ID}
-          privateKey: ${GITHUB_PRIVATE_KEY}
-          # ... other app config
+          clientId: ${GITHUB_CLIENT_ID}
+          clientSecret: ${GITHUB_CLIENT_SECRET}
+          privateKey: |
+            ${GITHUB_PRIVATE_KEY}
       token: ${GITHUB_TOKEN}  # Fallback PAT
 ```
 
