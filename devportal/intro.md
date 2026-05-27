@@ -5,6 +5,7 @@ title: Intro to DevPortal
 ---
 
 import style from './style.module.css';
+import DocCard from '@site/src/components/DocCard';
 
 # Intro
 
@@ -31,33 +32,13 @@ This documentation guide aims to help you understand the workings of the Develop
 
 <div className={style.wrapper}>
 
-export const Card = ({children, title, link}) => (
-   <div className={style.card}
-      onClick={() => window.location = link }
-      onKeyDown={(e) => e.key === 'Enter' && (window.location = link)}
-      tabIndex={0}
-      role="button"
-      aria-label={`Navigate to ${title}`}>
-      <div className={style.titlebar}>
-         <h3 className={style.title}>{title}</h3>
-      </div>
-      <p className={style.desc}>
-         {children}
-      </p>
-   </div>
-);
+<DocCard title="💻 Installation Guide" link="/devportal/installation-guide/simple-setup" style={style}>Learn how to install the Developer Portal on your own infrastructure.</DocCard>
 
-<!-- <Card title="📄️ Self-Service Demo" link="self-service-demo/prerequisites">Explore the platform's features through a simple interactive demo.</Card> -->
+<DocCard title="💡 Concepts" link="/devportal/concepts/catalog" style={style}>Understand the core concepts and terminology related to the Developer Portal.</DocCard>
 
-<Card title="💻 Installation Guide" link="/devportal/installation-guide/simple-setup">Learn how to install the Developer Portal on your own infrastructure.</Card>
+<DocCard title="🧩 Plugins" link="/devportal/plugins/techdocs" style={style}>Customize and extend the functionality of your Developer Portal.</DocCard>
 
-<Card title="💡 Concepts" link="/devportal/concepts/catalog">Understand the core concepts and terminology related to the Developer Portal.</Card>
-
-<!-- <Card title="🌐 API Management" link="/devportal/api-management/apiManagement">Effectively manage your APIs and services using the Developer Portal.</Card> -->
-
-<Card title="🧩 Plugins" link="/devportal/plugins/techdocs">Customize and extend the functionality of your Developer Portal.</Card>
-
-<Card title="📍 Troubleshooting" link="/devportal/troubleshooting">Find solutions to common issues and learn how to report errors.</Card>
+<DocCard title="📍 Troubleshooting" link="/devportal/troubleshooting" style={style}>Find solutions to common issues and learn how to report errors.</DocCard>
 
 </div>
 

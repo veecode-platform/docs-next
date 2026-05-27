@@ -11,35 +11,20 @@ You can use VeeCode DevPortal for free in many possible ways. Find here a few se
 :::
 
 import style from '../style.module.css';
+import DocCard from '@site/src/components/DocCard';
 
 <div className={style.wrapper}>
 
-export const Card = ({children, title, link}) => (
-   <div className={style.card}
-      onClick={() => window.location = link }
-      onKeyDown={(e) => e.key === 'Enter' && (window.location = link)}
-      tabIndex={0}
-      role="button"
-      aria-label={`Navigate to ${title}`}>
-      <div className={style.titlebar}>
-         <h3 className={style.title}>{title}</h3>
-      </div>
-      <p className={style.desc}>
-         {children}
-      </p>
-   </div>
-);
+<DocCard title="Docker Run (Quickstart)" link="./docker-local/intro" style={style}>Quickly run DevPortal locally using Docker. Ideal for testing and exploration without Kubernetes.</DocCard>
 
-<Card title="Docker Run (Quickstart)" link="./docker-local/intro">Quickly run DevPortal locally using Docker. Ideal for testing and exploration without Kubernetes.</Card>
+<DocCard title="VKDR (Local Kubernetes)" link="./vkdr-local/vkdr-setup" style={style}>Install DevPortal locally on a lightweight Kubernetes cluster using VKDR. Best for reproducing production scenarios.</DocCard>
 
-<Card title="VKDR (Local Kubernetes)" link="./vkdr-local/vkdr-setup">Install DevPortal locally on a lightweight Kubernetes cluster using VKDR. Best for reproducing production scenarios.</Card>
+<DocCard title="Simple Setup" link="./simple-setup" style={style}>Learn how to install a self-hosted Developer Portal with a simple setup (trial, demo or small production environment).</DocCard>
 
-<Card title="Simple Setup" link="./simple-setup">Learn how to install a self-hosted Developer Portal with a simple setup (trial, demo or small production environment).</Card>
+<DocCard title="Production Setup" link="./production-setup" style={style}>Learn how to install a self-hosted and production-ready Developer Portal on your own infrastructure.</DocCard>
 
-<Card title="Production Setup" link="./production-setup">Learn how to install a self-hosted and production-ready Developer Portal on your own infrastructure.</Card>
+<DocCard title="Customization" link="/devportal/customization" style={style}>Learn how to customize your Developer Portal.</DocCard>
 
-<Card title="Customization" link="/devportal/customization">Learn how to customize your Developer Portal.</Card>
-
-<Card title="FAQs" link="./FAQs">Frequently Asked Questions.</Card>
+<DocCard title="FAQs" link="./FAQs" style={style}>Frequently Asked Questions.</DocCard>
 
 </div>
