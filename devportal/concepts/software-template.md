@@ -85,14 +85,14 @@ Upon completion:
 
 ---
 
-## Benefits of Using Templates
+## Why Templates Matter
 
-- **Efficiency:** Predefined configurations save time.
-- **Standardization:** Ensures consistency across projects.
-- **Scalability:** Easily replicable infrastructure for new components.
-- **Integration:** Simplifies linking to CI/CD and database systems.
+Templates are the primary mechanism through which [Golden Paths](/platform/concepts/golden-paths) are delivered in the DevPortal. Rather than a developer searching for the "right" way to start a new service, a well-crafted template makes the right way the easiest way.
 
-You now have a comprehensive understanding of the **template creation feature** in the Developer Portal. By using this tool, you can streamline project setup and focus on development tasks.
+- **Self-service:** Teams spin up new services without opening a ticket to the platform team.
+- **Standardization:** Every project starts from the same base — same Dockerfile structure, same CI pipeline, same observability hooks.
+- **Compliance by default:** Security and governance requirements are built into the template rather than enforced after the fact.
+- **Scalability:** Adding a new team or project type means adding a template, not duplicating runbooks.
 
 If additional help is needed, contact the support team or watch the video.
 <center>

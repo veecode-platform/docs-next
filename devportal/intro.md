@@ -9,11 +9,7 @@ import DocCard from '@site/src/components/DocCard';
 
 # Intro
 
-:::tip
-This documentation is being updated to our latest release supporting dynamic plugins. Keep in touch and, by all means, file PRs to help us improve it.
-:::
-
-Welcome to VeeCode Developer Portal documentation! This document will guide you through our Developer Portal, which is a modern and open-source Platform Engineering solution designed to help organizations better manage their API and service ecosystems.
+Welcome to VeeCode Developer Portal documentation. This guide covers installation, plugins, and concepts for running DevPortal on your infrastructure.
 
 ### What is VeeCode DevPortal?
 
@@ -28,7 +24,7 @@ VeeCode DevPortal is a Backstage distro that provides a production-grade portal 
 - It is an API showcase and governance tool for both developers and business partners
 - It simplifies DevOps adoption and scaling, removing cognitive load from average teams
 
-This documentation guide aims to help you understand the workings of the Developer Portal, how to use it, and how to customize it to meet your specific needs. Here are some of the topics covered in this guide:
+If you want to understand **why** this portal matters before diving into setup — the reasoning behind golden paths, self-service design, and developer autonomy — start with [Platform Concepts](/platform/concepts). If you're here to install and configure, continue below.
 
 <div className={style.wrapper}>
 
@@ -36,7 +32,7 @@ This documentation guide aims to help you understand the workings of the Develop
 
 <DocCard title="💡 Concepts" link="/devportal/concepts/catalog" style={style}>Understand the core concepts and terminology related to the Developer Portal.</DocCard>
 
-<DocCard title="🧩 Plugins" link="/devportal/plugins/techdocs" style={style}>Customize and extend the functionality of your Developer Portal.</DocCard>
+<DocCard title="🧩 Plugins" link="/devportal/plugins/plugins" style={style}>Enable and configure plugins to extend DevPortal with Day-2 capabilities.</DocCard>
 
 <DocCard title="📍 Troubleshooting" link="/devportal/troubleshooting" style={style}>Find solutions to common issues and learn how to report errors.</DocCard>
 
