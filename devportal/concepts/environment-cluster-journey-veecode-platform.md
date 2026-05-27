@@ -4,58 +4,48 @@ sidebar_label: Environment Cluster Journey by Veecode Platform
 title: Environment Cluster Journey by Veecode Platform
 ---
 
-
-Welcome to our Environment Cluster journey. In this brief guide, we will explain the purpose of our approach and provide a step-by-step guide for its use.
+Welcome to the Environment Cluster journey. This guide explains the purpose of this approach and how to use it.
 
 # Environment Cluster Journey by Veecode Platform
 
+Our environment cluster journey is designed to make the development process more dynamic and independent. Once the DevOps team has set up the environments and the types of clusters available, developers can deploy their applications swiftly and accurately.
 
-Our environment cluster journey is designed to make the development process more dynamic and independent. Once the DevOps team has set up the environments and the types of clusters available, Developers will be able to deploy their applications swiftly and accurately. This greatly contributes to best development practices and, consequently, to the creation of a more suitable environment.
+## How It Works
 
-But how is this possible?
+Both **Environments** and **Clusters** are modeled as `Resource` entities in the Software Catalog. The journey works as follows:
 
-The Environment Cluster journey functions as follows:
-<!-- O Environment nao é criado com um template nosso. Ele é manualmente inserido no catalogo atualmente. Cluster sera criado com as info previamente inseridas no environment selecionado, porem, as informacoes especificas do cluster podem  ser inseridas no proprio template (name, tamanho de maquina, regiao, repositorio...) -->
- 1. **Environment Creation:** The DevOps team establishes an “environment”, a space where specific environmental information is stored. This information contains network configurations, environmental variables, service access credentials, and more.
+1. **Environment Creation:** The DevOps team manually inserts an Environment entity into the catalog. An environment stores configuration and credential references: network settings, environmental variables, service access credentials, and more. Environments are currently registered manually via a `catalog-info.yaml` with `kind: Resource` and `spec.type: environment`.
 
- 2. **Cluster Configuration:** Within each environment, “clusters” are formed. A cluster is a collection of servers that collaborate to provide high availability and load balancing for your applications. A cluster will be created with the information previously entered in the selected environment. However, specific cluster information can be entered in the template itself (name, machine size, region, repository…).
+2. **Cluster Configuration:** A Cluster is a `Resource` entity that references an environment. Clusters are typically created via a scaffolder IaC template — the template uses the environment's configuration as input (network, region, credentials) and applies cluster-specific parameters (name, machine size, repository). Once the template runs, the cluster entity is registered in the catalog.
 
-3. **Application Deployment:** With the environments and clusters set up, developers can then proceed to deploy their applications.
+3. **Application Deployment:** With environments and clusters in the catalog, developers can reference them in software templates and deploy their applications to the correct target infrastructure.
 
-This approach enables a more dynamic and independent development process. Developers are granted greater freedom and flexibility in deploying their applications, while the DevOps team can ensure that the infrastructure is correctly configured and optimized. This greatly contributes to best development practices and the creation of a more suitable environment for your company.
+This approach creates a clear separation of concerns: the DevOps team controls environment and cluster definitions; developers consume them self-service.
 
-#### To summarize: Environments are utilized by clusters, and these clusters function as the infrastructure for the deployment of the final projects.
+**Summary:** Environments are utilized by clusters, and clusters provide the infrastructure for deploying final projects.
 
-Bellow step-by-step guide : 
-## Using Cluster templates 
-1. **Prepare your environment:** Before you start, make sure you have an environment set up.
-2. **Access Veecode Platform:** Log in to the Veecode Platform and select “Create” from the sidebar menu.
-3. **Choose to Provision EC2 Cluster:** From the options available, select “Provision EC2 Cluster”.
-4. **Select Environment:** Choose the desired Environment under “Resource Available”, then press “Next”.
-5. **Configure EC2:** Fill in all the fields in the EC2 configuration section, then press “Next”.
-6. **Network Configurations:** Enter your Network Configurations, then press “Next”.
-7. **Terraform Configuration:** In this step, you need to enter your Terraform Configuration.
-8. **Set up Git:** Select your Git provider, specify the owner, and name the repository you’re going to create. Also, set the visibility of the repository. Once done, click on “Review”.
-9. **Review and Create:** Review all the information you’ve entered for the cluster creation. Make sure everything is correct, then click on “Create”.
+---
 
-10. **Secrets Configuration:** It’s crucial to define all the necessary secrets for the functioning of the generated project so that the pipeline that will create the cluster can be executed without errors.
-Below are the secrets that you need to ensure you have for the project pipeline to function properly:
+## Using Cluster Templates
 
-🔑 **AWS_ACCESS_KEY mandatory**
-🔑 **AWS_SECRET_KEY mandatory**
-🔑 **AWS_REGION mandatory**
-🔑 INFRACOST_API_KEY optional
+The steps below describe the general flow for creating a cluster via a scaffolder template. The exact fields depend on the specific template your organization has published.
 
-:::warning
+1. **Prepare your environment:** Before you start, make sure you have an environment `Resource` entity registered in the catalog.
+2. **Access DevPortal:** Log in and select **"Create"** from the sidebar menu.
+3. **Choose a cluster template:** Select the cluster provisioning template relevant to your target infrastructure.
+4. **Select Environment:** Choose the desired environment from the available resources, then proceed.
+5. **Configure cluster parameters:** Fill in resource-specific fields (machine size, region, network settings, etc.) as required by the template.
+6. **Set up the repository:** Select your Git provider, specify the owner, and name the repository the template will create. Set repository visibility.
+7. **Review and Create:** Review all the information, then click **"Create"**.
+8. **Monitor the pipeline:** The scaffolder creates the repository and triggers a CI/CD pipeline. Monitor progress in the scaffolder log view. Ensure all required secrets (cloud credentials, tokens, etc.) are configured in your CI/CD environment before the pipeline runs.
+9. **Locate the cluster in the catalog:** Once the pipeline completes and the entity is registered, navigate to the **Catalog**, filter by `Kind: Resource`, and look for your cluster by name.
 
-  Remember, each variable plays a significant role in the project’s functionality, so make sure they are correctly set.
-
+:::info
+There is no dedicated "Resources > Clusters" sidebar entry. Clusters and environments appear in the standard Catalog view — filter by `Kind: Resource` or use the search to find them.
 :::
 
-11.    **Initiate the Pipeline:** Now, you should initiate the pipeline. This can be done through the Veecode Platform interface. In the sidebar, navigate to the “Resources” area and select “Clusters”. Then, choose the cluster with the name you provided. Click on the “About” menu and, at the bottom of the screen, click on “Deploy”. The pipeline will begin to build your cluster.
+:::warning
+Make sure all required CI/CD secrets (e.g., cloud provider credentials) are set before initiating the pipeline. Missing secrets will cause the pipeline to fail.
+:::
 
-If everything goes as expected, the pipeline will build your cluster and it will be visible for use in your projects.
-    
-Remember, each step is crucial for the successful creation of a cluster. If you encounter any issues, refer to the platform’s documentation or reach out to their support team. 
-
-    
+If you encounter any issues, refer to the platform's documentation or reach out to the support team.

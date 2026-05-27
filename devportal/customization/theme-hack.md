@@ -4,7 +4,13 @@ sidebar_label: Theme hacking
 title: Theme hacking
 ---
 
-A more obscure way to override theme settings despite the chosen variant is to use the `global.theme.customJson` value to override just the ones you want to change.
+:::warning Legacy workaround
+The `global.theme.customJson` mechanism described on this page is a **Helm-only** workaround that requires setting `readOnlyRootFilesystem: false`. It is superseded by the supported `app.branding.theme.*` configuration (see [Simple Branding](./branding.md)), which works in all install methods and does not require a writable container filesystem.
+
+Use this page only if you need to override theme values that are not yet exposed by `app.branding.theme.*`, or if you are on an older install that has not migrated to the supported mechanism.
+:::
+
+A more obscure way to override theme settings despite the chosen variant is to use the `global.theme.customJson` value to override just the ones you want to change. This approach is specific to the **Helm chart install** — Docker/distro users should use `app.branding.theme.*` in `app-config.local.yaml` instead.
 
 ## How it works
 

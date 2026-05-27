@@ -8,7 +8,9 @@ There is an entire branding section in the `appConfig` section of DevPortal conf
 
 ## The default config
 
-Our default values for Helm chart install are:
+The default branding values are defined in `app-config.yaml` (base layer). For a Helm install, override them under `upstream.backstage.appConfig`; for a Docker/distro install, place them at the top level in `app-config.local.yaml`.
+
+**Helm chart format:**
 
 ```yaml
 upstream:
@@ -17,24 +19,48 @@ upstream:
       app:
         branding:
           fullLogo: https://veecode-platform.github.io/support/logos/logo.svg
-          fullLogoDark: https://veecode-platform.github.io/support/logos/logo-black.svg
           iconLogo: https://veecode-platform.github.io/support/logos/logo-mobile.png
           fullLogoWidth: 150
           theme:
             light:
               variant: "backstage"
               palette:
-              navigation:
-                background: "#222222" # your fixed light theme sidebar background
+                navigation:
+                  background: "#222222"
             dark:
               variant: "backstage"
               palette:
-              navigation:
-                background: "#222222" # same fixed color for dark theme
+                navigation:
+                  background: "#222222"
       backend:
         csp:
           img-src: ["'self'","data:","https://raw.githubusercontent.com/","https://avatars.githubusercontent.com/","https://veecode-platform.github.io","https://platform.vee.codes"]
 ```
+
+**Direct app-config format (Docker/distro):**
+
+```yaml
+app:
+  branding:
+    fullLogo: https://veecode-platform.github.io/support/logos/logo.svg
+    iconLogo: https://veecode-platform.github.io/support/logos/logo-mobile.png
+    fullLogoWidth: 150
+    theme:
+      light:
+        variant: "backstage"
+        palette:
+          navigation:
+            background: "#222222"
+      dark:
+        variant: "backstage"
+        palette:
+          navigation:
+            background: "#222222"
+```
+
+:::note About `fullLogoDark`
+The `fullLogoDark` key (a separate dark-mode logo) is present in the source but is currently commented out in the default config with the note "new form breaks sidebar, check later." It is **not recommended** to use this key until it is formally supported. Use a single `fullLogo` URL that works in both themes, or style accordingly.
+:::
 
 Will result in this:
 
