@@ -9,7 +9,7 @@ DevPortal exposes an MCP (Model Context Protocol) server that lets external AI t
 Two independent capabilities:
 
 1. **MCP server for external clients** — OAuth per-user authentication, no LLM API key required
-2. **AI Chat in-portal** — optional; requires an LLM API key (OpenAI or Anthropic)
+2. **AI Chat in-portal** — optional; requires an LLM API key (OpenAI, Anthropic, Gemini, or Ollama)
 
 ## For platform teams
 
@@ -20,7 +20,7 @@ Go to **Configure → Integrations** and open the **MCP + AI Chat** card.
 1. Click **Connect**
 2. The dialog opens with the default action **"Enable MCP server"**
 3. (Optional) Toggle **"Also add AI Chat in portal"**
-4. If AI Chat is on, select provider (OpenAI or Anthropic) and provide the API key
+4. If AI Chat is on, select provider (OpenAI, Anthropic, Gemini, or Ollama) and provide the API key
 5. Confirm — the button label reflects what will be provisioned:
    - **Enable MCP server** — MCP server only
    - **Enable MCP + AI Chat** — MCP server + in-portal chat
@@ -50,8 +50,9 @@ Add the following to your `dynamic-plugins.yaml`:
 
 ```yaml
 plugins:
-  - disabled: false
-    package: oci://quay.io/veecode/backstage:bs_1.49.4!backstage-plugin-mcp-actions-backend
+  # MCP Actions Backend — exposes Backstage actions as MCP tools
+  - package: oci://quay.io/veecode/backstage:bs_1.49.4!backstage-plugin-mcp-actions-backend
+    disabled: false
     pluginConfig:
       backend:
         actions:
@@ -62,6 +63,14 @@ plugins:
             - scaffolder-mcp-extras
             - catalog
             - scaffolder
+
+  # MCP Tool Plugins — must be enabled individually so the plugin packages are loaded
+  - package: oci://quay.io/veecode/mcp-integrations:bs_1.49.4!red-hat-developer-hub-backstage-plugin-software-catalog-mcp-extras
+    disabled: false
+  - package: oci://quay.io/veecode/mcp-integrations:bs_1.49.4!red-hat-developer-hub-backstage-plugin-techdocs-mcp-extras
+    disabled: false
+  - package: oci://quay.io/veecode/mcp-integrations:bs_1.49.4!red-hat-developer-hub-backstage-plugin-scaffolder-mcp-extras
+    disabled: false
 ```
 
 :::warning
@@ -138,6 +147,22 @@ url = "https://<your-instance>/api/mcp-actions/v1"
 ```
 
 On first use, the client opens a browser window for the OAuth authorization flow. No manual token management is needed.
+
+### Cursor
+
+Add to your Cursor MCP configuration (`.cursor/mcp.json` in the project root, or the global Cursor settings under **Settings → MCP**):
+
+```json
+{
+  "mcpServers": {
+    "devportal": {
+      "url": "https://<your-instance>/api/mcp-actions/v1"
+    }
+  }
+}
+```
+
+On first use, Cursor triggers the OAuth authorization flow and stores the resulting token. The server will appear in the Cursor MCP panel under **Tools**.
 
 ## Advanced configuration
 

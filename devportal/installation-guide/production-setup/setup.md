@@ -4,405 +4,260 @@ sidebar_label: Production Setup
 title: Production Setup
 ---
 
-:::warning
-The information in this section needs updating and should be ignored. Please have patience while we take care of it.
-:::
-
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-export const your_domain = "devportal.yourdomain.com";
+Welcome to the VeeCode Platform DevPortal production installation guide. This guide walks through installing DevPortal on a production-grade Kubernetes cluster using the official Helm chart.
 
-Welcome to the VeeCode Platform DevPortal complete product installation guide. This guide will help you install the product. You will need an Kubernetes cluster for this installation.
+## Overview
 
-## **Overview**
+This guide covers:
 
-This guide will cover the following steps:
+1. **Prerequisites** — cluster, database, DNS, and credentials
+2. **Creating a catalog repository** in your Git provider
+3. **Configuring and deploying** DevPortal via Helm
+4. **Accessing the portal**
 
-1. **Creating a Repository for Hosting Your Catalog in the DevPortal**
-2. **Configuring the DevPortal with your credentials and deploying it to your cluster**
-3. **Accessing the DevPortal**
+## Prerequisites
 
-By following these steps, you'll be able to install the DevPortal product on your cluster and explore its features.
+- A Kubernetes cluster (cloud-managed or self-managed)
+- `kubectl` and `helm` (v3) installed and configured
+- A PostgreSQL database accessible from the cluster
+- A DNS hostname pointing to your cluster's ingress load balancer (e.g., `devportal.example.com`)
+- An ingress controller deployed in the cluster (nginx or Kong)
+- A Git provider account (GitHub or GitLab) with credentials
 
-To continue, select your preferred provider:
+<Tabs groupId="providers">
+<TabItem value="github" label="GitHub">
 
-<Tabs groupId="providers1">
-<TabItem value="Github" label="Github">
+**Required GitHub credentials:**
 
-## **Prerequisites (GitHub)**
+- **GitHub OAuth App** — Client ID and Client Secret for user sign-in.
+  1. Go to [GitHub Developer Settings](https://github.com/settings/developers) → **New OAuth App**.
+  2. Set **Homepage URL** to `https://devportal.example.com`.
+  3. Set **Authorization callback URL** to `https://devportal.example.com/api/auth/github/handler/frame`.
+  4. Note the **Client ID** and generate a **Client Secret**.
 
-Before you start, you'll need to have the following:
+- **GitHub Personal Access Token (PAT)** — for backend catalog and API access.
+  1. Go to [GitHub Tokens](https://github.com/settings/tokens) → **Generate new token (classic)**.
+  2. Select scopes: `repo` (all), `workflow`.
+  3. Note the token; it will not be shown again.
 
-- An existing Kubernetes cluster for the installation.
-- A GitHub account.
-- A GitHub OAuth App Client ID and Client Secret
-- A GitHub personal access token
-- A PostgreSQL database.
-
-In the next sections, we will provide a brief tutorial on **how to generate the GitHub OAuth App Client ID, Client Secret, and a personal access token**. If you already know how to generate these or have them readily available, feel free to skip the upcoming tutorial and proceed directly to Step 1 of the installation guide.
-
-### Create a new GitHub OAuth App
-
-1. **Create a New OAuth App**
-
- First, **[click here](https://github.com/settings/developers)** and then click on "New OAuth App". Fill in the required information, including:
-
-- **Application name:** Choose a name that's easily identifiable, such as "devportal".
-- **Homepage URL:** https://{your_domain}
-- **Description:** (Optional) Add a brief description of the application, such as "VeeCode DevPortal".
-- **Authorization callback URL:** https://{your_domain}/api/auth/github/handler/frame
-
-Make sure to replace "**{your_domain}**" with the actual domain used in your kubernetes applications.
-
-Leave the "Enable device flow" checkbox unselected and click on "Register application".
-
-2. Write down the **Client ID** and click on "**Generate a New Client Secret**"
-
-After registering the OAuth App, save the Client ID displayed on the screen. Then, click on "**Generate a new client secret**" and save the generated Client Secret.
-
-Finally, click on "Update application" at the bottom of the page to save your changes.
-
-By completing these steps, you have successfully generated a GitHub OAuth App and collected the Client ID and Client Secret to use in your application.
-
-The reason for generating these credentials is to enable the Devportal to authenticate users via GitHub. The Client ID uniquely identifies your application, while the Client Secret serves as a secret key for authentication. This OAuth App allows the Devportal to securely connect to GitHub's API and access user information, ensuring a seamless integration between the Devportal and users' GitHub accounts.
-
-### Create an Access Token on GitHub
-1. **Create a new Access Token**
-
-To generate an access token, **[click here](https://github.com/settings/tokens)** and then click "Generate new token". Choose the **classic mode** option and fill in the requested information.
-
-- Name: any proper label, such as "devportal-token"
-- Expiration date: we recommend setting it to 90 days
-
-2. **Select the Correct Scopes** for the Token In the "Select scopes" section, select the "repo" scopes (select all) and "workflow" scopes. Make sure no other option is selected.
-
-3. **Create the Token**
-
-Click "Generate token" to create the access token. Copy the token and store it in a secure location, as it will only be displayed once.
-
-With these three steps, you have successfully generated an access token on GitHub. Make sure to use to keep those safe.
-
-The reason for the generation of these credentials is so that you can have access to the Devportal plugins.
+Store these as a Kubernetes Secret before deploying (see [Step 2](#step-2-create-a-kubernetes-secret-for-credentials)).
 
 </TabItem>
+<TabItem value="gitlab" label="GitLab">
 
-<TabItem value="Gitlab" label="Gitlab">
+**Required GitLab credentials:**
 
-## **Prerequisites (GitLab)**
+- **GitLab Personal Access Token** — for backend catalog and API access. Create one at **GitLab → User Settings → Access Tokens** with scopes `read_api`, `read_repository`.
 
-Before you start, you'll need to have the following:
+- **GitLab OAuth Application** (optional, for user sign-in):
+  1. Go to **GitLab → User Settings → Applications**.
+  2. Set **Redirect URI** to `https://devportal.example.com/api/auth/gitlab/handler/frame`.
+  3. Enable scopes: `read_user`, `openid`, `email`, `profile`.
+  4. Note the **Application ID** and **Secret**.
 
-- An existing Kubernetes cluster for the installation.
-- A GitLab account.
-- A GitLab personal access token.
-- A PostgreSQL database.
-
-In the next sections, we'll provide a brief tutorial on **how to generate a GitLab personal access token**. If you already know how to generate this token or if you have it readily available, feel free to skip the upcoming section and proceed directly to Step 1 of the installation guide.
-
-### Create an Access Token on GitLab
-
-1. **Log in to your GitLab account**: Visit **`https://gitlab.com/users/sign_in`** and enter your credentials to log in.
-2. **Navigate to your profile settings**: Click on your account icon in the upper right corner of the GitLab interface and select "Settings" from the dropdown menu.
-3. **Go to the Personal Access Tokens section**: On the left side menu, click on "Access Tokens".
-4. **Create a new token**:
-    - **Name**: Enter a name for the token that describes its purpose, such as "Personal Access Token".
-    - **Expires at**: Optionally, you can set an expiration date for the token.
-    - **Scopes**: Choose the appropriate scopes for this token. For instance, if you want the token to be able to read and write to repositories, you should select the "read_repository" and "write_repository" scopes.
-5. **Create the token**: Click the "Create personal access token" button at the bottom of the page.
-6. **Copy your token**: After creating the token, you will see a token value on the page. This is your personal access token and it will be shown only once, so copy it and keep it in a safe place.
-The reason for the generation of these credentials is so that you can have access to the Devportal plugins.
-
-
-**Important:** Keep your Personal Access Token saved, as you will need it in subsequent steps of the installation process.
+Store these as a Kubernetes Secret before deploying (see [Step 2](#step-2-create-a-kubernetes-secret-for-credentials)).
 
 </TabItem>
 </Tabs>
 
-## **Step 1: Creating a Repository for Hosting Your Catalog in the DevPortal**
+---
 
-The initial step to using the DevPortal involves setting up a repository to host your catalog. The catalog maps and exposes specifications, APIs, templates, and other resources. Depending on your preferred provider (GitHub or GitLab), the process may differ slightly.
+## Step 1: Fork the sample catalog
 
-First, select your preferred provider:
+Fork [veecode-platform/public-catalog](https://github.com/veecode-platform/public-catalog) into your Git account or organization. This gives you a starting catalog repository that DevPortal can index.
 
-<Tabs groupId="providers1">
-<TabItem value="Github" label="Github">
+Note the repository name — you'll reference it in your `values.yaml`.
 
-Creating a repository on Github with the files you have, follows this process:
+---
 
-1. **Go to**  [public-catalog](https://github.com/veecode-platform/public-catalog)  on GitHub.
-2. **In the upper right** corner of the page, click the "Fork" button.
-3. **In "Owner"**, select your account or the organization that you want to fork the repository to. Keep the original repository name and then click "Create fork"
-4. **The repository** will be forked to your account.
-5. **You will** be redirected to your forked repository.
+## Step 2: Create a Kubernetes Secret for credentials
 
-Now you can make changes to your forked repository without affecting the original repository.
+Never put secrets directly in `values.yaml`. Create a Kubernetes Secret in the namespace where DevPortal will run (typically `platform`):
 
-**Important**: Please remember to save the name of the repository you created, as you will need it in subsequent steps of the installation process.
+```bash
+kubectl create namespace platform --dry-run=client -o yaml | kubectl apply -f -
+```
 
-And there you have it! Your GitHub repository is now set up correctly for the DevPortal to map and expose your catalog's contents.
+<Tabs groupId="providers">
+<TabItem value="github" label="GitHub">
 
+```bash
+kubectl create secret generic devportal-secrets \
+  --namespace platform \
+  --from-literal=GITHUB_AUTH_CLIENT_ID=<oauth-client-id> \
+  --from-literal=GITHUB_AUTH_CLIENT_SECRET=<oauth-client-secret> \
+  --from-literal=GITHUB_TOKEN=<personal-access-token>
+```
 
 </TabItem>
+<TabItem value="gitlab" label="GitLab">
 
-<TabItem value="Gitlab" label="Gitlab">
-
-Creating a repository on GitLab with the files you have, follows this process:
-
-1. **Access** [public-catalog](https://github.com/veecode-platform/public-catalog)
-2. **Click on the "Clone" button** and select "Clone with HTTPS".
-3. **Copy** the URL of the repository.
-4. **Log into your GitLab** account and navigate to the "New project" page. You can do this by clicking on the "+" icon on the upper left corner and then selecting "New project/repository".
-5. **Choose** "Import project".
-6. **Select** "Repository by URL" as the source repository.
-7. **Paste** the URL of the repository you want to import into the "Git repository URL" field.
-8. **Click** on the "Import" button".
-
-The repository will be imported to your GitLab account.
-
-**Important**: Please remember to save the name of the repository you created, as you will need it in subsequent steps of the installation process.
-
-Your GitLab repository is now correcly setup for the DevPortal to map and expose your catalog's contents.
+```bash
+kubectl create secret generic devportal-secrets \
+  --namespace platform \
+  --from-literal=GITLAB_TOKEN=<personal-access-token> \
+  --from-literal=GITLAB_AUTH_CLIENT_ID=<oauth-app-id> \
+  --from-literal=GITLAB_AUTH_CLIENT_SECRET=<oauth-app-secret>
+```
 
 </TabItem>
 </Tabs>
 
-## **Step 2: Configuring the DevPortal with your credentials and deploying it to your cluster**
+---
 
-To configure DevPortal deployment, edit the YAML file provided below and **replace** the following information with your own:
+## Step 3: Create your `values.yaml`
 
-The file should be created with the name "values" by default.
+The chart name is `veecode-devportal` from the `veecode-devportal` Helm repository. See [Understand the Helm Chart](../understand-chart) for a full reference of available keys.
 
-<Tabs groupId="providers1">
-<TabItem value="Github" label="Github">
+<Tabs groupId="providers">
+<TabItem value="github" label="GitHub">
 
-1. Copy this values.yaml file:
-    
-    ```yaml
-    replicas: 1
+```yaml
+global:
+  host: devportal.example.com   # your DNS hostname
+  protocol: https
+  port: ''
+
+upstream:
+  enabled: true
+  ingress:
+    enabled: true
+    className: nginx             # or 'kong'
+    tls:
+      - secretName: devportal-tls
+        hosts:
+          - devportal.example.com
+  backstage:
     image:
-      repository: veecode/devportal-bundle
-      tag: latest
-      pullPolicy: IfNotPresent
-    
-    environment: development
-    
-    service:
-      enabled: true
-      name: devportal
-      type: ClusterIP
-      containerPort: 7007
-    
-    ingress:
-      enabled: true
-      host: <devportal-host> #devportal.com
-      className: nginx
-      # className: kong
-      # annotations:
-      #   konghq.com/https-redirect-status-code: "308"
-      #   konghq.com/preserve-host: "true"
-      #   konghq.com/protocols: "https"
-      #   konghq.com/strip-path: "false"
-      tls:
-        secretName: devportal-secret
-    
-    resources:
-      requests:
-        cpu: 500m
-        memory: 512Mi
-      limits:
-        cpu: 1000m
-        memory: 1Gi
-    
+      repository: veecode/devportal
+      tag: "1.4.5"
+    extraEnvVarsSecret: devportal-secrets
     appConfig:
-      title: Devportal
       app:
-        baseUrl: <devportal-host>
+        title: "VeeCode DevPortal"
       backend:
-        baseUrl: <devportal-host>
-        secret: 56616a93-ac28-42ab-929d-6ec1fc008c54
-      database:
-        client: pg
-        connection:
-          host: <database-url>
-          port: 5432
-          database: platform_devportal
-          user: <username>
-          password: <password>
-    
-    auth:
-      providers:
+        database:
+          client: pg
+          connection:
+            host: <db-host>
+            port: 5432
+            database: platform_devportal
+            user: <db-user>
+            password: <db-password>
+      integrations:
         github:
-          clientId: <github-client-id>
-          clientSecret: <github-client-secret>
-    
-    integrations:
-      github:
-        token: <github-token>
-    
-    catalog:
-      providers:
-        github:
-          organization: <github-organization> # string
-          catalogPath: /catalog-info.yaml # string
-          filters:
-            branch: main # Optional. Uses `master` as default
-            repository: <repository-name> #suggestion devportal-catalog
-            validateLocationsExist: true
-    
-    platform:
-      guest:
-        enabled: true
-      apiManagement:
-        enabled: false
-        readOnlyMode: false
-    ```
-    
-2. **Replace `<devportal-host>`**: This placeholder appears in two places: under **`ingress.host`**, and in **`appConfig`** under **`app.baseUrl`** and **`backend.baseUrl`**. Replace it with the hostname where your DevPortal will be accessible, such as **`devportal.yourdomain.com`**.
-3. **Update Database Connection**: In the **`appConfig.database.connection`** section, you should replace:
-    - **`<database-url>`**: Replace it with your PostgreSQL database server's hostname.
-    - **`<username>`** and **`<password>`**: Replace these with the appropriate credentials to access your PostgreSQL database.
-4. **Set GitHub OAuth Credentials**: In the **`auth.providers.github`** section, replace:
-    - **`<github-client-id>`** and **`<github-client-secret>`**: Replace these with your GitHub OAuth app's client ID and client secret.
-5. **Set GitHub Token**: In the **`integrations.github`** section, replace **`<github-token>`** with your GitHub personal access token.
-6. **Configure Catalog Repository**: In the **`catalog.providers.github`** section:
-    - Replace **`<github-organization>`**: This should be replaced with your GitHub username or organization name.
-    - Replace **`<repository-name>`**: This should be replaced with the name of your GitHub repository.
+          - host: github.com
+            token: ${GITHUB_TOKEN}
+      auth:
+        providers:
+          github:
+            development:
+              clientId: ${GITHUB_AUTH_CLIENT_ID}
+              clientSecret: ${GITHUB_AUTH_CLIENT_SECRET}
+      catalog:
+        providers:
+          github:
+            myOrg:
+              organization: <your-github-org>
+              catalogPath: /catalog-info.yaml
+              filters:
+                branch: main
+                repository: public-catalog
+```
 
 </TabItem>
+<TabItem value="gitlab" label="GitLab">
 
-<TabItem value="Gitlab" label="Gitlab">
+```yaml
+global:
+  host: devportal.example.com   # your DNS hostname
+  protocol: https
+  port: ''
 
-1. Copy this values.yaml file:
-    
-    ```yaml
-    replicas: 1
+upstream:
+  enabled: true
+  ingress:
+    enabled: true
+    className: nginx             # or 'kong'
+    tls:
+      - secretName: devportal-tls
+        hosts:
+          - devportal.example.com
+  backstage:
     image:
-      repository: veecode/devportal-bundle
-      tag: latest
-      pullPolicy: IfNotPresent
-    
-    environment: development
-    
-    service:
-      enabled: true
-      name: devportal
-      type: ClusterIP
-      containerPort: 7007
-    
-    ingress:
-      enabled: true
-      host: <devportal-host> #devportal.com
-      className: nginx
-      # className: kong
-      # annotations:
-      #   konghq.com/https-redirect-status-code: "308"
-      #   konghq.com/preserve-host: "true"
-      #   konghq.com/protocols: "https"
-      #   konghq.com/strip-path: "false"
-      tls:
-        secretName: devportal-secret
-    
-    resources:
-      requests:
-        cpu: 500m
-        memory: 512Mi
-      limits:
-        cpu: 1000m
-        memory: 1Gi
-    
+      repository: veecode/devportal
+      tag: "1.4.5"
+    extraEnvVarsSecret: devportal-secrets
     appConfig:
-      title: Devportal
       app:
-        baseUrl: <devportal-host>
+        title: "VeeCode DevPortal"
       backend:
-        baseUrl: <devportal-host>
-        secret: 56616a93-ac28-42ab-929d-6ec1fc008c54
-      database:
-        client: pg
-        connection:
-          host: <database-url>
-          port: 5432
-          database: platform_devportal
-          user: <username>
-          password: <password>
-    
-    auth: {}
-    
-    integrations:
-      gitlab:
-        token: <gitlab-token>
-    
-    catalog:
-      providers:
+        database:
+          client: pg
+          connection:
+            host: <db-host>
+            port: 5432
+            database: platform_devportal
+            user: <db-user>
+            password: <db-password>
+      integrations:
         gitlab:
-          branch: main # Optional. Uses `master` as default
-          group: <gitlab group/subgroup> # Optional. Group and subgroup (if needed) to look for repositories. If not present the whole project will be scanned
-          entityFilename: catalog-info.yaml # Optional. Defaults to `catalog-info.yaml`
-          projectPattern: <repository-name> #suggestion devportal-catalog
-    
-    platform:
-      guest:
-        enabled: true
-      apiManagement:
-        enabled: false
-        readOnlyMode: false
-    ```
-    
-2. **Replace `<devportal-host>`**: You'll see this in two places: once under **`ingress.host`** and twice under **`appConfig`**. This should be replaced with the hostname where you will be accessing your DevPortal. It would typically be the domain name or IP address where your DevPortal service will be accessible. For example, it could be **`devportal.yourcompany.com`**.
-3. **Update Database Connection**: In the **`appConfig.database.connection`** section, replace:
-    - **`<database-url>`**: Replace it with the hostname of your PostgreSQL database server.
-    - **`<username>`** and **`<password>`**: Replace these with the credentials used to access your PostgreSQL database.
-4. **Set GitLab Token**: In the **`integrations.gitlab`** section, replace **`<gitlab-token>`** with the GitLab personal access token you created earlier.
-5. **Configure Catalog Repository**: In the **`catalog.providers.gitlab`** section:
-    - Replace **`<gitlab group/subgroup>`**: This is the group or subgroup in GitLab where your repository exists. If your repository is under a subgroup, it should be formatted as **`group/subgroup`**.
-    - Replace **`<repository-name>`**: This should be replaced with the name of your GitLab repository.
+          - host: gitlab.com    # or your self-hosted hostname
+            token: ${GITLAB_TOKEN}
+      auth:
+        providers:
+          gitlab:
+            development:
+              clientId: ${GITLAB_AUTH_CLIENT_ID}
+              clientSecret: ${GITLAB_AUTH_CLIENT_SECRET}
+      catalog:
+        providers:
+          gitlab:
+            myGroup:
+              host: gitlab.com
+              group: <your-gitlab-group>
+              branch: main
+              entityFilename: catalog-info.yaml
+```
 
 </TabItem>
 </Tabs>
 
-1. Open a terminal in the same directory as the YAML file.
-2. Add the Veecode Platform repository to Helm by executing the following command:
-    
-    ```
-    helm repo add veecode-platform https://veecode-platform.github.io/public-charts/
-    ```
-    
-    This command enables Helm to access charts from the Veecode Platform repository.
-    
-3. Update Helm with the latest chart versions from all your repositories:
-    
-    ```
-    helm repo update
-    ```
-    
-    This command retrieves the latest version information about all the charts from the repositories that Helm is aware of.
-    
-4. After successfully completing the steps above, you can install or upgrade the Devportal platform using the following command:
-    
-    ```
-    helm upgrade platform-devportal --install --values ./values.yaml veecode-platform/devportal
-    ```
-    
-    This command upgrades (or installs if it does not exist) the platform-devportal release with the configuration specified in the **`values.yaml`** file. The chart used is from the veecode-platform repository, specifically the **`devportal`** chart.
-    
+Replace all `<placeholder>` values with your actual configuration. Database credentials can also be supplied via a Kubernetes Secret and `extraEnvVarsSecret` instead of inline values.
 
-By following these steps, Helm is properly configured with the Veecode Platform repository and updated with the latest chart information before upgrading or installing the Devportal platform.
+---
 
-:::info Disclaimer
-If you're interested in a deeper understanding of the DevPortal chart, visit the documentation on Artifact Hub, [click here](https://artifacthub.io/packages/helm/veecode-platform/devportal). 
-:::
+## Step 4: Deploy with Helm
 
-## **Step 3: Accessing the DevPortal**
+```bash
+helm repo add veecode-devportal https://veecode-platform.github.io/next-charts
+helm repo update veecode-devportal
+helm upgrade --install veecode-devportal \
+  --namespace platform \
+  --create-namespace \
+  --values values.yaml \
+  veecode-devportal/veecode-devportal
+```
 
-Once the DevPortal deployment is completed, you can access it by following this step:
+---
 
-1. **Open your web browser and navigate to the DevPortal host.**
+## Step 5: Access the portal
 
-You should now have full access to the VeeCode Platform DevPortal and be able to explore its features.
+Once the rollout completes, open `https://devportal.example.com` in your browser. You should reach the DevPortal login screen.
 
-## **Conclusion**
+```bash
+kubectl rollout status deployment/veecode-devportal -n platform
+```
 
-Congratulations! You have successfully installed the VeeCode Platform DevPortal. By following this product installation guide, you have set up the DevPortal on your cluster and can now begin to use.
+---
 
-If you encounter any issues during the installation process, please reach out to the [support team](https://platform.vee.codes/contact-us/) for assistance or join our [community](https://github.com/orgs/veecode-platform/discussions).
+## Next steps
+
+- Configure additional integrations and plugins — see the [Auth & Integrations](/devportal/integrations) section.
+- Review RBAC roles (`role:default/admin`, `role:default/developer`, `role:default/viewer`) and assign them to users.
+- For a deeper explanation of chart keys, see [Understand the Helm Chart](../understand-chart) or the [chart page on ArtifactHub](https://artifacthub.io/packages/helm/veecode-platform-next/veecode-devportal).
+
+If you encounter issues, reach out via [support](https://platform.vee.codes/contact-us/) or join the [community](https://github.com/orgs/veecode-platform/discussions).

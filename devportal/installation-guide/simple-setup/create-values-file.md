@@ -44,9 +44,9 @@ upstream:
 This will deploy a functional DevPortal with sensible defaults. You can access it at `http://localhost:8000` (or whatever host/port you configure).
 
 :::info
-To enable authentication and full Git provider integration (GitHub, GitLab, etc.), see the [Auth & Integrations](/devportal/integrations/integrations) section. The values for those integrations should be added under `upstream.backstage.appConfig` in your `values.yaml` file.
+To enable authentication and full Git provider integration (GitHub, GitLab, etc.), see the [Auth & Integrations](/devportal/integrations) section. The values for those integrations should be added under `upstream.backstage.appConfig` in your `values.yaml` file.
 :::
 
 ### About the Helm chart
 
-Please check [Understand the Helm Chart](./understand-chart) for more information on the chart structure and available settings. You can also check the chart page on [ArtifactHub](https://artifacthub.io/packages/helm/veecode-platform/devportal).
+Please check [Understand the Helm Chart](../understand-chart) for more information on the chart structure and available settings. You can also check the chart page on [ArtifactHub](https://artifacthub.io/packages/helm/veecode-platform-next/veecode-devportal).

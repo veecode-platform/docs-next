@@ -4,167 +4,144 @@ sidebar_label: SonarQube
 title: SonarQube
 ---
 
-# How to Use the SonarQube Plugin in Backstage
+# SonarQube Plugin
 
-The **SonarQube plugin for Backstage** allows you to view code quality metrics—such as bugs, vulnerabilities, test coverage, and duplications—directly in the component catalog. It connects to your organization's SonarQube instance and displays key insights to support continuous inspection of code health.
+The SonarQube plugin for DevPortal displays code quality metrics — bugs, vulnerabilities, test coverage, and duplications — directly in the component catalog. It connects to your SonarQube instance and surfaces key insights inside Backstage.
 
 ---
 
 ## What is SonarQube?
 
-**SonarQube** is an open-source platform for static code analysis. It automatically detects code quality issues such as:
+**SonarQube** is an open-source platform for static code analysis. It detects:
 
-- **Bugs:** errors that can lead to failures.
-- **Vulnerabilities:** security issues like SQL Injection and XSS.
-- **Code Smells:** non-error code that hinders maintainability.
-- **Test Coverage:** how much of your code is covered by automated tests.
-- **Duplications:** repeated blocks of code.
-- **Cyclomatic Complexity:** measures the complexity of functions or methods.
-- **Technical Debt:** estimated effort to fix the detected issues.
+- **Bugs** — errors that can lead to failures
+- **Vulnerabilities** — security issues like SQL injection and XSS
+- **Code Smells** — non-error code that hinders maintainability
+- **Test Coverage** — how much of your code is covered by automated tests
+- **Duplications** — repeated blocks of code
+- **Technical Debt** — estimated effort to fix detected issues
 
 ---
 
-## 🎯 Why Use the Plugin in Backstage?
+## Plugin packages
 
-- **Centralized view** of code quality metrics.
-- **CI/CD pipeline integration** for continuous inspection.
-- **Early failure detection** during development.
-- **Track quality metrics over time.**
-- **Easy access for developers to security and maintenance insights** directly in the Backstage UI.
+| Package | Role |
+|---|---|
+| `backstage-community-plugin-sonarqube` | Frontend — entity card and Code Quality tab |
+| `backstage-community-plugin-sonarqube-backend-dynamic` | Backend — SonarQube API proxy |
+| `backstage-community-plugin-scaffolder-backend-module-sonarqube-dynamic` | Optional — scaffolder actions for SonarQube |
+
+All three are preloaded in the DevPortal image and **disabled by default**. No image rebuild is needed.
 
 ---
 
 ## Prerequisites
 
-To use the SonarQube plugin in Backstage, you need:
-
-- ✅ A configured and up-to-date Backstage instance.
-- ✅ A SonarQube instance (community, self-hosted, or cloud).
-- ✅ A SonarQube workspace with your Organization and configured projects.
+- A running SonarQube instance (community, self-hosted, or SonarCloud)
+- A SonarQube API key (user token or analysis token) with read access
 
 ---
 
-## Plugin Installation
+## Enabling the plugin
 
-### Backend
+Add the following to your `dynamic-plugins.yaml`:
 
-1. **Install the dependency:**
+```yaml
+plugins:
+  - package: ./dynamic-plugins/dist/backstage-community-plugin-sonarqube-backend-dynamic
+    disabled: false
 
-```bash
-yarn --cwd packages/backend add @backstage-community/plugin-sonarqube-backend
+  - package: ./dynamic-plugins/dist/backstage-community-plugin-sonarqube
+    disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          backstage-community.plugin-sonarqube:
+            entityTabs:
+              - path: /code-quality
+                title: Code Quality
+                mountPoint: entity.page.code-quality
+                config:
+                  if:
+                    allOf:
+                      - isSonarQubeAvailable
+            mountPoints:
+              - mountPoint: entity.page.code-quality/cards
+                importName: SonarQubeRelatedEntitiesOverview
+                config:
+                  layout:
+                    gridColumn: "1 / -1"
+                  if:
+                    allOf:
+                      - isSonarQubeAvailable
+              - mountPoint: entity.page.overview/cards
+                importName: EntitySonarQubeCard
+                config:
+                  layout:
+                    gridColumnEnd:
+                      lg: span 4
+                      md: span 6
+                      xs: span 12
+                  if:
+                    allOf:
+                      - isSonarQubeAvailable
+
+  # Optional: scaffolder actions
+  - package: ./dynamic-plugins/dist/backstage-community-plugin-scaffolder-backend-module-sonarqube-dynamic
+    disabled: false
 ```
 
-1. Add the plugin in `index.ts`:
+Restart DevPortal after saving. Via the Marketplace UI you can click **Enable** instead of editing YAML manually.
 
-```ts
-import { createBackend } from '@backstage/backend-defaults';
-const backend = createBackend();
-// ... other features
-backend.add(import('@backstage-community/plugin-sonarqube-backend'));
-backend.start();
-```
+---
 
-1. Configure the variables in **`app-config.yaml`:**
-- For a single instance:
+## App configuration
+
+Add SonarQube connection details to `app-config.yaml`.
+
+### Single instance
 
 ```yaml
 sonarqube:
   baseUrl: ${SONARQUBE_BASE_URL}
-  instanceKey: ${SONARQUBE_INSTANCE_KEY}
   apiKey: ${SONARQUBE_API_KEY}
 ```
 
-- For multiple instances:
+`baseUrl` defaults to `https://sonarcloud.io` if omitted.
+
+### Multiple instances
 
 ```yaml
 sonarqube:
   instances:
     - name: default
       baseUrl: ${SONARQUBE_BASE_URL}
-      instanceKey: ${SONARQUBE_INSTANCE_KEY}
       apiKey: ${SONARQUBE_API_KEY}
     - name: specialProject
-      baseUrl: ${SONARQUBE_BASE_UR2L}
-      instanceKey: ${SONARQUBE_INSTANCE_KEY2}
-      apiKey: ${SONARQUBE_API_KEY2}
+      baseUrl: ${SONARQUBE_BASE_URL_2}
+      apiKey: ${SONARQUBE_API_KEY_2}
 ```
+
+The valid top-level fields are `baseUrl`, `externalBaseUrl`, `apiKey`, and `instances`. There is no `instanceKey` field — that field does not exist in the schema and is silently ignored if present.
 
 ---
 
-### Frontend
+## Connecting a component to SonarQube
 
-1. Install the dependencies:
-
-```bash
-yarn --cwd packages/app add @backstage-community/plugin-sonarqube @backstage-community/plugin-sonarqube-react
-```
-
-1. Add the components in **`EntityPage.tsx`:**
-
-```tsx
-import { EntitySonarQubeCard } from '@backstage-community/plugin-sonarqube';
-import { isSonarQubeAvailable } from '@backstage-community/plugin-sonarqube-react';
-
-const overviewContent = (
-  <Grid container spacing={3} alignItems="stretch">
-    <Grid item md={6}>
-      <EntityAboutCard variant="gridItem" />
-    </Grid>
-    <EntitySwitch>
-      <EntitySwitch.Case if={isSonarQubeAvailable}>
-        <Grid item md={6}>
-          <EntitySonarQubeCard variant="gridItem" />
-        </Grid>
-      </EntitySwitch.Case>
-    </EntitySwitch>
-  </Grid>
-);
-```
-
-1. **If using the new frontend:**
-- In `App.tsx`, add:
-
-```ts
-import sonarQubePlugin from '@backstage-community/plugin-sonarqube/alpha';
-
-export const app = createApp({
-  features: [
-    // other plugins
-    sonarQubePlugin,
-  ],
-});
-```
-
----
-
-## How to Connect a Project to the Plugin
-
-In your repository, edit the `catalog-info.yaml` file of the corresponding entity and add the annotation with the SonarQube project key:
+Add the `sonarqube.org/project-key` annotation in the component's `catalog-info.yaml`:
 
 ```yaml
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: nest-api
-  title: NestJs API
-  description: |
-    Demo of vulnerabilities and security in the project.
+  name: my-api
   annotations:
-    github.com/project-slug: veecode-homolog/nest-api
-    sonarqube.org/project-key: veecode-homolog_nest-api
+    github.com/project-slug: my-org/my-api
+    sonarqube.org/project-key: my-org_my-api
 spec:
   type: service
   owner: user:default/admin
   lifecycle: production
-
 ```
 
----
-
-## Example: Daily Usage
-
-During the development of a Java API, the team sets up SonarQube in the Jenkins pipeline. With every new push, the code is analyzed:
-
-- If bugs or security issues are found, the build fails.
-- The team receives instant feedback and fixes the issues before proceeding to production.
-- Backstage displays a panel with the updated quality indicators for the project.
+The project key value must match the project key in your SonarQube instance. The SonarQube card and Code Quality tab only appear on entities where `isSonarQubeAvailable` is true (i.e., where this annotation is set).

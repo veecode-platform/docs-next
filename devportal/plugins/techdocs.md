@@ -1,58 +1,159 @@
 ---
 sidebar_position: 10
-sidebar_label: Tech Docs 
-title: Tech Docs Plugin Tutorial
+sidebar_label: Tech Docs
+title: Tech Docs
 ---
 
-### How to Use the **Tech Docs Plugin** in DevPortal
+# TechDocs
 
-The **Tech Docs Plugin** in DevPortal simplifies the process of creating, managing, and publishing technical documentation. Follow this step-by-step guide to utilize its full potential.
-
----
-
-### Why Use the Tech Docs Plugin?
-
-- **Clear Documentation:** Create structured, easy-to-understand guides for your projects.
-- **Better Collaboration:** Centralized documentation improves teamwork.
-- **Boosted Productivity:** Access organized, searchable resources.
-- **Enhanced User Experience:** Provide users with comprehensive support.
+TechDocs is a **docs-as-code** system built into Backstage. Documentation lives as Markdown files in your source repository and is rendered inside DevPortal. There is no in-portal editor, "New Page" button, or "Publish" button — content is written, committed, and built from the repository.
 
 ---
 
-# Step-by-Step Guide
+## How it works
 
-### Step 1: Accessing the Tech Docs Plugin
-
-1. Log in to the **DevPortal** with your credentials.
-2. Navigate to the sidebar menu.
-3. Select the **"Tech Docs"** tab to open the Tech Docs dashboard.
+1. A repository contains a `mkdocs.yml` configuration file and a `docs/` directory with Markdown content.
+2. The `catalog-info.yaml` for the component carries a `backstage.io/techdocs-ref` annotation pointing to the docs source.
+3. When a user opens the **Docs** tab in DevPortal, TechDocs builds (or serves pre-built) documentation using MkDocs.
 
 ---
 
-### Step 2: Creating a New Documentation Page
+## Repository requirements
 
-1. Click on **“New Page”** in the dashboard.
-2. Use the built-in editor to craft your page:
-    - Add text, headings, and images.
-    - Utilize formatting options for engaging and readable content.
-3. Save your progress to ensure no data is lost.
+Every component that uses TechDocs must have:
+
+### `mkdocs.yml` (at the repository root)
+
+```yaml
+site_name: My Component
+docs_dir: docs
+nav:
+  - Home: index.md
+```
+
+### `docs/index.md` (minimum content)
+
+```markdown
+# My Component
+
+Welcome to the documentation for My Component.
+```
+
+### `catalog-info.yaml` annotation
+
+```yaml
+metadata:
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+```
+
+`dir:.` means the `mkdocs.yml` is in the same directory as `catalog-info.yaml`. Use `dir:./path/to/docs` if your docs live in a subdirectory.
 
 ---
 
-### Step 3: Editing and Managing Documentation
+## Builder and publisher configuration
 
-1. From the Tech Docs dashboard:
-    - Organize your pages into **categories and subcategories**.
-    - Assign **tags** for improved searchability.
-2. Customize the appearance of your documentation to align with your project's branding.
+TechDocs requires a **builder** (how docs are generated) and a **publisher** (where generated docs are stored). The default configuration uses `local` for both, which is suitable for local development but not recommended for production.
+
+```yaml
+# app-config.yaml (default — suitable for development only)
+techdocs:
+  builder: 'local'
+  generator:
+    runIn: 'local'
+  publisher:
+    type: 'local'
+```
+
+With `builder: 'local'` and `publisher: 'local'`, DevPortal regenerates docs on demand and stores them in the container's local filesystem. **Docs are lost when the pod restarts.**
+
+### Local builder toolchain requirement
+
+When `builder: 'local'` and `generator.runIn: 'local'` are set, the DevPortal container runs `mkdocs` directly. The container image includes the required Python toolchain. If you are running DevPortal outside the official image, install:
+
+```bash
+pip install mkdocs mkdocs-techdocs-core
+```
 
 ---
 
-### Step 4: Publishing Documentation
+## Production setup: external builder + cloud storage
 
-1. Once your documentation is finalized, click on the **“Publish”** button.
-2. The content will become accessible to your audience, enhancing their understanding and interaction with your project.
+For production deployments, generate docs in CI and store them in a cloud bucket. This avoids per-request generation overhead and persists docs across restarts.
 
-The **Tech Docs Plugin** in DevPortal is an essential tool for maintaining high-quality technical documentation. By following this guide, you can improve user engagement, streamline team collaboration, and enhance your project's overall success.
+### Step 1: Generate docs in CI
 
+Add a step to your CI pipeline using the `techdocs-cli`:
 
+```bash
+npx @techdocs/cli generate --source-dir . --output-dir ./site
+npx @techdocs/cli publish --publisher-type awsS3 --storage-name my-techdocs-bucket --entity default/Component/my-api
+```
+
+### Step 2: Configure an external publisher
+
+#### Amazon S3
+
+```yaml
+techdocs:
+  builder: 'external'
+  publisher:
+    type: 'awsS3'
+    awsS3:
+      bucketName: ${TECHDOCS_S3_BUCKET_NAME}
+      region: ${AWS_REGION}
+      # credentials: use IAM role or AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY env vars
+```
+
+#### Google Cloud Storage
+
+```yaml
+techdocs:
+  builder: 'external'
+  publisher:
+    type: 'googleGcs'
+    googleGcs:
+      bucketName: ${TECHDOCS_GCS_BUCKET_NAME}
+      # credentials: use Application Default Credentials or set GOOGLE_APPLICATION_CREDENTIALS
+```
+
+#### Azure Blob Storage
+
+```yaml
+techdocs:
+  builder: 'external'
+  publisher:
+    type: 'azureBlobStorage'
+    azureBlobStorage:
+      containerName: ${TECHDOCS_AZURE_CONTAINER_NAME}
+      credentials:
+        accountName: ${AZURE_ACCOUNT_NAME}
+        accountKey: ${AZURE_ACCOUNT_KEY}
+```
+
+With `builder: 'external'`, DevPortal only reads from the bucket — it does not attempt to generate docs itself.
+
+---
+
+## Static plugin status
+
+TechDocs is a **static plugin** in DevPortal — the frontend and backend are compiled into the base image and always active. No entry in `dynamic-plugins.yaml` is needed to enable TechDocs. Configuration in `app-config.yaml` is sufficient.
+
+---
+
+## Common issues
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| Docs tab shows "No docs found" | Missing `mkdocs.yml` or `docs/index.md` | Add `mkdocs.yml` and at least one Markdown file under `docs/` |
+| Docs tab shows "No docs found" | Missing or wrong `backstage.io/techdocs-ref` annotation | Check annotation value — use `dir:.` for docs at repo root |
+| Docs disappear after pod restart | `publisher.type: local` in production | Switch to S3/GCS/Azure Blob and generate docs in CI |
+| MkDocs build error | Missing `mkdocs-techdocs-core` plugin | Add `plugins: - techdocs-core` to `mkdocs.yml` and ensure the package is installed |
+
+---
+
+## References
+
+- [Backstage TechDocs documentation](https://backstage.io/docs/features/techdocs/)
+- [TechDocs CLI](https://backstage.io/docs/features/techdocs/cli)
+- [MkDocs documentation](https://www.mkdocs.org/)

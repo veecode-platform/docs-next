@@ -31,7 +31,7 @@ Expected output (example):
 VKDR Local Infra Start Routine
 Ports Used: 8000/http :8001/https
 Kubernetes API port: random
-Local Docker Hub Registry Mirror: 6001
+Local Docker Hub Registry Mirror: 6000
 INFO: Creating Kubernetes nodes and registries...
 INFO: Starting LoadBalancer and tools node...
 INFO: Cluster 'vkdr-local' created successfully!
@@ -43,7 +43,7 @@ After this step, the following will be available:
 
 - A local Kubernetes cluster running under Docker.
 - Ports **8000** and **8001** bound to HTTP and HTTPS of the first LoadBalancer in the cluster (DevPortal will configure this automatically).
-- Local **registry mirrors** (starting from port 6001) to speed up Docker image downloads, even when recycling the cluster.
+- Local **registry mirrors** (starting from port 6000) to speed up Docker image downloads, even when recycling the cluster.
 
 ### Check Cluster Status
 
@@ -77,16 +77,16 @@ To access DevPortal and other services in your local cluster, you need friendly 
 Run the following command (or edit your hosts file manually):
 
 ```sh
-echo "127.0.0.1 devportal.localhost manager.localhost" | sudo tee -a /etc/hosts
+echo "127.0.0.1 devportal.localhost manager.localhost petclinic.localhost" | sudo tee -a /etc/hosts
 ```
 
 Expected result (example):
 
 ```sh
-127.0.0.1 devportal.localhost manager.localhost
+127.0.0.1 devportal.localhost manager.localhost petclinic.localhost
 ```
 
-This maps `devportal.localhost` and `manager.localhost` to your local machine, so you can open DevPortal in a browser as usual.
+This maps `devportal.localhost`, `manager.localhost`, and `petclinic.localhost` to your local machine, so you can open DevPortal and sample applications in a browser as usual.
 
 ### Check Host Entries
 
@@ -113,7 +113,7 @@ ping -c 1 manager.localhost
 Expected output (example):
 
 ```sh
-PING devportal.localhost (127.0.0.1): 56 data bytes
+PING manager.localhost (127.0.0.1): 56 data bytes
 64 bytes from 127.0.0.1: icmp_seq=0 ttl=64 time=0.093 ms
 ...
 ```

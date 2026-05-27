@@ -1,60 +1,115 @@
 ---
 sidebar_position: 13
-sidebar_label: Kubernetes 
-title: Kubernetes Plugin Tutorial
+sidebar_label: Kubernetes
+title: Kubernetes Plugin
 ---
 
-### How to Use the Kubernetes Plugin in DevPortal
+# Kubernetes Plugin
 
-The **Kubernetes Plugin** in DevPortal simplifies the management of your Kubernetes clusters by allowing you to deploy, monitor, and scale workloads directly from the DevPortal dashboard.
+The Kubernetes plugin for Backstage displays the live state of Kubernetes resources — pods, deployments, services, and more — for a catalog entity. It appears as a **Kubernetes tab on the entity page** (not a sidebar item).
 
----
-
-### Benefits of Using the Kubernetes Plugin
-
-1. **Simplified Management:** Manage clusters easily from a centralized dashboard.
-2. **Real-time Monitoring:** Access metrics and live status of your workloads.
-3. **Improved Collaboration:** Facilitate seamless cooperation between development and operations teams.
+The plugin is **preloaded in the DevPortal image** and disabled by default. No image rebuild or support contact is needed to enable it.
 
 ---
 
-# Steps to Use the Kubernetes Plugin
+## Plugin package
 
-### Step 1: Access the Kubernetes Dashboard
+| Package | Role |
+|---|---|
+| `backstage-plugin-kubernetes-dynamic` | Frontend — entity Kubernetes tab |
 
-1. **Request Access:** Contact VeeCode Platform’s support team to enable the Kubernetes Plugin.
-2. **Confirm Plan Level:** Ensure your support plan includes access to the plugin. Visit [VeeCode Plans](https://platform.vee.codes/compare-plans/) for details.
-
----
-
-### Step 2: Using the Kubernetes Plugin
-
-1. **Install the Plugin:**
-    - If not already installed, add the Kubernetes Plugin to your project. Contact support for help if needed.
-2. **Navigate to the Dashboard:**
-    - Access the Kubernetes icon in the sidebar to open the dashboard.
-3. **Explore Features:**
-    - View running **pods** and **deployments** within your clusters.
-    - Use provided tools to scale, update, or delete resources.
+The backend for Kubernetes is a **static plugin** compiled into the DevPortal base image. The frontend is a dynamic plugin that must be enabled in `dynamic-plugins.yaml`.
 
 ---
 
-### Step 3: Viewing and Managing Your Workloads
+## Enabling the plugin
 
-1. **Access Workloads:** View a detailed list of pods and deployments running across your clusters.
-2. **Perform Actions:**
-    - Scale resources to handle traffic demands.
-    - Update configurations or images.
-    - Delete unused resources to optimize performance.
+Add the following to your `dynamic-plugins.yaml`:
+
+```yaml
+plugins:
+  - package: ./dynamic-plugins/dist/backstage-plugin-kubernetes-dynamic
+    disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          backstage.plugin-kubernetes:
+            entityTabs:
+              - path: /kubernetes
+                title: Kubernetes
+                mountPoint: entity.page.kubernetes
+                config:
+                  if:
+                    allOf:
+                      - hasAnnotation: backstage.io/kubernetes-label-selector
+            mountPoints:
+              - mountPoint: entity.page.kubernetes/cards
+                importName: EntityKubernetesContent
+                config:
+                  layout:
+                    gridColumn: "1 / -1"
+                  if:
+                    allOf:
+                      - hasAnnotation: backstage.io/kubernetes-label-selector
+```
+
+Restart DevPortal after saving. Via the Marketplace UI you can click **Enable** instead of editing YAML manually.
+
+The **Kubernetes tab only appears on entities that have the `backstage.io/kubernetes-label-selector` annotation**. Entities without the annotation will not show the tab.
 
 ---
 
-### Step 4: Monitor Your Workloads in Real-time
+## App configuration
 
-1. **View Metrics:** Monitor key performance indicators, including resource utilization and uptime.
-2. **Identify Issues:** Use logs and metrics to troubleshoot and address any anomalies promptly.
-3. **Optimize Performance:** Adjust resource allocation as needed for improved efficiency.
+Configure the Kubernetes backend in `app-config.yaml`:
 
-The **Kubernetes Plugin** in DevPortal empowers teams to manage Kubernetes workloads with efficiency and ease. It streamlines workflows, fosters collaboration, and ensures optimal system performance.
+```yaml
+kubernetes:
+  serviceLocatorMethod:
+    type: 'multiTenant'
+  clusterLocatorMethods:
+    - type: 'config'
+      clusters:
+        - name: ${K8S_CLUSTER_NAME}
+          url: ${K8S_CLUSTER_URL}
+          authProvider: 'serviceAccount'
+          skipTLSVerify: true
+          serviceAccountToken: ${K8S_CLUSTER_TOKEN}
+```
 
-For more assistance, contact the VeeCode Platform support team or explore available plans on their [website](https://platform.vee.codes/compare-plans/).
+Multiple clusters are supported — add additional entries to the `clusters` array.
+
+---
+
+## Required annotation
+
+Add the `backstage.io/kubernetes-label-selector` annotation to the component's `catalog-info.yaml`. The value is a Kubernetes label selector that identifies the workloads belonging to this component:
+
+```yaml
+metadata:
+  annotations:
+    backstage.io/kubernetes-label-selector: 'app=my-service,environment=production'
+```
+
+The Kubernetes tab and its content only render when this annotation is present on the entity.
+
+---
+
+## What the plugin shows
+
+The Kubernetes tab displays:
+
+- Running **pods** (with status, restarts, and age)
+- **Deployments** and their rollout status
+- **ReplicaSets**, **StatefulSets**, and **DaemonSets**
+- **Services** and **Ingresses**
+- Pod logs (click a pod for live log streaming)
+
+The plugin does not add a top-level sidebar item — it is accessible only via the entity's Kubernetes tab.
+
+---
+
+## References
+
+- [Backstage Kubernetes plugin documentation](https://backstage.io/docs/features/kubernetes/)
+- [Kubernetes backend configuration](https://backstage.io/docs/features/kubernetes/configuration)

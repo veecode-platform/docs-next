@@ -78,7 +78,7 @@ Points to notice:
 
 - "Guest" authentication enabled as an admin user ("user:default/admin", "group:default/admins", "role:default/admin" with all permissions granted).
 - The catalog will be populated with a built-in catalog for demo purposes (folder "/app/examples" inside the containers).
-- The bundled `app-config*.yaml` files define the container's default behavior, but you can override any config by mounting a custom config file at `/app/app-config.local.yaml` and providing just the changes you need.
+- The container loads several config files in a defined precedence order. Your custom file at `/app/app-config.local.yaml` overrides the base and profile defaults. See [Custom Configuration](./custom-config) for the full merge order.
 - There are many plugins already bundled in the container image, ready to be enabled. You can mount the `/app/dynamic-plugins.yaml` plugin file to enable those you want to use.
 
 We will talk more about these subjects later on, but understand there are many possible ways to extend and configure DevPortal container without rebuilding it (or making a derived image).

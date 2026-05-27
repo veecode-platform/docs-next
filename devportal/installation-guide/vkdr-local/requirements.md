@@ -43,10 +43,6 @@ Bash is available
 
 > Note: The command only checks if Bash is installed somewhere on your system. You do not need to switch your current shell to Bash.
 
-Aqui está a seção revisada, incluindo instruções para **rodar o Docker** de forma simples e didática:
-
----
-
 ## Step 2: Docker Engine
 
 Docker is required because DevPortal runs inside containers. You will also use Docker indirectly through `k3d`, which launches a Kubernetes cluster inside Docker.

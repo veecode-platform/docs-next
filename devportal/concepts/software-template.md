@@ -14,7 +14,7 @@ This guide provides detailed steps for leveraging the **template creation featur
 
 The **template creation feature** helps developers quickly create projects or components by providing a standardized, pre-configured base. This approach reduces the time spent on setup, allowing developers to focus on specific tasks.
 
-Templates include options for linking repositories, integrating databases, and configuring CI/CD pipelines, promoting a seamless workflow from creation to deployment.
+Templates include options for linking repositories, integrating databases, and configuring CI/CD pipelines, promoting a seamless workflow from creation to deployment. The specific form fields you see depend entirely on the template selected — each template defines its own parameters.
 
 ---
 
@@ -55,18 +55,14 @@ If you have a pre-existing component to add:
 
 ### **Configuring the Template**
 
-1. **Project Information:**
-    - Input basic details such as name, description, Java version, and application port.
-2. **Database Configuration:**
-    - Select a database and provide authentication credentials (username/password).
-    - You can skip this step if the database is unnecessary.
-3. **CI/CD Pipeline Setup:**
-    - Select a provider (e.g., GitHub), specify the repository owner, and enter repository details.
-    - Optional: Enable Kubernetes Kong export or add a mock server URL.
-4. **OpenAPI File Configuration:**
-    - Define the location of OpenAPI files (Spec House) for catalog integration.
-5. **Build Destination:**
-    - Provide the destination repository details (provider, owner, repository).
+Each template defines its own form steps and fields. Common categories of information that templates ask for include:
+
+- **Project information:** name, description, owner.
+- **Repository details:** provider (GitHub, GitLab, etc.), organization, repository name, visibility.
+- **CI/CD pipeline setup:** target branch, pipeline configuration.
+- **Database or infrastructure options:** where applicable, per-template.
+
+The exact fields depend on the template. Review the template's description and documentation before starting.
 
 ---
 

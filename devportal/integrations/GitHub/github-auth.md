@@ -93,8 +93,17 @@ auth:
   providers:
     github:
       development:
-        clientId: ${AUTH_GITHUB_CLIENT_ID}
-        clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
+        clientId: ${GITHUB_AUTH_CLIENT_ID}
+        clientSecret: ${GITHUB_AUTH_CLIENT_SECRET}
+        signIn:
+          resolvers:
+            - resolver: usernameMatchingUserEntityName
+            - resolver: emailMatchingUserEntityProfileEmail
+            - resolver: emailLocalPartMatchingUserEntityName
+        scope:
+          - read:user
+          - user:email
+          - read:org
 ```
 
 :::tip
@@ -142,8 +151,17 @@ auth:
   providers:
     github:
       development:
-        clientId: ${AUTH_GITHUB_CLIENT_ID}
-        clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
+        clientId: ${GITHUB_AUTH_CLIENT_ID}
+        clientSecret: ${GITHUB_AUTH_CLIENT_SECRET}
+        signIn:
+          resolvers:
+            - resolver: usernameMatchingUserEntityName
+            - resolver: emailMatchingUserEntityProfileEmail
+            - resolver: emailLocalPartMatchingUserEntityName
+        scope:
+          - read:user
+          - user:email
+          - read:org
 ```
 
 ## About VeeCode Profiles
@@ -157,7 +175,7 @@ You will find more information about VeeCode Profiles in:
 ## Troubleshooting
 
 - **Callback URL Mismatch**: Ensure the callback URL in your GitHub OAuth app matches exactly with your VeeCode DevPortal URL.
-- **Insufficient Permissions**: Verify that the OAuth app has the required scopes (`read:user`, `user:email`).
+- **Insufficient Permissions**: Verify that the OAuth app has the required scopes (`read:user`, `user:email`, `read:org`). Missing `read:org` prevents org/team resolution.
 - **Rate Limiting**: Consider using GitHub App authentication for higher rate limits.
 
 ## Security Considerations

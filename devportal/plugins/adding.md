@@ -71,13 +71,20 @@ oci://quay.io/veecode/<workspace>:bs_<backstage-version>!<plugin-name>
 
 Available workspaces on `quay.io/veecode`:
 
-| Workspace | Plugins |
-|---|---|
-| `gitlab` | GitLab frontend + backend (immobiliare) |
-| `tech-insights` | Tech Insights frontend, backend, jsonfc |
-| `aws-ecs` | AWS ECS frontend + backend |
-| `mcp-integrations` | MCP extras (catalog, techdocs, scaffolder) |
-| `backstage` | MCP actions backend |
+| Workspace | Plugins | Tag |
+|---|---|---|
+| `gitlab` | GitLab frontend + backend (immobiliare) | `bs_1.48.4` |
+| `tech-insights` | Tech Insights frontend, backend, jsonfc | `bs_1.48.4` |
+| `aws-ecs` | AWS ECS frontend + backend | `bs_1.48.4` |
+| `mcp-integrations` | MCP extras (catalog, techdocs, scaffolder) | `bs_1.49.4` |
+| `backstage` | MCP actions backend | `bs_1.49.4` |
+| `mcp-chat` | MCP Chat frontend + backend | `bs_1.49.4` |
+
+:::note
+The workspace tag must match the Backstage version of your DevPortal instance. The examples above reflect current published tags; MCP workspaces are on `bs_1.49.4` while others are on `bs_1.48.4`. The workspace table above is not exhaustive — there are 60+ workspaces in the export-overlays pipeline. Use the Marketplace for the complete catalog.
+:::
+
+For a complete list of bundled (preloaded) plugins that do not require an OCI reference, see [Bundled Plugins](./bundled).
 
 ### VKDR (local setup)
 
