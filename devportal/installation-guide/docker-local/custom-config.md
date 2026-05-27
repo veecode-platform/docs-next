@@ -8,7 +8,21 @@ title: Custom App Configuration
 
 You can use a combination of `docker compose`, profiles, configuration files, and environment variables to customize the behavior of the DevPortal instance.
 
-You can customize your DevPortal by mounting a custom `app-config.local.yaml` file. This allows you to override default settings without modifying the container image.
+The recommended approach is to mount a custom `app-config.local.yaml` file. This lets you override default settings without modifying the container image.
+
+## Config File Precedence
+
+All configuration files are loaded and merged in this order (later entries override earlier ones):
+
+1. `app-config.yaml` — base image defaults
+2. `app-config.production.yaml` — production overrides baked into image
+3. `app-config.{profile}.yaml` — profile-specific config (if `VEECODE_PROFILE` is set)
+4. `app-config.distro.yaml` — distro-level overrides (baked in)
+5. **`app-config.local.yaml`** ← your custom file, mounted at `/app/app-config.local.yaml`
+6. `dynamic-plugins-root/app-config.dynamic-plugins.yaml` — generated at startup by the plugin install script
+7. `app-config.saas.yaml` — SaaS mode only; decoded from `VEECODE_APP_CONFIG`
+
+Your `app-config.local.yaml` (layer 5) wins over the base and profile defaults, but plugin-injected config (layer 6) is loaded after it. If a setting in `local.yaml` seems to be ignored, check whether an enabled plugin's `pluginConfig` block is overriding it.
 
 ## Creating a Custom Config File
 
@@ -37,7 +51,7 @@ integrations:
     - host: github.com
       token: ${GITHUB_TOKEN}
 
-# Example: Configure catalog locations
+# Example: Add a catalog location
 catalog:
   locations:
     - type: url
@@ -77,6 +91,33 @@ Then run:
 docker compose up -d
 ```
 
+## Development Mode
+
+Set `DEVELOPMENT=true` to enable nodemon hot-reload. DevPortal will watch `app-config.yaml`, `app-config.production.yaml`, and `app-config.local.yaml` for changes and restart automatically:
+
+```yaml
+services:
+  devportal:
+    image: veecode/devportal:latest
+    ports:
+      - "7007:7007"
+    environment:
+      - DEVELOPMENT=true
+    volumes:
+      - ./app-config.local.yaml:/app/app-config.local.yaml:ro
+```
+
+You can also expose the Node.js debugger by setting `DEBUG_PORT`:
+
+```yaml
+    environment:
+      - DEVELOPMENT=true
+      - DEBUG_PORT=9229
+    ports:
+      - "7007:7007"
+      - "9229:9229"
+```
+
 ## Common Configuration Examples
 
 ### GitHub Authentication
@@ -87,20 +128,8 @@ auth:
   providers:
     github:
       development:
-        clientId: ${GITHUB_CLIENT_ID}
-        clientSecret: ${GITHUB_CLIENT_SECRET}
-```
-
-### Custom Theme
-
-```yaml
-app:
-  branding:
-    theme:
-      light:
-        primaryColor: '#2196F3'
-      dark:
-        primaryColor: '#90CAF9'
+        clientId: ${GITHUB_AUTH_CLIENT_ID}
+        clientSecret: ${GITHUB_AUTH_CLIENT_SECRET}
 ```
 
 ### Database Configuration
@@ -118,7 +147,7 @@ backend:
 
 ## Environment Variables
 
-You can use environment variables in your config file using the `${VAR_NAME}` syntax. Pass them via Docker:
+You can reference environment variables in your config file using the `${VAR_NAME}` syntax. Pass them via Docker:
 
 ```bash
 docker run --rm --name devportal -d \
