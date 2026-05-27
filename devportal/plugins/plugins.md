@@ -83,7 +83,11 @@ Example: TechDocs plugin.
 
 **Bundled dynamic plugins** are not linked to DevPortal as a part of its build process, but stored in a "dynamic-plugins" folder included in DevPortal distro. DevPortal configuration can be set to load these plugins at start time. These plugins can also be referred as "pre-installed plugins".
 
-Example: VeeCode "home" and "header" plugin.
+Examples of always-active preInstalled plugins: VeeCode Homepage, Global Header, RBAC, Tech Radar, About, Marketplace, and Pending Changes.
+
+Examples of bundled-but-disabled plugins: Kubernetes, GitHub Actions, Azure DevOps, Jenkins, SonarQube, GitHub Workflows.
+
+For the complete list with package names and enable instructions, see the [Bundled Plugin Catalog](./bundled).
 
 ### Downloaded plugins
 

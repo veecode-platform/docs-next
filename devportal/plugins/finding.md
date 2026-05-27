@@ -4,14 +4,36 @@ sidebar_label: Finding Plugins
 title: Finding Plugins
 ---
 
-Currently there are a few online Backstage plugin catalogs today.
+# Finding Plugins
 
-- 🔥[VeeCode Backstage Plugins](https://platform.vee.codes/en/resources/)🔥: **this is our curated list of (mostly) VeeCode-mantained and some third-party Backstage plugins. It is intended to evolve into a marketplace-like experience, where we list both bundled and downloadable plugins and how to enable them in your DevPortal instance.**
+## In-portal Marketplace (recommended)
 
-- [Backstage Plugin Registry](https://backstage.io/plugins): this is the official Backstage plugin registry, but it is not exactly a marketplace-like experience. Some plugins are just links to GitHub repositories, others are not even published as a package. Almost all of them assume you will statically link them to your Backstage custom build as a developer.
+The fastest way to find and enable plugins is the **Marketplace** built into DevPortal. Navigate to **Marketplace** in the sidebar to browse available plugins, see which are enabled or disabled, and enable them with one click — no YAML editing required.
 
-- [Roadie Backstage Plugins](https://roadie.io/backstage/plugins/): this is a curated list of (mostly) Roadie-mantained Backstage plugins. It is almost a marketplace-like experience, but the "no-code" approach is proprietary for their closed-source product. When using their plugins you will need to statically link them to your Backstage custom build as a developer (this is referred as "Self-hosted Backstage" in Roadie docs).
+The Marketplace shows:
+- All bundled plugins (preloaded in the image, ready to enable)
+- OCI-published plugins available for download at startup
 
-:::important
-Please understand that Backstage plugin ecossystem is still in its early stages and there are no clear standards for publishing plugins, specially dynamic plugins. We at VeeCode are committed to provide a "no-code" marketplace-like experience for our customers and we are working hard to make it happen.
+See [Bundled Plugins](./bundled) for a complete list of what ships with DevPortal.
+
+---
+
+## Online catalogs
+
+For plugins beyond the bundled set:
+
+- [VeeCode Backstage Plugins](https://platform.vee.codes/en/resources/): VeeCode-curated list of maintained and third-party plugins, with OCI references for DevPortal.
+
+- [Backstage Plugin Registry](https://backstage.io/plugins): The official Backstage plugin registry. Most entries assume a static Backstage custom build; for DevPortal use, you need a dynamic plugin version (OCI or npm).
+
+- [Roadie Backstage Plugins](https://roadie.io/backstage/plugins/): Roadie-curated list. The self-hosted path requires static linking unless a dynamic-compatible version is available.
+
+:::note
+The Backstage plugin ecosystem does not yet have a universal standard for publishing dynamic plugins. VeeCode publishes dynamic-ready OCI artifacts for a growing set of community plugins. Check the Marketplace first before sourcing from external registries.
 :::
+
+---
+
+## Checking what is already bundled
+
+Review `dynamic-plugins.default.yaml` in the DevPortal distro for the definitive list of bundled plugins and their package names. All entries with `preInstalled: true` are always active; entries with `disabled: true` are available but need enabling.

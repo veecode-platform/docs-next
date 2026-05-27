@@ -1,73 +1,92 @@
 ---
 sidebar_position: 7
 sidebar_label: Template Dashboards
-title: Template Dashboards
+title: Observability Dashboard
 ---
 
-import logImg from "/img/assets/log.png"
-import metricsImg from "/img/assets/metrics.png"
-import traceImg from "/img/assets/trace.png"
+This page explains how to configure the Grafana plugin in DevPortal and what catalog annotations are required to surface observability data on entity pages.
 
-Welcome to the Observability Dashboard in our Developer Portal! In this section, we will take you through a guided tour of the Observability Dashboard, where you can explore real-time insights and monitoring data for your applications. 
+DevPortal does **not** embed Prometheus, Jaeger, or Loki directly. Instead, it integrates with externally-deployed instances of these tools through the Grafana plugin and catalog entity annotations.
 
-## **Accessing the Observability Dashboard**
+---
 
-1. **Navigate to the Developer Portal:** To access the Observability Dashboard, start by visiting our Developer Portal.
-2. **Catalog View:** Once you are on the Developer Portal homepage, choose the "Catalog" option from the menu.
-3. **Filter by Component:** In the catalog view, you can filter components to find the one you are interested in monitoring. Locate and select the component that has the Grafana plugin configured for observability.
-4. **Observability Links:** Upon selecting the component, you will find dedicated links that provide you with easy access to various observability views:
-    - **Trace View:** where you can explore distributed traces and trace details for your application.
-    - **Metric View:** where you can visualize and analyze metrics collected by Prometheus. Observe performance trends and detect anomalies in real-time.
-    - **Log View:** where you can search and analyze logs from your application. This is invaluable for troubleshooting and understanding application behavior.
+## **Setting Up the Grafana Plugin**
 
-## **Grafana Dashboard: Metrics View**
+The Grafana plugin is not bundled in the default image. Add it to your `dynamic-plugins.yaml` as an external plugin. Refer to the [Grafana plugin guide](/devportal/plugins/grafana) for the full plugin package reference and configuration.
 
-In the Metrics View of the Observability Dashboard, you will find a collection of interactive and customizable dashboards powered by Prometheus and Grafana. These dashboards offer a rich set of visualizations and widgets that enable you to monitor various aspects of your application's performance, resource utilization, and health.
+At minimum, configure the Grafana proxy in your app-config:
 
-<center>
-<img src={metricsImg}/>
-</center>
+```yaml
+proxy:
+  endpoints:
+    /grafana/api:
+      target: https://your-grafana-instance.example.com
+      headers:
+        Authorization: Bearer ${GRAFANA_TOKEN}
+      changeOrigin: true
 
+grafana:
+  domain: https://your-grafana-instance.example.com
+```
 
-### **Key Features:**
+---
 
-- **Pre-configured Dashboards:** We provide a set of pre-configured dashboards that cover common performance metrics for your application, including CPU usage, memory consumption, request latency, and more.
-- **Customizable Widgets:** You have the flexibility to customize existing widgets or create new ones tailored to your specific monitoring needs. This allows you to visualize the metrics that are most relevant to your application.
-- **Alerting and Notifications:** Set up alerting rules to be notified when certain metrics exceed predefined thresholds. Receive notifications via email, Slack, or other channels to take timely actions on critical issues.
-- **Time-Based Analysis:** The Grafana dashboard enables you to analyze historical data by adjusting the time range. This feature allows you to perform retrospective analysis and identify trends over time.
+## **Catalog Annotations**
 
-## **Jaeger Tracing: Trace View**
+To enable observability panels on an entity page, add the following annotations to the entity's `catalog-info.yaml`:
 
-In the Trace View of the Observability Dashboard, Jaeger provides a powerful interface to explore distributed traces across your application. Tracing enables you to visualize the entire flow of a request as it travels through various microservices and components.
+### Grafana Dashboard Panel
 
-<center>
-<img src={traceImg}/>
-</center>
+```yaml
+metadata:
+  annotations:
+    grafana/dashboard-selector: "title @> 'My Service'"
+```
 
-### **Key Features:**
+### Grafana Alert Status Panel
 
-- **Trace Visualization:** Jaeger displays traces as a directed acyclic graph, making it easy to visualize the sequence of calls and dependencies within your distributed system.
-- **Service Dependencies:** Identify the relationships between different services and understand how they interact to process a request.
-- **Latency Analysis:** Trace View allows you to inspect the latency of individual spans (operations) within a trace. Identify bottlenecks and performance issues that impact request processing time.
-- **Error Analysis:** Spot errors and exceptions that occur during request processing and quickly drill down to the root cause for troubleshooting.
+```yaml
+metadata:
+  annotations:
+    grafana/alert-label-selector: "service=my-service"
+```
 
-## **Loki Log Viewer: Log View**
+### External Trace Links (Jaeger)
 
-The Log View of the Observability Dashboard powered by Loki presents a powerful log aggregation and searching capability. Easily navigate through logs generated by your application to diagnose issues, detect anomalies, and investigate system behavior.
+Jaeger traces are surfaced as external links — clicking opens Jaeger in a new browser tab:
 
-<center>
-<img src={logImg}/>
-</center>
+```yaml
+metadata:
+  annotations:
+    jaeger/service-name: my-service
+```
 
-### **Key Features:**
+*(Exact annotation keys depend on which Jaeger/tracing annotation plugin you have enabled.)*
 
-- **Log Aggregation:** Loki efficiently collects and indexes logs from various sources, allowing you to access logs for your application in a centralized and easily searchable manner.
-- **Dynamic Queries:** Perform dynamic searches using log labels and keywords to narrow down logs relevant to specific components or events.
-- **Log Visualization:** Visualize log data with histograms, bar charts, and other Grafana log-specific visualizations for quick insights.
-- **Log Stream:** Observe logs in real-time with a live log stream view, making it easy to monitor events as they occur.
+### External Log Links (Loki)
 
-The Observability Dashboard in our Developer Portal provides you with a powerful set of tools to monitor, troubleshoot, and optimize your applications effectively. By integrating Prometheus, Jaeger, Loki, and Grafana, we offer you a unified and seamless experience to explore metrics, traces, and logs in real-time. Embrace the power of observability to gain a deep understanding of your application's performance, enhance reliability, and foster a proactive DevOps culture.
+Loki logs are surfaced as external links to the Grafana Explore view:
 
-Reach out to our expert team to schedule a personalized demonstration and discover how our Observability Module can be tailored to meet your organization's unique needs. Our dedicated team will guide you through the platform's capabilities, provide best practices, and help you maximize the benefits of observability.
+```yaml
+metadata:
+  annotations:
+    grafana/tag-filter: "service=my-service"
+```
 
-**To book a demonstration** or inquire about any aspect of our Observability Module, please don't hesitate to **contact us [here](https://platform.vee.codes/contact-us/)**. We look forward to showcasing the power of observability and how it can transform your application monitoring and management processes.
+---
+
+## **Accessing the Observability Data**
+
+1. **Navigate to the Catalog:** Select the component you want to observe.
+2. **Open the entity page:** Look for the Grafana plugin tab or cards in the Overview section.
+3. **Metrics view:** Grafana dashboards matching the `dashboard-selector` annotation are displayed inline.
+4. **Alert status:** Alert panels matching the `alert-label-selector` annotation show current alert state.
+5. **Trace/Log links:** If trace or log annotations are configured, links appear on the entity page that open the respective tools in your browser.
+
+---
+
+:::info External tools required
+The Grafana, Prometheus, Loki, and Jaeger instances must be separately deployed and accessible to both DevPortal's backend (for API calls) and end users' browsers (for direct links). DevPortal does not provision or manage these services.
+:::
+
+For more on the plugin, see the [Grafana Plugin guide](/devportal/plugins/grafana).

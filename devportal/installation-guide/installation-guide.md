@@ -38,8 +38,8 @@ export const Card = ({children, title, link}) => (
 
 <Card title="Production Setup" link="./production-setup">Learn how to install a self-hosted and production-ready Developer Portal on your own infrastructure.</Card>
 
-<Card title="Customization" link="./Customization">Learn how to customize your Developer Portal.</Card>
+<Card title="Customization" link="/devportal/customization">Learn how to customize your Developer Portal.</Card>
 
-<Card title="FAQs" link="./FAQs">Frequently Asked Question.</Card>
+<Card title="FAQs" link="./FAQs">Frequently Asked Questions.</Card>
 
 </div>

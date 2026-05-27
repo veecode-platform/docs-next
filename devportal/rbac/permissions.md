@@ -21,8 +21,10 @@ Each permission in the RBAC system is structured as follows:
 | --- | --- | --- | --- |
 | policy.entity.read | read | Allows the user to read permission policies/roles | X |
 | policy.entity.create | create | Allows the user to create permission policies/roles | X |
-| policy.entity.update | update | Allows the user to update permission policies/roles | X |
-| policy.entity.delete | delete | Allows the user to delete permission policies/roles | X |
+
+:::note
+`policy.entity.update` and `policy.entity.delete` are not granted in the default shipped policy. Add them to a custom role if needed.
+:::
 
 ---
 
@@ -30,12 +32,12 @@ Each permission in the RBAC system is structured as follows:
 
 | Name | Policy | Description | Requirements |
 | --- | --- | --- | --- |
-| scaffolder.action.execute | - | Allows execution of an action from a template | scaffolder.template.parameter.read, scaffolder.template.step.read |
+| scaffolder.action.execute | use | Allows execution of an action from a template | scaffolder.template.parameter.read, scaffolder.template.step.read |
 | scaffolder.template.parameter.read | read | Allows reading parameters of a template | scaffolder.template.step.read |
 | scaffolder.template.step.read | read | Allows reading steps of a template | scaffolder.template.parameter.read |
 | scaffolder.task.read | read | Allows reading scaffolder tasks | X |
 | scaffolder.task.create | create | Allows creating scaffolder tasks | X |
-| scaffolder.task.cancel | use | Allows canceling scaffolder tasks | X |
+| scaffolder.task.cancel | delete | Allows canceling scaffolder tasks | X |
 
 ---
 
@@ -55,6 +57,10 @@ Each permission in the RBAC system is structured as follows:
 
 ## **4. Platform Permissions**
 
+:::note
+These permissions are defined by optional add-on plugins (Kong, cluster explorer, API management, CI/CD, etc.). They are only enforced when the corresponding plugin is installed and enabled — they are **not** part of the default `rbac-policy.csv` shipped with the base image. Use them only if you have the relevant plugin enabled.
+:::
+
 | Name | Policy | Description | Requirements |
 | --- | --- | --- | --- |
 | admin.access.read | read | Allows reading admin access data | X |
@@ -69,3 +75,18 @@ Each permission in the RBAC system is structured as follows:
 | kong.service.manager.delete | delete | Allows removing plugins | X |
 | kong.service.manager.read | read | Allows viewing plugins | X |
 | kong.service.manager.update | update | Allows updating plugins | X |
+
+---
+
+## **5. Extensions Marketplace Permissions**
+
+These permissions are added by the distro image via `rbac-policy-extensions.csv` and control access to the plugin marketplace.
+
+| Name | Policy | Description |
+| --- | --- | --- |
+| extensions.plugin.configuration.read | read | Allows browsing the Extensions Marketplace |
+| extensions.plugin.configuration.write | create | Allows installing and uninstalling plugins via the Marketplace |
+
+By default:
+- `role:default/admin` has both `read` and `write`.
+- `role:default/developer` and `role:default/viewer` have `read` only.

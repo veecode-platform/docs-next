@@ -16,7 +16,9 @@ GitHub backend integrations enable VeeCode DevPortal to interact with GitHub API
 These integrations run server-side and use **service credentials** rather than end-user tokens.
 
 :::tip
-If you use the `github` or `github-pat` profiles, DevPortal will configure both authentication and integrations for you using bundled `app-config.yaml` files. You still need to obtain the GitHub App and PAT credentials manually and provide the environment variables, though.
+If you use the `github` profile, DevPortal will configure both authentication and integrations for you using a bundled `app-config.yaml` file. You still need to obtain the GitHub App and PAT credentials manually and provide the environment variables, though.
+
+The `github-pat` profile configures **repository/catalog discovery and integrations only** (with guest/no authentication). It uses the `github` catalog provider to ingest `catalog-info.yaml` entities from the organization's repos — it does **not** import GitHub users and teams as `User`/`Group` entities (that org sync is the `githubOrg` provider, configured by the full `github` profile). It also does not configure the auth provider, and is intended for local development and PoCs. See [GitHub Tokens](./github-tokens.md) for the required `GITHUB_TOKEN` variable.
 :::
 
 ## How Backend Integrations Work
@@ -81,7 +83,7 @@ To create a GitHub App for backend integrations:
 3. Fill in the application details:
    - **GitHub App name**: VeeCode DevPortal Integration
    - **Homepage URL**: `https://your-veecode-instance.com`
-   - **Authorization callback URL**: `https://your-veecode-instance.com/api/auth/github/handler/frame`
+   - **Authorization callback URL**: `https://your-veecode-instance.com/api/auth/github/handler/frame` — only required if this same GitHub App also handles sign-in. For an integration-only App (the recommended setup, where an OAuth App handles sign-in), this can be left blank.
    - **Permissions** (read more at [Required GitHub App Permissions](./github-integrations.md#required-github-app-permissions)):
      - Repository Permissions
         - Actions: Read and Write
@@ -123,10 +125,9 @@ integrations:
         - appId: ${GITHUB_APP_ID}
           clientId: ${GITHUB_CLIENT_ID}
           clientSecret: ${GITHUB_CLIENT_SECRET}
-          webhookUrl: ${GITHUB_WEBHOOK_URL}
-          webhookSecret: ${GITHUB_WEBHOOK_SECRET}
           privateKey: |
             ${GITHUB_PRIVATE_KEY}
+          # webhookSecret: ${GITHUB_WEBHOOK_SECRET}  # optional — only for webhook event handling
 ```
 
 :::warning
@@ -143,8 +144,10 @@ integrations:
     - host: github.com
       apps:
         - appId: ${GITHUB_APP_ID}
-          privateKey: ${GITHUB_PRIVATE_KEY}
-          # ... other app config
+          clientId: ${GITHUB_CLIENT_ID}
+          clientSecret: ${GITHUB_CLIENT_SECRET}
+          privateKey: |
+            ${GITHUB_PRIVATE_KEY}
       token: ${GITHUB_TOKEN}  # Fallback PAT
 ```
 

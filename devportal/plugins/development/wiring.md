@@ -34,7 +34,7 @@ global:
 
 ## Testing with VKDR
 
-Our [local DevPortal setup](../../installation-guide/local-setup) using `vkdr` can be used to validate locally the wiring of a dynamic frontend plugin.
+Our [local DevPortal setup](../../installation-guide/vkdr-local/vkdr-setup) using `vkdr` can be used to validate locally the wiring of a dynamic frontend plugin.
 
 ### Steps
 
@@ -43,7 +43,7 @@ What you need:
 - A local npm registry (run [Verdaccio](https://verdaccio.org/) at local port 4873)
 - Publish the frontend plugin to Verdaccio (as described [here](/devportal/plugins/development/packaging#publish-a-dynamic-plugin))
 - Obtain the SHA integrity signature of the published plugin
-- A local `vkdr` cluster with DevPortal properly installed - check the [local DevPortal setup](../../installation-guide/local-setup) guide for more info.
+- A local `vkdr` cluster with DevPortal properly installed - check the [local DevPortal setup](../../installation-guide/vkdr-local/vkdr-setup) guide for more info.
 
 ### Verdaccio
 
@@ -64,7 +64,7 @@ npm view @your-org/plugin-my-front-plugin-dynamic@x.y.z --registry http://localh
 ```
 
 :::important
-The integrity signature is a SHA512 hash of the plugin package. It is required for the dynamimc plugin to be loaded.
+The integrity signature is a SHA512 hash of the plugin package. It is required for the dynamic plugin to be loaded.
 :::
 
 ### VKDR Infra Up
@@ -111,7 +111,7 @@ vkdr devportal install --github-token $GITHUB_TOKEN \
 ```
 
 :::note
-This command installs DebPortal with the extra plugin wiring. It also installs a few sample apps and configures DevPortal to rely on Verdaccio as an external npm registry.
+This command installs DevPortal with the extra plugin wiring. It also installs a few sample apps and configures DevPortal to rely on Verdaccio as an external npm registry.
 :::
 
 ### Open DevPortal (VKDR)

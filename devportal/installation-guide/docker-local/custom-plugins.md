@@ -83,27 +83,39 @@ plugins:
     disabled: false
 ```
 
-## Plugin Configuration Priority
+## Plugin Configuration and the `includes` Mechanism
 
-The configuration is merged in this order (later overrides earlier):
+Your `dynamic-plugins.yaml` merges with the image defaults via an `includes:` key. The distro's bundled `dynamic-plugins.yaml` already includes `dynamic-plugins.default.yaml` to preserve the image's built-in plugin set. If you mount your own `dynamic-plugins.yaml`, make sure it also includes the defaults so you do not lose the pre-installed plugins:
 
-1. `dynamic-plugins.default.yaml` (built into image)
-2. `dynamic-plugins.yaml` (your custom file)
-3. Environment variables (if applicable)
+```yaml
+includes:
+  - dynamic-plugins.default.yaml
+
+plugins:
+  # Your overrides below
+  - package: './dynamic-plugins/dist/some-plugin-dynamic'
+    disabled: false
+```
+
+The `dynamic-plugins.default.yaml` file (pre-installed plugins, all `disabled: true` by default) is baked into the image. You can also mount it from the distro repo to inspect or override individual entries.
+
+After the plugin install script runs, it generates `dynamic-plugins-root/app-config.dynamic-plugins.yaml` from the `pluginConfig` blocks of all enabled plugins. This generated file is loaded last in the config chain (after your `app-config.local.yaml`).
+
+### `extensions-install.yaml`
+
+You may notice an `extensions-install.yaml` file in the working directory. This is a write-through cache for marketplace plugin installation state — the database is the source of truth and the Node app regenerates this file on every change. The Python install script reads it at startup. Do not delete it; if it is missing, the entrypoint creates an empty one automatically.
 
 ## Important Notes
 
 Dynamic plugins are a deep subject on their own. Please refer to the [Plugins](/devportal/plugins/) section for more information. The dynamic plugins feature is based on the same plugin system used by Red Hat Developer Hub, so Red Hat documentation is also a good resource on this topic.
 
 :::warning
-Dynamic plugins require a special kind of packaging. All DevPortal pre-installled dynamic plugins are published on public NPM registry and pulled at build time into the `veecode/devportal` distro image. **Not all plugins are available as dynamic plugins**, so please check each plugin's documentation to see if it is available as such. There is usually a `-dynamic` suffix in a dynamic plugin package name, and they tend to exist in both forms in the NPM registry.
+Dynamic plugins require a special kind of packaging. All DevPortal pre-installed dynamic plugins are published on the public NPM registry and pulled at build time into the `veecode/devportal` distro image. **Not all plugins are available as dynamic plugins**, so please check each plugin's documentation to see if it is available as such. There is usually a `-dynamic` suffix in a dynamic plugin package name, and they tend to exist in both forms in the NPM registry.
 :::
 
 ## Examples
 
-We have published several dynamic plugins examples on GitHub.
-
-- [TODO](.)
+We have published several dynamic plugins examples on GitHub. Check the [OCI plugins guide](https://github.com/veecode-platform/devportal-distro/blob/main/docs/OCI_PLUGINS.md) in the distro repository for OCI registry usage examples.
 
 ## Viewing Available Plugins
 

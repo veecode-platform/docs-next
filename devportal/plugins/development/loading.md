@@ -4,13 +4,33 @@ sidebar_label: Loading
 title: "Loading a Dynamic Plugin"
 ---
 
-Dynamic plugins can be loaded by VeeCode DevPortal at start time. They are usually published to a private npm registry, and the DevPortal instance will load them from there according to the configuration.
+Dynamic plugins can be loaded by VeeCode DevPortal at start time. They are usually published to a private npm registry or OCI registry, and the DevPortal instance will load them from there according to the configuration.
 
 ## Configuration
 
-VeeCode DevPortal is usually deployed with its Helm chart, and the configuration is done in the `values.yaml` file, under the `global.dynamic.plugins` section:
+There are two configuration surfaces depending on your deployment model:
+
+### `dynamic-plugins.yaml` (distro container / SaaS)
+
+For the standard DevPortal container (docker-compose, SaaS, or VKDR), edit `dynamic-plugins.yaml` directly:
 
 ```yaml
+plugins:
+  # npm plugin
+  - package: '@yourorg/yourplugin@x.y.z'
+    disabled: false
+    integrity: sha512-xxxxxxxxx
+  # preloaded plugin (uses path relative to the dynamic-plugins directory)
+  - package: ./dynamic-plugins/dist/another-plugin-dynamic
+    disabled: false
+```
+
+### Helm `values.yaml` (Kubernetes deployment)
+
+For Kubernetes deployments using the VeeCode Helm chart, configure plugins under `global.dynamic.plugins`:
+
+```yaml
+global:
   dynamic:
     plugins:
       # npm plugin
@@ -21,6 +41,8 @@ VeeCode DevPortal is usually deployed with its Helm chart, and the configuration
       - package: ./dynamic-plugins/dist/another-plugin-dynamic
         disabled: false
 ```
+
+Both surfaces accept the same plugin entry format. The `dynamic-plugins.yaml` approach is recommended for non-Helm deployments.
 
 ## Private npm registry
 
@@ -52,7 +74,7 @@ kubectl create secret generic veecode-devportal-dynamic-plugins-npmrc \
 
 Dynamic plugins have the ability to wire themselves to the DevPortal instance configuration. **This is a critical feature** because unlike static plugins they cannot imply in code changes to the host Backstage project.
 
-Backwend plugins should be detected and loaded automatically, but frontend plugins must be wired by `pluginConfig:` to the DevPortal instance.
+Backend plugins should be detected and loaded automatically, but frontend plugins must be wired by `pluginConfig:` to the DevPortal instance.
 
 All dynamic plugins can bring their own settings in the `pluginConfig:` field:
 

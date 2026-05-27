@@ -179,20 +179,32 @@ spec:
 
 ## Remote Catalog Locations
 
-You can also reference remote catalogs in your `app-config.local.yaml`:
+You can also reference remote catalogs in your `app-config.local.yaml`. The `url` type requires a fully-resolved, direct URL to a single file — glob patterns are not supported by the `url` location type:
 
 ```yaml
 catalog:
   locations:
-    # GitHub repository
+    # Single file from a GitHub repository
     - type: url
       target: https://github.com/my-org/my-repo/blob/main/catalog-info.yaml
-    
-    # Multiple files from a repo
-    - type: url
-      target: https://github.com/my-org/my-repo/blob/main/*/catalog-info.yaml
-      rules:
-        - allow: [Component, API, Resource]
+```
+
+To discover catalog files across many repositories automatically, use the GitHub or GitLab catalog provider (configured via a `VEECODE_PROFILE` or in `app-config.local.yaml`). For example, using the GitHub provider in `app-config.local.yaml`:
+
+```yaml
+catalog:
+  providers:
+    github:
+      my-org:
+        organization: my-org
+        catalogPath: /catalog-info.yaml
+        filters:
+          branch: main
+        schedule:
+          frequency:
+            minutes: 30
+          timeout:
+            minutes: 3
 ```
 
 ## Next Steps

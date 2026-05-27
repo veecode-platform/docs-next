@@ -1,53 +1,60 @@
 ---
 sidebar_position: 15
-sidebar_label: CI/CD 
-title: CI/CD Plugin Tutorial
+sidebar_label: CI/CD Plugins
+title: CI/CD Plugins
 ---
 
-### How to Use the CI/CD Plugin in DevPortal
+# CI/CD Plugins
 
-The **CI/CD Plugin** in DevPortal simplifies and automates continuous integration and continuous delivery processes, improving team collaboration and ensuring high-quality code. This tutorial will walk you through the steps to effectively use the plugin.
+DevPortal ships several separate CI/CD plugins, each integrating with a specific CI/CD platform. There is no single "CI/CD Plugin" — each platform has its own bundled plugin that must be enabled individually.
 
----
-
-### Why Use the CI/CD Plugin?
-
-1. **Automation:** Automates code integration and deployment, reducing human error and saving time.
-2. **Code Quality:** Automatically runs tests and code analysis on each commit to catch issues early.
-3. **Collaboration:** Enhances coordination among development, QA, and operations teams, offering real-time pipeline updates and issue resolution.
-4. **Continuous Delivery:** Facilitates frequent, reliable deployments for faster feature and bug fix releases.
-
-# Steps to Use the CI/CD Plugin
-
-### Step 1: Access the DevPortal
-
-- Log in to the DevPortal using your credentials.
-- Once logged in, access the available features and plugins tailored to your project.
+All CI/CD plugins described here are **preloaded in the DevPortal image and disabled by default**. Enable them via `dynamic-plugins.yaml` or the Marketplace — no support contact required.
 
 ---
 
-### Step 2: Navigate to the Catalog
+## Available CI/CD plugins
 
-- Open the sidebar menu and select **Catalog**.
-- Use filters like **APIs** or **Components** to narrow down the list of items.
-- Quickly find APIs or components relevant to your CI/CD pipeline.r.
+| Plugin | Platform | Package |
+|---|---|---|
+| [GitHub Actions](./bundled/github-actions) | GitHub Actions workflow runs | `backstage-community-plugin-github-actions-dynamic` |
+| [GitHub Workflows](./GitHubWorkflows) | Manual GitHub workflow trigger + cards | `veecode-platform-backstage-plugin-github-workflows-dynamic` |
+| [Jenkins](./bundled/jenkins) | Jenkins build status | `backstage-community-plugin-jenkins` + backend |
+| [Azure DevOps](./bundled/azure-devops) | Azure Pipelines + Pull Requests | `backstage-community-plugin-azure-devops-dynamic` |
+| [GitLab Pipelines](./GitLabPipelines) | GitLab CI pipeline trigger and status | OCI: `oci://quay.io/veecode/gitlab:bs_1.48.4!immobiliarelabs-backstage-plugin-gitlab` |
 
-### Step 3: Select the Configured CI/CD Plugin
+---
 
-- Choose the API or component that has the CI/CD plugin configured.
-- If the plugin is not yet installed or configured, contact the [VeeCode Platform Support Team](https://platform.vee.codes/contact-us/)for assistance.
-    - Learn more about support plans [here](https://platform.vee.codes/compare-plans/).
+## How CI/CD results appear
 
-### **Step 4: Interact with the CI/CD Plugin**
+The bundled GitHub Actions, Jenkins, and Azure DevOps plugins mount their content in the **CI** entity tab (`entity.page.ci/cards`). The tab appears automatically on entities that have the relevant annotation and `disabled: false` in the plugin configuration.
 
-1. **Access the Plugin:**
-    - Go to the list of plugins or view the **Overview** tab of the selected API/component to locate the CI/CD plugin.
-2. **Pipeline Monitoring:**
-    - Check the pipeline status, recent runs, and deployment history.
-    - Review logs for detailed information on each stage.
-3. **Perform Actions:**
-    - Start new pipeline runs.
-    - Re-run pipelines that failed.
-    - Approve or reject manual deployment stages when required.
+GitHub Workflows mounts as an **overview card** (`entity.page.overview/cards`) rather than in the CI tab, and is controlled by the `github.com/workflows` or `vee.codes/has-github-workflows` annotation.
 
-Using the CI/CD Plugin in DevPortal enhances automation, collaboration, and code quality, enabling reliable software delivery. It ensures that your team operates efficiently and delivers value to users through fast and secure deployments.
+---
+
+## Quick enable: GitHub Actions
+
+The simplest CI/CD plugin to enable for GitHub-hosted projects:
+
+```yaml
+plugins:
+  - package: ./dynamic-plugins/dist/backstage-community-plugin-github-actions-dynamic
+    disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          backstage-community.plugin-github-actions:
+            mountPoints:
+              - mountPoint: entity.page.ci/cards
+                importName: EntityGithubActionsContent
+                config:
+                  layout:
+                    gridColumn: "1 / -1"
+                  if:
+                    allOf:
+                      - isGithubActionsAvailable
+```
+
+Add `github.com/project-slug: my-org/my-repo` to the component's `catalog-info.yaml` and the CI tab will appear.
+
+For other platforms, follow the links in the table above for full enable instructions.

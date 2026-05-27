@@ -19,8 +19,8 @@ The in-portal Marketplace is the simplest path — no YAML editing required.
 1. Open your Backstage instance and click **Marketplace** in the sidebar
 2. Search for the plugin you want (e.g., GitLab, Tech Insights, AWS ECS)
 3. Click **Enable** on the plugin card
-4. A *Restart Pending* badge appears in the customer portal
-5. In the customer portal, click **Restart** — allow ~2 minutes for the pod to come back up
+4. A *Restart Pending* badge appears in the DevPortal header
+5. Restart the instance so the change takes effect — on self-hosted deployments restart the pod/container yourself (e.g. `kubectl rollout restart`); on the VeeCode SaaS the customer portal exposes a **Restart** button. Allow ~2 minutes for the instance to come back up.
 6. The plugin appears in its configured location (sidebar entry, entity tab, etc.)
 
 :::warning
@@ -71,13 +71,20 @@ oci://quay.io/veecode/<workspace>:bs_<backstage-version>!<plugin-name>
 
 Available workspaces on `quay.io/veecode`:
 
-| Workspace | Plugins |
-|---|---|
-| `gitlab` | GitLab frontend + backend (immobiliare) |
-| `tech-insights` | Tech Insights frontend, backend, jsonfc |
-| `aws-ecs` | AWS ECS frontend + backend |
-| `mcp-integrations` | MCP extras (catalog, techdocs, scaffolder) |
-| `backstage` | MCP actions backend |
+| Workspace | Plugins | Tag |
+|---|---|---|
+| `gitlab` | GitLab frontend + backend (immobiliare) | `bs_1.48.4` |
+| `tech-insights` | Tech Insights frontend, backend, jsonfc | `bs_1.48.4` |
+| `aws-ecs` | AWS ECS frontend + backend | `bs_1.48.4` |
+| `mcp-integrations` | MCP extras (catalog, techdocs, scaffolder) | `bs_1.49.4` |
+| `backstage` | MCP actions backend | `bs_1.49.4` |
+| `mcp-chat` | MCP Chat frontend + backend | `bs_1.49.4` |
+
+:::note
+The workspace tag must match the Backstage version of your DevPortal instance. The examples above reflect current published tags; MCP workspaces are on `bs_1.49.4` while others are on `bs_1.48.4`. The workspace table above is not exhaustive — there are 60+ workspaces in the export-overlays pipeline. Use the Marketplace for the complete catalog.
+:::
+
+For a complete list of bundled (preloaded) plugins that do not require an OCI reference, see [Bundled Plugins](./bundled).
 
 ### VKDR (local setup)
 
@@ -86,7 +93,7 @@ If you are using VKDR to manage your local DevPortal instance, add plugins using
 ```bash
 vkdr devportal install \
   --github-token=$GITHUB_TOKEN \
-  --install-samples \
+  --samples \
   --merge ./my-plugins.yaml
 ```
 
@@ -116,7 +123,7 @@ Add the plugin to the `global.dynamic.plugins` array in your `values.yaml`:
 global:
   dynamic:
     plugins:
-      - package: 'oci://quay.io/veecode/gitlab:bs_1.49.4!immobiliarelabs-backstage-plugin-gitlab'
+      - package: 'oci://quay.io/veecode/gitlab:bs_1.48.4!immobiliarelabs-backstage-plugin-gitlab'
         disabled: false
         pluginConfig: {}
 ```
