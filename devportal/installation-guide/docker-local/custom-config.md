@@ -93,7 +93,7 @@ docker compose up -d
 
 ## Development Mode
 
-Set `DEVELOPMENT=true` to enable nodemon hot-reload. DevPortal will watch `app-config.yaml`, `app-config.production.yaml`, and `app-config.local.yaml` for changes and restart automatically:
+Set `DEVELOPMENT=true` to enable nodemon hot-reload. DevPortal will watch `app-config.yaml`, `app-config.production.yaml`, `app-config.local.yaml`, and the generated `dynamic-plugins-root/app-config.dynamic-plugins.yaml` for changes and restart automatically:
 
 ```yaml
 services:

@@ -112,7 +112,7 @@ global:
       - dynamic-plugins.default.yaml
 ```
 
-To enable a specific plugin, add it under the includes list or reference a custom manifest. See the [dynamic plugins documentation](/devportal/integrations) for details.
+To enable a specific plugin, add it under the includes list or reference a custom manifest. See the [dynamic plugins documentation](/devportal/concepts/dynamic-plugins) for details.
 
 ## RBAC
 

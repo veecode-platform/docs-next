@@ -33,7 +33,7 @@ LDAP authentication works differently from OAuth/OIDC: the Backstage backend bin
 |---|---|---|---|
 | `LDAP_USERS_FILTER` | `(uid=*)` | — | LDAP filter for user search |
 | `LDAP_GROUPS_FILTER` | `(objectClass=groupOfNames)` | — | LDAP filter for group search |
-| `LDAP_TLS_REJECT_UNAUTHORIZED` | `false` | `true` | Whether to reject self-signed TLS certs |
+| `LDAP_TLS_REJECT_UNAUTHORIZED` | — | `true` | Whether to reject self-signed TLS certs. **`ldap-ad` only** — the `ldap` profile hardcodes `rejectUnauthorized: false` and ignores this variable. |
 | `LDAP_SYNC_FREQUENCY` | `PT1H` (set by entrypoint) | `PT1H` | ISO 8601 duration for org sync frequency (`ldap-ad` only) |
 
 ## Auth configuration

@@ -68,7 +68,7 @@ base64 -w 0 < github-app.private-key.pem
 
 ### Keycloak authentication fails at sign-in
 
-Ensure `KEYCLOAK_METADATA_URL` resolves correctly. If you do not set it explicitly, the entrypoint derives it as `$KEYCLOAK_BASE_URL/realms/$KEYCLOAK_REALM`. You can verify this by checking the container log line: `VEECODE: Keycloak metadata URL: ...`.
+Confirm `KEYCLOAK_BASE_URL` and `KEYCLOAK_REALM` are correct — the discovery URL is built from them (`$KEYCLOAK_BASE_URL/realms/$KEYCLOAK_REALM`). The entrypoint logs the resolved value: check the container log line `VEECODE: Keycloak metadata URL: ...`.
 
 Also confirm the redirect URI in your Keycloak client:
 ```

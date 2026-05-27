@@ -223,7 +223,7 @@ docker compose up --no-log-prefix
 
 **Optional environment variables:**
 
-- `KEYCLOAK_METADATA_URL`: Full OIDC discovery URL. If not set, the entrypoint derives it as `$KEYCLOAK_BASE_URL/realms/$KEYCLOAK_REALM`.
+- `KEYCLOAK_METADATA_URL`: Computed and logged by the entrypoint as `$KEYCLOAK_BASE_URL/realms/$KEYCLOAK_REALM`. The bundled config builds the discovery URL from `KEYCLOAK_BASE_URL` + `KEYCLOAK_REALM` directly, so setting this variable alone does not change it — override `auth.providers` in `app-config.local.yaml` for a non-standard endpoint.
 
 For setup instructions, see the [Keycloak integration guide](/devportal/integrations/Keycloak/keycloak-auth).
 
@@ -271,10 +271,7 @@ docker compose up --no-log-prefix
 - `AZURE_ORGANIZATION`: Azure DevOps organization name
 - `AZURE_TOKEN`: Personal access token with `Code (Read)`, `Graph (Read)`, `Project and Team (Read)` scopes
 - `AUTH_SESSION_SECRET`: Random string used to sign session cookies
-
-**Optional environment variables:**
-
-- `AZURE_PROJECT`: Specific Azure DevOps project to limit repo discovery. If unset, all projects in the organization are scanned.
+- `AZURE_PROJECT`: Azure DevOps project to scan for repos. Set to `*` to discover across all projects in the organization. There is no default, so set it explicitly.
 
 :::note
 `AZURE_CLIENT_ID` and `AZURE_TENANT_ID` are used for both Microsoft Entra ID sign-in and Microsoft Graph org sync. Ensure the app registration has the necessary Microsoft Graph API permissions (`User.Read.All`, `Group.Read.All`).

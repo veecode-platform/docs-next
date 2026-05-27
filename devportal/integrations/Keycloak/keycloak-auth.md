@@ -15,7 +15,7 @@ The `keycloak` profile connects VeeCode DevPortal to a Keycloak instance for OID
 
 Set `VEECODE_PROFILE=keycloak` to activate `app-config.keycloak.yaml`.
 
-The entrypoint automatically derives `KEYCLOAK_METADATA_URL` as `${KEYCLOAK_BASE_URL}/realms/${KEYCLOAK_REALM}` if it is not explicitly set.
+The OIDC discovery URL is built from `KEYCLOAK_BASE_URL` + `KEYCLOAK_REALM` (`${KEYCLOAK_BASE_URL}/realms/${KEYCLOAK_REALM}`). The entrypoint also computes and logs this as `KEYCLOAK_METADATA_URL`, but the bundled config derives the URL from the base URL and realm directly — to point at a non-standard discovery endpoint, override `auth.providers` in your own `app-config.local.yaml`.
 
 ## Required environment variables
 
@@ -31,7 +31,7 @@ The entrypoint automatically derives `KEYCLOAK_METADATA_URL` as `${KEYCLOAK_BASE
 
 | Variable | Default | Description |
 |---|---|---|
-| `KEYCLOAK_METADATA_URL` | `${KEYCLOAK_BASE_URL}/realms/${KEYCLOAK_REALM}` | OIDC discovery endpoint (derived automatically if not set) |
+| `KEYCLOAK_METADATA_URL` | `${KEYCLOAK_BASE_URL}/realms/${KEYCLOAK_REALM}` | Computed and logged by the entrypoint for visibility. The bundled config builds the discovery URL from `KEYCLOAK_BASE_URL` + `KEYCLOAK_REALM`, so setting this variable alone does not change it. |
 
 ## Prerequisites
 

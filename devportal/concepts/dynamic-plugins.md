@@ -43,7 +43,7 @@ plugins:
       # ... plugin-specific config
 ```
 
-In the Helm chart, this maps to `global.dynamic.plugins` in `values.yaml`. For Docker installs, mount the file or pass it via `VEECODE_APP_CONFIG`.
+In the Helm chart, this maps to `global.dynamic.plugins` in `values.yaml`. For Docker installs, mount your `dynamic-plugins.yaml` into the container at `/app/dynamic-plugins.yaml` (the entrypoint processes it at startup). Note that `VEECODE_APP_CONFIG` only carries `app-config` content — it cannot be used to deliver `dynamic-plugins.yaml`.
 
 ---
 

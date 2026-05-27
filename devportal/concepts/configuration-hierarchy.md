@@ -17,9 +17,9 @@ DevPortal uses a 7-layer configuration merge system. Each layer overrides values
 2. app-config.production.yaml               (production overrides, shipped in the image)
 3. app-config.<profile>.yaml               (auth/identity provider config, loaded when VEECODE_PROFILE is set)
 4. app-config.distro.yaml                  (distro-level additions: marketplace, extra plugins, etc.)
-5. app-config.local.yaml                   (your operator overrides — via VEECODE_APP_CONFIG or manual mount)
+5. app-config.local.yaml                   (your operator overrides — mounted into the container)
 6. dynamic-plugins-root/app-config.dynamic-plugins.yaml  (generated at startup from your dynamic-plugins.yaml)
-7. app-config.saas.yaml                    (SaaS/platform-managed overrides — last wins)
+7. app-config.saas.yaml                    (SaaS/platform-managed overrides — last wins; populated from VEECODE_APP_CONFIG)
 ```
 
 Layer 7 wins. Layer 1 provides the baseline.
@@ -71,7 +71,11 @@ organization:
   name: My Org
 ```
 
-Pass it to the container via the `VEECODE_APP_CONFIG` environment variable (path to the file) or by mounting it into the container.
+Mount it into the container at `/app/app-config.local.yaml` (for example, a Docker volume mount or a Kubernetes ConfigMap).
+
+:::note `VEECODE_APP_CONFIG` is different
+`VEECODE_APP_CONFIG` is **not** a path to `app-config.local.yaml`. It holds a **base64-encoded app-config document** that the entrypoint decodes into `app-config.saas.yaml` (layer 7, loaded last). It is used by the VeeCode SaaS platform; self-hosted operators normally mount `app-config.local.yaml` instead.
+:::
 
 ---
 
@@ -104,7 +108,7 @@ organization:
 ```
 
 2. For Helm: place these keys under `upstream.backstage.appConfig` in `values.yaml`.
-3. For Docker: mount the file and set `VEECODE_APP_CONFIG=/path/to/app-config.local.yaml`.
+3. For Docker: mount the file into the container at `/app/app-config.local.yaml`.
 
 ---
 

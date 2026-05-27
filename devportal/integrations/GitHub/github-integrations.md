@@ -18,7 +18,7 @@ These integrations run server-side and use **service credentials** rather than e
 :::tip
 If you use the `github` profile, DevPortal will configure both authentication and integrations for you using a bundled `app-config.yaml` file. You still need to obtain the GitHub App and PAT credentials manually and provide the environment variables, though.
 
-The `github-pat` profile configures **integrations and org sync only** (with guest/no authentication). It does not configure the auth provider and is intended for local development and PoCs. See [GitHub Tokens](./github-tokens.md) for the required `GITHUB_TOKEN` variable.
+The `github-pat` profile configures **repository/catalog discovery and integrations only** (with guest/no authentication). It uses the `github` catalog provider to ingest `catalog-info.yaml` entities from the organization's repos — it does **not** import GitHub users and teams as `User`/`Group` entities (that org sync is the `githubOrg` provider, configured by the full `github` profile). It also does not configure the auth provider, and is intended for local development and PoCs. See [GitHub Tokens](./github-tokens.md) for the required `GITHUB_TOKEN` variable.
 :::
 
 ## How Backend Integrations Work

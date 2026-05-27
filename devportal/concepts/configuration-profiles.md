@@ -53,13 +53,13 @@ This profile does **not** enable OAuth sign-in. Users authenticate as guest or v
 ### `github`
 | Variable | Required | Notes |
 | --- | --- | --- |
-| `GITHUB_CLIENT_ID` | Yes | GitHub OAuth App client ID |
-| `GITHUB_CLIENT_SECRET` | Yes | GitHub OAuth App client secret |
+| `GITHUB_CLIENT_ID` | Yes | GitHub App client ID (for integrations) |
+| `GITHUB_CLIENT_SECRET` | Yes | GitHub App client secret (for integrations) |
 | `GITHUB_APP_ID` | Yes | GitHub App ID |
 | `GITHUB_PRIVATE_KEY` | Yes | GitHub App private key (YAML block scalar `\|`) |
 | `GITHUB_ORG` | Yes | GitHub organization name |
 
-The entrypoint auto-copies `GITHUB_CLIENT_ID` → `GITHUB_AUTH_CLIENT_ID` if the latter is unset.
+Sign-in uses `GITHUB_AUTH_CLIENT_ID` / `GITHUB_AUTH_CLIENT_SECRET`. If those are unset, the entrypoint auto-copies `GITHUB_CLIENT_ID` → `GITHUB_AUTH_CLIENT_ID` and `GITHUB_CLIENT_SECRET` → `GITHUB_AUTH_CLIENT_SECRET`, so a single GitHub App's OAuth credentials can serve both sign-in and integration.
 
 ### `gitlab`
 | Variable | Required | Notes |
