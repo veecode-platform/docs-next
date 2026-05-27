@@ -41,7 +41,6 @@ To enable observability panels on an entity page, add the following annotations 
 metadata:
   annotations:
     grafana/dashboard-selector: "title @> 'My Service'"
-    grafana/unified-thematic-label: "service=my-service"
 ```
 
 ### Grafana Alert Status Panel
