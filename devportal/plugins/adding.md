@@ -6,6 +6,10 @@ title: Adding Plugins
 
 You can add dynamic plugins to your DevPortal instance at any time without rebuilding the base image.
 
+:::note
+Adding a plugin is the **load** step — step 1 of 3 in the plugin activation model. A loaded plugin does nothing visible until the relevant catalog entities carry the correct annotation (context) and `app-config.yaml` configures the backend it queries. See [Composing a Portal](/platform/concepts/portal-composition) for the full model.
+:::
+
 ## Prerequisites
 
 - A running DevPortal instance
