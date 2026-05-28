@@ -209,7 +209,7 @@ catalog:
 
 ## Replacing vs adding to the demo catalog
 
-The default DevPortal image ships with demo entities registered via `/app/examples/` in `app-config.production.yaml` (see [Docker Run — What's in the demo catalog](./intro#whats-in-the-demo-catalog)). Backstage merges `catalog.locations[]` **additively** across config layers, so understanding the consequence matters:
+The default DevPortal image ships with demo entities registered via `/app/examples/` in `app-config.production.yaml` (see [Docker Run — What's in the demo catalog](./intro.md#whats-in-the-demo-catalog)). Backstage merges `catalog.locations[]` **additively** across config layers, so understanding the consequence matters:
 
 **Adding alongside the demo (the common case):** Anything you put in `app-config.local.yaml` under `catalog.locations[]` is appended to the demo locations. Both sets will appear in the portal. This is what every example in this page does, and it's almost always what you want for a first contact.
 
@@ -234,6 +234,6 @@ Mounting your own `app-config.production.yaml` replaces the file entirely. Make 
 
 ## Next Steps
 
-- [Custom App Configuration](./custom-config)
-- [Configure Dynamic Plugins](./custom-plugins)
+- [Custom App Configuration](./custom-config.md)
+- [Configure Dynamic Plugins](./custom-plugins.md)
 - [Backstage Catalog Documentation](https://backstage.io/docs/features/software-catalog/)

@@ -151,7 +151,7 @@ The same disambiguation pattern applies whenever you see plugins from `@backstag
 The README of `devportal-plugin-export-overlays` is partially stale — it mentions `ghcr.io/veecode-platform/...` as the registry and a `bs_<version>__<plugin-version>` tag format. The actual published artifacts use `quay.io/veecode/...` with `bs_<version>` only. Trust the `dynamicArtifact` field in each plugin's `metadata/<plugin>.yaml` — that's what the CI pipeline writes and what the Marketplace reads.
 :::
 
-For a complete list of bundled (preloaded) plugins that do not require an OCI reference, see [Bundled Plugins](./bundled).
+For a complete list of bundled (preloaded) plugins that do not require an OCI reference, see [Bundled Plugins](./bundled/index.md).
 
 ### VKDR (local setup)
 
@@ -185,7 +185,7 @@ global:
 :::note `integrity:` is npm-only — and required
 The `integrity:` field is **required for remote npm packages** (unless `SKIP_INTEGRITY_CHECK=true` is set). It is **not used** for OCI packages (`oci://...`, validated by digest comparison) or local paths (`./dynamic-plugins/dist/...`, pre-bundled in the image).
 
-To generate the `sha512-<base64>` string, see [Generating the integrity hash](./development/loading#generating-the-integrity-hash) — covers both `npm view <pkg>@<ver> dist.integrity` (preferred) and an `openssl`-based fallback.
+To generate the `sha512-<base64>` string, see [Generating the integrity hash](./development/loading.md#generating-the-integrity-hash) — covers both `npm view <pkg>@<ver> dist.integrity` (preferred) and an `openssl`-based fallback.
 :::
 
 ### Helm

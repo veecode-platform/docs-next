@@ -27,7 +27,7 @@ vkdr kong install --default-ic
 
 ## Available Commands
 
-- **[devportal](./devportal)** - Install and manage VeeCode DevPortal
+- **[devportal](./devportal.md)** - Install and manage VeeCode DevPortal
 
 ## Quick Start
 

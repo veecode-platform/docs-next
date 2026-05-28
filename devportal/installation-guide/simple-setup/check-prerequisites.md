@@ -12,4 +12,4 @@ Use this checklist to ensure you're ready to install the DevPortal.
 - [ ] Git provider account ready (GitHub or GitLab)
 - [ ] Optional: Ingress controller (nginx or kong) installed in the cluster
 
-If you already have them ready, you can skip to the next section named [Create or choose a target organization/group](./target-organization-group).
+If you already have them ready, you can skip to the next section named [Create or choose a target organization/group](./target-organization-group.md).
