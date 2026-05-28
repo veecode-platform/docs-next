@@ -6,7 +6,9 @@ title: Vault Plugin
 
 # Vault Plugin
 
-The Vault plugin for Backstage displays HashiCorp Vault secrets associated with a catalog entity, allowing developers to view secret paths and metadata directly from the DevPortal UI.
+Without this plugin, secrets are completely opaque from the portal's perspective. A developer who wants to know what secrets a service depends on must navigate to Vault separately, with separate credentials, and know where to look. Enable the plugin, add `vault.io/secrets-path` with the secret path prefix for that service, and the entity overview shows the secret paths — so the team knows what the service depends on without switching tools. The plugin shows paths and metadata only, not secret values.
+
+The Vault plugin displays HashiCorp Vault secrets associated with a catalog entity, allowing developers to view secret paths and metadata directly from the DevPortal UI.
 
 :::note
 The Vault plugin is **not bundled** in the DevPortal image. It must be added as an external dynamic plugin via `dynamic-plugins.yaml` or the Marketplace. No special support plan is required — the plugin is a standard Backstage community plugin available publicly.

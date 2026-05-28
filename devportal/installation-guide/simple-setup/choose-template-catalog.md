@@ -18,4 +18,3 @@ We recommend that you start by forking (or just copying) our [public base catalo
 You may simply point directly to the public base catalog repository if you don't plan to make any changes to it, but forking/copying is recommended for better security and control (you should work with your own template catalog).
 :::
 
-TODO: video showing the fork process in GitHub UI.
