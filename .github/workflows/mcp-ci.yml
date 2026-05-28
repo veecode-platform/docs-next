@@ -10,6 +10,10 @@ on:
       - platform/**
       - admin-ui/**
       - vkdr/**
+      - src/**
+      - docusaurus.config.js
+      - sidebars.js
+      - scripts/check-links.py
       - .github/workflows/mcp-ci.yml
 
 jobs:
@@ -27,6 +31,21 @@ jobs:
         run: yarn install --immutable
       - name: Build site (generates snapshot)
         run: yarn build
+      - name: Serve built site
+        run: |
+          nohup yarn serve --port 3001 > /tmp/docusaurus-serve.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fs http://localhost:3001/devportal/intro > /dev/null; then
+              echo "server ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "ERROR: server did not become ready within 60s"
+          cat /tmp/docusaurus-serve.log
+          exit 1
+      - name: Check for broken internal links
+        run: python3 scripts/check-links.py
       - name: Validate emitted snapshot
         run: |
           node -e "
