@@ -182,6 +182,12 @@ global:
                     importName: DynamicGlobalFloatingActionButton
 ```
 
+:::note `integrity:` is npm-only — and required
+The `integrity:` field is **required for remote npm packages** (unless `SKIP_INTEGRITY_CHECK=true` is set). It is **not used** for OCI packages (`oci://...`, validated by digest comparison) or local paths (`./dynamic-plugins/dist/...`, pre-bundled in the image).
+
+To generate the `sha512-<base64>` string, see [Generating the integrity hash](./development/loading#generating-the-integrity-hash) — covers both `npm view <pkg>@<ver> dist.integrity` (preferred) and an `openssl`-based fallback.
+:::
+
 ### Helm
 
 Add the plugin to the `global.dynamic.plugins` array in your `values.yaml`:
