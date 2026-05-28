@@ -61,13 +61,48 @@ Without this, the tab loads and shows an error or empty state. With all three la
 
 ### The diagnostic model
 
-A plugin that fails silently has failed at one of these three levels:
+A plugin that fails silently has failed at one of these three levels. Diagnose in layer order — load before context before backend, because each layer assumes the previous one succeeded.
 
-| Symptom | Cause | Fix |
+| Symptom | Layer | Fix |
 |---|---|---|
-| Tab not visible on entity | Annotation missing | Add annotation to `catalog-info.yaml` |
-| Tab visible, empty or error | Backend not configured or unreachable | Check `app-config.yaml` for the relevant integration |
-| Nothing plugin-related works | Plugin not loaded | Check `disabled: false` in `dynamic-plugins.yaml` |
+| Plugin entirely absent (no tab, no card, nothing) on any entity | Load — declared but installer failed | See [Diagnosing "plugin not loaded"](#diagnosing-plugin-not-loaded) below |
+| Tab not visible on a specific entity | Context — annotation missing | Add the annotation to that entity's `catalog-info.yaml` |
+| Tab visible, empty or error | Backend — configuration missing or unreachable | Check `app-config.yaml` for the relevant integration |
+
+#### Diagnosing "plugin not loaded"
+
+This is the trickiest failure to spot because **the portal still boots normally** — there is no startup error, no banner, no warning in the UI. The plugin is simply absent.
+
+The DevPortal entrypoint runs `install-dynamic-plugins.py` before starting Backstage. The installer reads `dynamic-plugins.yaml`, downloads each OCI/npm artifact, and writes the merged config that Backstage reads on boot. The installer is best-effort: when it fails for a specific plugin, it logs an error, **skips that plugin, and continues**. Backstage then boots without it. If you're not looking at the logs, the plugin just isn't there.
+
+Check the container logs for the specific install lifecycle lines the installer prints:
+
+```bash
+docker logs devportal 2>&1 | grep -E "======= (Installing|Skipping|Successfully|ERROR|Using pre-installed)"
+```
+
+What you should see for a healthy load:
+
+```
+======= Installing dynamic plugin <package>
+==> Successfully installed dynamic plugin <package>
+```
+
+Common failure signatures and what they mean:
+
+| Log signature | What happened | Likely cause |
+|---|---|---|
+| `======= ERROR: Failed to install plugin ... npm ERR! 404` | npm package or version doesn't exist | Typo in `package:`, or version not published |
+| `======= ERROR: Failed to install OCI plugin ... skopeo ... non-zero exit status 1` | OCI image not found or unreachable | Wrong workspace, wrong tag, registry unreachable, or plugin commented out in [`devportal-plugin-export-overlays`](https://github.com/veecode-platform/devportal-plugin-export-overlays) — see [Finding the OCI reference](/devportal/plugins/adding#finding-the-oci-reference-for-a-plugin) |
+| `======= ERROR: ... hash of the downloaded package ... does not match the provided integrity hash` | Tampered or wrong-version artifact | Regenerate or remove the `integrity:` field |
+| `yaml.scanner.ScannerError:` or `yaml.parser.ParserError:` | `dynamic-plugins.yaml` itself doesn't parse | YAML syntax error — duplicate keys, bad indentation. **No plugins load at all when this happens.** |
+| `InstallException: Config key '...' defined differently for 2 dynamic plugins` | Two plugins set the same config key incompatibly | Reconcile the conflicting `pluginConfig` entries |
+| `InstallException: skopeo executable not found in PATH` | OCI install attempted on an image that doesn't have skopeo | Use the official VeeCode image, or switch to npm packages |
+| No `Installing` line for the plugin at all | The package name in your YAML doesn't match anything that was processed | Typo in `package:`, or the entry is inside an `includes:` file that wasn't found |
+
+:::caution Installer crashes are non-fatal
+A Python crash in `install-dynamic-plugins.py` does not abort the boot. The portal starts anyway, with `app-config.dynamic-plugins.yaml` either stale or empty. After any change to `dynamic-plugins.yaml`, verify the install lifecycle lines above before assuming the plugin is active.
+:::
 
 #### Diagnosing "tab appears but is empty or errors"
 
@@ -135,10 +170,16 @@ plugins:
   - package: oci://quay.io/veecode/gitlab:bs_1.48.4!immobiliarelabs-backstage-plugin-gitlab
     disabled: false
 
-  # Grafana — OCI plugin, downloaded at startup
+  # Grafana — see note below; reference is illustrative
   - package: oci://quay.io/veecode/<workspace>:<tag>!roadiehq-backstage-plugin-grafana
     disabled: false
 ```
+
+:::note Grafana is not currently published as an OCI artifact by VeeCode
+The `@roadiehq/backstage-plugin-grafana` package exists upstream but is not in any active workspace in [`devportal-plugin-export-overlays`](https://github.com/veecode-platform/devportal-plugin-export-overlays). To use Grafana today you have two options: reference the npm package directly (`package: '@roadiehq/backstage-plugin-grafana'`) if upstream publishes a dynamic build, or fork `devportal-plugin-export-overlays` and add the plugin to a workspace. For ready-to-use observability and quality plugins that ARE published as OCI, see [Tech Insights](/devportal/plugins/bundled), [SonarQube](/devportal/plugins/Sonar), or `kiali` (service mesh).
+
+The composition model below applies identically — once loaded by either route, Grafana follows the same Layer 1 / 2 / 3 rules.
+:::
 
 **Each service's `catalog-info.yaml` — what it owns:**
 

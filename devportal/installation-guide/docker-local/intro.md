@@ -77,11 +77,49 @@ import SetupDefaults from '@site/static/img/docker-setup/setup-defaults.png';
 Points to notice:
 
 - "Guest" authentication enabled as an admin user ("user:default/admin", "group:default/admins", "role:default/admin" with all permissions granted).
-- The catalog will be populated with a built-in catalog for demo purposes (folder "/app/examples" inside the containers).
+- The catalog is populated with built-in demo entities (see [What's in the demo catalog](#whats-in-the-demo-catalog) below).
 - The container loads several config files in a defined precedence order. Your custom file at `/app/app-config.local.yaml` overrides the base and profile defaults. See [Custom Configuration](./custom-config) for the full merge order.
 - There are many plugins already bundled in the container image, ready to be enabled. You can mount the `/app/dynamic-plugins.yaml` plugin file to enable those you want to use.
 
 We will talk more about these subjects later on, but understand there are many possible ways to extend and configure DevPortal container without rebuilding it (or making a derived image).
+
+## What's in the demo catalog
+
+When you run `veecode/devportal:latest` with no custom config, the catalog is **not empty by accident** — it is populated from `/app/examples/` inside the image. Knowing what's in there matters because (a) you can read these files as concrete examples of how every entity kind is declared, and (b) you need a strategy for replacing them when you go beyond the demo.
+
+The demo data lives in these files (you can inspect them directly with `docker exec`):
+
+```bash
+docker exec devportal ls /app/examples/
+docker exec devportal cat /app/examples/entities.yaml
+```
+
+| File | What it contains |
+|---|---|
+| `entities.yaml` | System (`examples`), Components (`example-website`, `example-node-app`), an inline gRPC API |
+| `org.yaml` | Users (`guest`, `admin`) and Groups (`guests`, `admins`, `developers`) |
+| `apis.yaml` | A live OpenAPI from `apis.guru` (loaded via `$openapi` remote ref) and a gRPC API |
+| `resources.yaml` | Demo Resources — a database, vault, bucket, and two environment-typed Resources |
+| `clusters.yaml` | A cluster Resource (`my-own-cluster`) |
+| `techdocs/catalog-info.yaml` | A Component with TechDocs enabled (good reference for TechDocs annotation usage) |
+| `template-nodejs/template.yaml` | Scaffolder Template that creates a Node.js service repo on GitHub |
+| `template-openapi/template.yaml` | Scaffolder Template that generates a Kong deck config from an OpenAPI spec |
+| `template-azure-nodejs/template.yaml` | Variant of the Node.js template targeting Azure DevOps |
+
+These files are registered as catalog locations in `app-config.production.yaml`, which is one of the layered configs loaded on startup. That is why they appear out of the box.
+
+:::warning Demo Templates need credentials to execute
+The three demo Templates appear in the **Create** tab but will fail at execution unless you provide the relevant secrets (GitHub token for `example-nodejs-template` and `template-openapi`, Kong connection for `template-openapi`, Azure DevOps PAT for `template-azure-nodejs`). They are useful as examples of template structure even if you don't run them.
+:::
+
+### Replacing the demo catalog
+
+`catalog.locations[]` is **additive** in Backstage's config merge — entries from `app-config.local.yaml` are appended to (not substituted for) the ones in `app-config.production.yaml`. This means:
+
+- **Adding your own entities alongside the demo:** mount your own `catalog-info.yaml` and add it as a location in `app-config.local.yaml`. Both sets will appear.
+- **Fully removing the demo entities:** mount a replacement `app-config.production.yaml` that omits the `/app/examples/` entries. You must preserve all the other settings from the original (baseUrl, CORS, auth, RBAC paths, etc.) — only do this when you intentionally want a clean catalog.
+
+See [Custom Catalog](./custom-catalog#replacing-vs-adding-to-the-demo-catalog) for the concrete YAML.
 
 ## Next Steps
 
