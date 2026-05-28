@@ -6,6 +6,10 @@ title: CI/CD Plugins
 
 # CI/CD Plugins
 
+The problem CI/CD plugins solve is the same across every platform: the service is registered in the portal, but its pipeline lives in GitHub Actions, GitLab, Jenkins, or Azure DevOps. Developers context-switch to check builds, find failures, and trigger runs. Each CI/CD plugin closes that gap for one platform by surfacing build status and triggers on the entity page itself — the service and its pipeline become one view.
+
+This is the [Application Lifecycle](/platform/capabilities) capability layer in practice. Pick the plugin that matches the platform your team uses; the activation pattern is the same for all of them.
+
 DevPortal ships several separate CI/CD plugins, each integrating with a specific CI/CD platform. There is no single "CI/CD Plugin" — each platform has its own bundled plugin that must be enabled individually.
 
 All CI/CD plugins described here are **preloaded in the DevPortal image and disabled by default**. Enable them via `dynamic-plugins.yaml` or the Marketplace — no support contact required.

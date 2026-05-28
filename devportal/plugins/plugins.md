@@ -4,7 +4,11 @@ sidebar_label: Plugins
 title: Backstage Plugins
 ---
 
-VeeCode DevPortal is built on top of [Backstage](https://backstage.io/), an open platform for building developer portals. Backstage offers a rich ecosystem of plugins that can be integrated into DevPortal to extend its functionality and tailor it to your organization's needs.
+Plugins are how the portal becomes useful beyond Day-0 setup. The base DevPortal gives you a service catalog and a template runner — plugins are what turn it into a central hub where teams actually operate their services: checking deployments, tracking pipelines, monitoring code quality, without leaving the portal.
+
+VeeCode DevPortal is built on top of [Backstage](https://backstage.io/) and ships with a set of bundled plugins ready to enable. Understand what each plugin adds before enabling it — the value is in the workflow it removes, not in the YAML you write.
+
+Before choosing which plugins to enable, read [Composing a Portal](/platform/concepts/portal-composition) — it explains the three-layer activation model (load → annotation → backend) and maps plugin combinations to operational use cases.
 
 ## Plugin Types
 

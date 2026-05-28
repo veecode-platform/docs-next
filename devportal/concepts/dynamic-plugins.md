@@ -10,6 +10,18 @@ Dynamic plugins are the mechanism DevPortal uses to ship, enable, and configure 
 
 ---
 
+## Loading is step 1 of 3
+
+This doc covers how plugins are packaged and loaded. Loading is necessary but not sufficient — a loaded plugin does nothing visible until two more steps are in place:
+
+1. **Load** (`dynamic-plugins.yaml`) — this doc. Makes the plugin's code available.
+2. **Context** (entity annotations in `catalog-info.yaml`) — tells the plugin which catalog entities it should attach to. Without the correct annotation on an entity, the plugin is loaded but idle.
+3. **Backend** (`app-config.yaml`) — provides the credentials and endpoints the plugin queries. Without this, the plugin's tab appears but shows an error or empty state.
+
+All three must be in place before a developer sees live data. See [Composing a Portal](/platform/concepts/portal-composition) for the full model and a worked example.
+
+---
+
 ## Preinstalled vs. Downloaded Plugins
 
 DevPortal ships two categories of dynamic plugins:

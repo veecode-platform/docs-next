@@ -1,6 +1,6 @@
 {
-  "name": "@veecode/docs-mcp",
-  "version": "0.0.0",
+  "name": "@veecode-platform/docs-mcp",
+  "version": "0.0.5",
   "description": "MCP server exposing VeeCode Platform documentation to CLI agents",
   "license": "Apache-2.0",
   "type": "module",
@@ -39,5 +39,9 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   }
 }
