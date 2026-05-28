@@ -8,6 +8,11 @@ title: Configuration Hierarchy
 
 DevPortal uses a 7-layer configuration merge system. Each layer overrides values from the layers below it. Understanding this order is essential for diagnosing unexpected behavior and knowing where to put your custom settings.
 
+**Quick answer — where do I put my override?**
+- Operator customizations (branding, catalog locations, integration credentials): `app-config.local.yaml` (layer 5).
+- Auth provider and SCM integration (set once per environment): handled by `VEECODE_PROFILE` (layer 3). See [Configuration Profiles](./configuration-profiles.md).
+- Plugin-specific backend config (Kubernetes cluster URLs, Grafana domain, SonarQube base URL): also goes in `app-config.local.yaml`, or is injected via `pluginConfig` in `dynamic-plugins.yaml` (layer 6). See [Composing a Portal](/platform/concepts/portal-composition) for the relationship between plugin loading and backend config.
+
 ---
 
 ## The 7 Layers (lowest to highest priority)
@@ -120,4 +125,5 @@ If a setting is not taking effect, check:
 3. Whether the key path is correct (e.g., `app.branding.theme.light.palette.*`, not `branding.theme.light.primaryColor`).
 
 For branding-specific keys, see [Simple Branding](../customization/branding.md).  
-For profile-specific env vars, see [Configuration Profiles](./configuration-profiles.md).
+For profile-specific env vars, see [Configuration Profiles](./configuration-profiles.md).  
+For how `app-config.yaml` backend sections relate to plugin loading and entity annotations, see [Composing a Portal](/platform/concepts/portal-composition).

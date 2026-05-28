@@ -32,7 +32,13 @@ A profile is not a mode or a switch — it is a YAML config file (`app-config.<p
 2. **Catalog discovery** — where to look for `catalog-info.yaml` files (GitHub org, GitLab group, etc.)
 3. **SCM integration** — credentials for the source control system so the catalog processor and scaffolder can read repositories
 
-This means that setting `VEECODE_PROFILE=github` and seeing "GitHub login works, catalog populated, templates executing in GitHub" is not magic — it is those three things being configured by a single file. To see exactly what was set, read `app-config.github.yaml` in the distro.
+This means that setting `VEECODE_PROFILE=github` and seeing "GitHub login works, catalog populated, templates executing in GitHub" is not magic — it is those three things being configured by a single file. To see exactly what was set, read the profile file directly inside the container:
+
+```bash
+docker exec devportal cat /app/app-config.github.yaml
+```
+
+Replace `github` with whatever profile you set. The file is the complete source of truth for what the profile configured.
 
 If something works that you didn't explicitly configure, it came from the profile. If you need to override any of it, add the relevant key to your `app-config.local.yaml` — it loads after the profile and wins.
 

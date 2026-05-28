@@ -66,8 +66,26 @@ A plugin that fails silently has failed at one of these three levels:
 | Symptom | Cause | Fix |
 |---|---|---|
 | Tab not visible on entity | Annotation missing | Add annotation to `catalog-info.yaml` |
-| Tab visible, empty or error | Backend not configured | Check `app-config.yaml` for the relevant integration |
+| Tab visible, empty or error | Backend not configured or unreachable | Check `app-config.yaml` for the relevant integration |
 | Nothing plugin-related works | Plugin not loaded | Check `disabled: false` in `dynamic-plugins.yaml` |
+
+#### Diagnosing "tab appears but is empty or errors"
+
+The plugin is loaded and the annotation is correct, but the data isn't showing. Check in this order:
+
+1. **Backend section exists in `app-config.yaml`** — for Kubernetes: `kubernetes.clusterLocatorMethods`. For Grafana: `grafana.domain`. For SonarQube: `sonarqube.baseUrl` + `apiKey`. Without the backend config, the plugin frontend has no source to query.
+
+2. **The annotation value matches reality** — `backstage.io/kubernetes-label-selector: 'app=my-service'` must match the actual labels on the pods in the cluster. If the pods are labeled `app=myservice` (no hyphen), the plugin returns empty with no UI error.
+
+3. **Credentials and reachability** — the service account token, OAuth credentials, or API key must have read access. The backend must be able to reach the external system (cluster URL, Grafana URL, etc.) from the DevPortal container's network.
+
+4. **TLS settings** — for self-signed certs in `kubernetes.clusterLocatorMethods`, set `skipTLSVerify: true`. Otherwise the connection fails silently from the frontend's perspective.
+
+5. **Backend logs** — connection errors surface in the container logs, not the UI:
+
+   ```bash
+   docker logs devportal | grep -i <plugin-name>
+   ```
 
 ---
 
