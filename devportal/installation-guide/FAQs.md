@@ -34,7 +34,7 @@ Common causes:
 
 ### I set a key in `app-config.local.yaml` but it has no effect
 
-Config files are merged in a 7-layer order. Your `app-config.local.yaml` is layer 5, but plugin-generated config (`dynamic-plugins-root/app-config.dynamic-plugins.yaml`) is layer 6 and loads after it. A plugin's `pluginConfig` block in `dynamic-plugins.yaml` can override keys from your `local.yaml`. See [Custom Configuration](./docker-local/custom-config) for the full merge order.
+Config files are merged in a 7-layer order. Your `app-config.local.yaml` is layer 5, but plugin-generated config (`dynamic-plugins-root/app-config.dynamic-plugins.yaml`) is layer 6 and loads after it. A plugin's `pluginConfig` block in `dynamic-plugins.yaml` can override keys from your `local.yaml`. See [Custom Configuration](./docker-local/custom-config.md) for the full merge order.
 
 ---
 
@@ -110,7 +110,7 @@ plugins:
     disabled: false
 ```
 
-See [Dynamic Plugins](./docker-local/custom-plugins) for details.
+See [Dynamic Plugins](./docker-local/custom-plugins.md) for details.
 
 ### My `dynamic-plugins.yaml` disables all plugins unexpectedly
 

@@ -60,4 +60,4 @@ permission:
       - kubernetes
 ```
 
-See [Permissions and RBAC](../../rbac/permissions) for full configuration details.
+See [Permissions and RBAC](../../rbac/permissions.md) for full configuration details.

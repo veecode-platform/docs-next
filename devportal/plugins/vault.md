@@ -24,7 +24,7 @@ Search for "Vault" in the DevPortal Marketplace and click **Enable**.
 
 ### Via `dynamic-plugins.yaml`
 
-Check the [Marketplace](../plugins/finding) or the [Backstage Plugin Registry](https://backstage.io/plugins) for the current OCI reference and workspace tag that matches your DevPortal's Backstage version.
+Check the [Marketplace](./finding.md) or the [Backstage Plugin Registry](https://backstage.io/plugins) for the current OCI reference and workspace tag that matches your DevPortal's Backstage version.
 
 A typical entry looks like:
 
@@ -47,7 +47,7 @@ plugins:
                       - isVaultAvailable
 ```
 
-Replace `<workspace>` and `<tag>` with the values that match your instance. See [Adding Plugins](./adding) for details on the OCI artifact format.
+Replace `<workspace>` and `<tag>` with the values that match your instance. See [Adding Plugins](./adding.md) for details on the OCI artifact format.
 
 ---
 
@@ -88,4 +88,4 @@ The entity card only renders when this annotation is present.
 
 - [Backstage Community Vault plugin](https://github.com/backstage/community-plugins/tree/main/workspaces/vault)
 - [HashiCorp Vault documentation](https://developer.hashicorp.com/vault/docs)
-- [Adding Plugins to DevPortal](./adding)
+- [Adding Plugins to DevPortal](./adding.md)

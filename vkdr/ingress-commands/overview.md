@@ -14,10 +14,10 @@ When starting the `vkdr` cluster you have an option to enable Traefik as its def
 
 ## Available Ingress Controllers
 
-- **[nginx](./nginx)** - NGinx ingress controller (simple, widely used)
-- **[kong](./kong)** - Kong Gateway (API gateway with advanced features)
-- **[traefik](./traefik)** - Traefik ingress controller (modern, easy setup)
-- **[whoami](./whoami)** - Test service for verifying ingress
+- **[nginx](./nginx.md)** - NGinx ingress controller (simple, widely used)
+- **[kong](./kong.md)** - Kong Gateway (API gateway with advanced features)
+- **[traefik](./traefik.md)** - Traefik ingress controller (modern, easy setup)
+- **[whoami](./whoami.md)** - Test service for verifying ingress
 
 ## Quick Start Examples
 
