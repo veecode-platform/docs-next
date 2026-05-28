@@ -34,7 +34,7 @@ global:
 
 ## Testing with VKDR
 
-Our [local DevPortal setup](../../installation-guide/vkdr-local/vkdr-setup) using `vkdr` can be used to validate locally the wiring of a dynamic frontend plugin.
+Our [local DevPortal setup](../../installation-guide/vkdr-local/vkdr-setup.md) using `vkdr` can be used to validate locally the wiring of a dynamic frontend plugin.
 
 ### Steps
 
@@ -43,7 +43,7 @@ What you need:
 - A local npm registry (run [Verdaccio](https://verdaccio.org/) at local port 4873)
 - Publish the frontend plugin to Verdaccio (as described [here](/devportal/plugins/development/packaging#publish-a-dynamic-plugin))
 - Obtain the SHA integrity signature of the published plugin
-- A local `vkdr` cluster with DevPortal properly installed - check the [local DevPortal setup](../../installation-guide/vkdr-local/vkdr-setup) guide for more info.
+- A local `vkdr` cluster with DevPortal properly installed - check the [local DevPortal setup](../../installation-guide/vkdr-local/vkdr-setup.md) guide for more info.
 
 ### Verdaccio
 

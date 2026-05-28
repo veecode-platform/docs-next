@@ -14,7 +14,7 @@ Currently, `vkdr` supports PostgreSQL as a managed database service. PostgreSQL 
 
 ## Available Commands
 
-- **[postgres](./postgres)** - Manage PostgreSQL database instances
+- **[postgres](./postgres.md)** - Manage PostgreSQL database instances
 
 ## Quick Start
 

@@ -491,6 +491,6 @@ docker run ... -e CATALOG_INDEX_REFRESH=true veecode/devportal:latest
 
 ## Next Steps
 
-- [Custom Configuration](./custom-config) for advanced customization
-- [Dynamic Plugins](./custom-plugins) to enable additional features
-- [Custom Catalog](./custom-catalog) to add manual catalog entries
+- [Custom Configuration](./custom-config.md) for advanced customization
+- [Dynamic Plugins](./custom-plugins.md) to enable additional features
+- [Custom Catalog](./custom-catalog.md) to add manual catalog entries

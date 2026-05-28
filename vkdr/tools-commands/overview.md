@@ -12,12 +12,12 @@ These commands are related to installing and managing supporting tools in your `
 
 ## Available Tools
 
-- **[keycloak](./keycloak)** - Identity and access management (IAM)
-- **[vault](./vault)** - HashiCorp Vault for secrets management
-- **[minio](./minio)** - S3-compatible object storage
-- **[eso](./eso)** - External Secrets Operator for syncing secrets
-- **[mirror](./mirror)** - Container image registry mirrors
-- **[openldap](./openldap)** - LDAP directory service
+- **[keycloak](./keycloak.md)** - Identity and access management (IAM)
+- **[vault](./vault.md)** - HashiCorp Vault for secrets management
+- **[minio](./minio.md)** - S3-compatible object storage
+- **[eso](./eso.md)** - External Secrets Operator for syncing secrets
+- **[mirror](./mirror.md)** - Container image registry mirrors
+- **[openldap](./openldap.md)** - LDAP directory service
 
 ## Quick Start
 

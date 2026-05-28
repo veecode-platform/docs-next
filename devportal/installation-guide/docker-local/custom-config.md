@@ -159,5 +159,5 @@ docker run --rm --name devportal -d \
 
 ## Next Steps
 
-- [Configure Dynamic Plugins](./custom-plugins)
-- [Add Custom Catalog](./custom-catalog)
+- [Configure Dynamic Plugins](./custom-plugins.md)
+- [Add Custom Catalog](./custom-catalog.md)

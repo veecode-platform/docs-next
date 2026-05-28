@@ -91,7 +91,7 @@ Examples of always-active preInstalled plugins: VeeCode Homepage, Global Header,
 
 Examples of bundled-but-disabled plugins: Kubernetes, GitHub Actions, Azure DevOps, Jenkins, SonarQube, GitHub Workflows.
 
-For the complete list with package names and enable instructions, see the [Bundled Plugin Catalog](./bundled).
+For the complete list with package names and enable instructions, see the [Bundled Plugin Catalog](./bundled/index.md).
 
 ### Downloaded plugins
 

@@ -110,7 +110,7 @@ kubectl create secret generic devportal-secrets \
 
 ## Step 3: Create your `values.yaml`
 
-The chart name is `veecode-devportal` from the `veecode-devportal` Helm repository. See [Understand the Helm Chart](../understand-chart) for a full reference of available keys.
+The chart name is `veecode-devportal` from the `veecode-devportal` Helm repository. See [Understand the Helm Chart](../understand-chart.md) for a full reference of available keys.
 
 <Tabs groupId="providers">
 <TabItem value="github" label="GitHub">
@@ -258,6 +258,6 @@ kubectl rollout status deployment/veecode-devportal-backstage -n platform
 
 - Configure additional integrations and plugins — see the [Auth & Integrations](/devportal/integrations) section.
 - Review RBAC roles (`role:default/admin`, `role:default/developer`, `role:default/viewer`) and assign them to users.
-- For a deeper explanation of chart keys, see [Understand the Helm Chart](../understand-chart) or the [chart page on ArtifactHub](https://artifacthub.io/packages/helm/veecode-platform-next/veecode-devportal).
+- For a deeper explanation of chart keys, see [Understand the Helm Chart](../understand-chart.md) or the [chart page on ArtifactHub](https://artifacthub.io/packages/helm/veecode-platform-next/veecode-devportal).
 
 If you encounter issues, reach out via [support](https://platform.vee.codes/contact-us/) or join the [community](https://github.com/orgs/veecode-platform/discussions).

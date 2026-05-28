@@ -49,4 +49,4 @@ To enable authentication and full Git provider integration (GitHub, GitLab, etc.
 
 ### About the Helm chart
 
-Please check [Understand the Helm Chart](../understand-chart) for more information on the chart structure and available settings. You can also check the chart page on [ArtifactHub](https://artifacthub.io/packages/helm/veecode-platform-next/veecode-devportal).
+Please check [Understand the Helm Chart](../understand-chart.md) for more information on the chart structure and available settings. You can also check the chart page on [ArtifactHub](https://artifacthub.io/packages/helm/veecode-platform-next/veecode-devportal).

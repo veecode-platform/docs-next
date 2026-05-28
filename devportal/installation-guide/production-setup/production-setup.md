@@ -31,4 +31,4 @@ Use this guide when you need a persistent, team-accessible DevPortal instance â€
 | **Image** | `veecode/devportal:1.4.5` |
 | **ArtifactHub** | [veecode-platform-next/veecode-devportal](https://artifacthub.io/packages/helm/veecode-platform-next/veecode-devportal) |
 
-See [Understand the Helm Chart](../understand-chart) for a detailed breakdown of chart values.
+See [Understand the Helm Chart](../understand-chart.md) for a detailed breakdown of chart values.
