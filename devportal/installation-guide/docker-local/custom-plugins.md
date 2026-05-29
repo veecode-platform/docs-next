@@ -14,10 +14,9 @@ Dynamic plugins are a deep subject on their own. Please refer to the [Plugins](/
 
 ## Understanding Dynamic Plugins
 
-The DevPortal image comes with pre-installed plugins that can be optionally loaded. The configuration is controlled by two files:
+The DevPortal image ships with pre-installed plugins, enabled by default. You add operator-level overrides by mounting a single file:
 
-- **`dynamic-plugins.default.yaml`**: Default plugin configuration (built into the image)
-- **`dynamic-plugins.yaml`**: Your custom overrides (mounted at runtime)
+- **`dynamic-plugins.yaml`** (mounted at runtime): a top-level `plugins:` list of your overrides. The entrypoint merges it on top of the image defaults automatically — you never reference the image's internal default file.
 
 ## Creating a Custom Plugins File
 
@@ -51,7 +50,7 @@ plugins:
 docker run --rm --name devportal -d \
   -p 7007:7007 \
   -v $(pwd)/dynamic-plugins.yaml:/app/dynamic-plugins.yaml:ro \
-  veecode/devportal:latest
+  veecode/devportal:2.0.0
 ```
 
 ## Mounting with Docker Compose
@@ -61,7 +60,7 @@ Update your `docker-compose.yml`:
 ```yaml
 services:
   devportal:
-    image: veecode/devportal:latest
+    image: veecode/devportal:2.0.0
     ports:
       - "7007:7007"
     volumes:
@@ -83,21 +82,18 @@ plugins:
     disabled: false
 ```
 
-## Plugin Configuration and the `includes` Mechanism
+## How merging works — the entrypoint owns `includes:`
 
-Your `dynamic-plugins.yaml` merges with the image defaults via an `includes:` key. The distro's bundled `dynamic-plugins.yaml` already includes `dynamic-plugins.default.yaml` to preserve the image's built-in plugin set. If you mount your own `dynamic-plugins.yaml`, make sure it also includes the defaults so you do not lose the pre-installed plugins:
+You provide only a top-level `plugins:` list. You do **not** write an `includes:` key. On every boot the entrypoint copies your `dynamic-plugins.yaml` to a writable shadow and **rebuilds** the `includes:` chain itself, prepending the resolved image defaults, the marketplace state, and any preset fragments. Any `includes:` you add is replaced — so you cannot accidentally drop the pre-installed plugins by omitting it:
 
 ```yaml
-includes:
-  - dynamic-plugins.default.yaml
-
 plugins:
-  # Your overrides below
+  # Your overrides — the image defaults are preserved automatically
   - package: './dynamic-plugins/dist/some-plugin-dynamic'
     disabled: false
 ```
 
-The `dynamic-plugins.default.yaml` file (pre-installed plugins, all `disabled: true` by default) is baked into the image. You can also mount it from the distro repo to inspect or override individual entries.
+(The entrypoint-owned shadow it prepends is `dynamic-plugins.default.resolved.yaml`, the image defaults with `${BACKSTAGE_VERSION}` and `${PLUGIN_REGISTRY}` already substituted. It exists for the entrypoint's use — you don't reference it.)
 
 After the plugin install script runs, it generates `dynamic-plugins-root/app-config.dynamic-plugins.yaml` from the `pluginConfig` blocks of all enabled plugins. This generated file is loaded last in the config chain (after your `app-config.local.yaml`).
 
@@ -115,7 +111,7 @@ Dynamic plugins require a special kind of packaging. All DevPortal pre-installed
 
 ## Examples
 
-We have published several dynamic plugins examples on GitHub. Check the [OCI plugins guide](https://github.com/veecode-platform/devportal-distro/blob/main/docs/OCI_PLUGINS.md) in the distro repository for OCI registry usage examples.
+OCI plugins are fetched via `skopeo` at boot. See the [Dynamic Plugins](/devportal/plugins/) section for OCI registry usage examples.
 
 ## Viewing Available Plugins
 

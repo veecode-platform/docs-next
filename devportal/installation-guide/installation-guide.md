@@ -15,16 +15,14 @@ import DocCard from '@site/src/components/DocCard';
 
 <div className={style.wrapper}>
 
-<DocCard title="Docker Run (Quickstart)" link="./docker-local/intro" style={style}>Quickly run DevPortal locally using Docker. Ideal for testing and exploration without Kubernetes.</DocCard>
+<DocCard title="Docker Run (Quickstart)" link="/devportal/installation-guide/docker-local/intro" style={style}>Quickly run DevPortal locally using Docker. Ideal for testing and exploration without Kubernetes.</DocCard>
 
-<DocCard title="VKDR (Local Kubernetes)" link="./vkdr-local/vkdr-setup" style={style}>Install DevPortal locally on a lightweight Kubernetes cluster using VKDR. Best for reproducing production scenarios.</DocCard>
+<DocCard title="VKDR (Local Kubernetes)" link="/devportal/installation-guide/vkdr-local/vkdr-setup" style={style}>Install DevPortal locally on a lightweight Kubernetes cluster using VKDR. Best for reproducing production scenarios.</DocCard>
 
-<DocCard title="Simple Setup" link="./simple-setup" style={style}>Learn how to install a self-hosted Developer Portal with a simple setup (trial, demo or small production environment).</DocCard>
-
-<DocCard title="Production Setup" link="./production-setup" style={style}>Learn how to install a self-hosted and production-ready Developer Portal on your own infrastructure.</DocCard>
+<DocCard title="Production Setup (Kubernetes)" link="/devportal/installation-guide/production-setup" style={style}>Deploy DevPortal to a Kubernetes cluster using plain manifests — no Helm chart required.</DocCard>
 
 <DocCard title="Customization" link="/devportal/customization" style={style}>Learn how to customize your Developer Portal.</DocCard>
 
-<DocCard title="FAQs" link="./FAQs" style={style}>Frequently Asked Questions.</DocCard>
+<DocCard title="FAQs" link="/devportal/installation-guide/FAQs" style={style}>Frequently Asked Questions.</DocCard>
 
 </div>

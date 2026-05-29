@@ -24,11 +24,11 @@ VeeCode DevPortal is a Backstage distro that provides a production-grade portal 
 - It is an API showcase and governance tool for both developers and business partners
 - It simplifies DevOps adoption and scaling, removing cognitive load from average teams
 
-If you want to understand **why** this portal matters before diving into setup — the reasoning behind golden paths, self-service design, and developer autonomy — start with [Platform Concepts](/platform/concepts/portal-composition). If you're here to install and configure, continue below.
+If you want to understand **why** this portal matters before diving into setup — the reasoning behind golden paths, self-service design, and developer autonomy — start with [Platform Concepts](/platform/intro). If you're here to install and configure, continue below.
 
 <div className={style.wrapper}>
 
-<DocCard title="💻 Installation Guide" link="/devportal/installation-guide/simple-setup" style={style}>Learn how to install the Developer Portal on your own infrastructure.</DocCard>
+<DocCard title="💻 Installation Guide" link="/devportal/installation-guide" style={style}>Learn how to install the Developer Portal on your own infrastructure.</DocCard>
 
 <DocCard title="💡 Concepts" link="/devportal/concepts/catalog" style={style}>Understand the core concepts and terminology related to the Developer Portal.</DocCard>
 
