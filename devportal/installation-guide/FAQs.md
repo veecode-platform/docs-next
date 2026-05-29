@@ -126,6 +126,32 @@ You cannot accidentally lose the pre-installed plugins by omitting the defaults,
 
 ---
 
+## Kubernetes install
+
+### How do I install DevPortal V2 on Kubernetes?
+
+The canonical path is the `veecode-devportal-platform` Helm chart published in the `next-charts` repo:
+
+```sh
+helm repo add next-charts https://veecode-platform.github.io/next-charts
+helm repo update next-charts
+helm search repo veecode-devportal-platform   # → chart 0.1.0, app 2.0.0
+```
+
+Create a Secret with the variables required by your chosen presets (see the [per-preset matrix](/devportal/installation-guide/production-setup)), then install:
+
+```sh
+helm install devportal next-charts/veecode-devportal-platform \
+  --set 'presets={recommended,github,github-auth}' \
+  --set existingSecret=my-devportal-creds
+```
+
+Use `existingSecret` (a Secret you manage) for production. The `credentials: { KEY: value }` values shortcut is available for development but stores credentials in the Helm release in plaintext.
+
+If you prefer not to use Helm, the raw `examples/deploy/k8s.yaml` in the `devportal-platform` repo is the no-Helm fallback, but the Helm chart is the recommended path for any ongoing deployment. See [Kubernetes (Helm chart)](/devportal/installation-guide/production-setup) for the full install guide.
+
+---
+
 ## Getting more help
 
 - Container logs: `docker logs devportal`

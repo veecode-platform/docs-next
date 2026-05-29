@@ -4,17 +4,18 @@ sidebar_label: VKDR (Kubernetes)
 title: Install with VKDR (Kubernetes)
 ---
 
-:::note
-VKDR deploys its own DevPortal instance whose version is managed by the VKDR release cycle. To try DevPortal V2 features specifically, use the [Docker local](../docker-local/intro) or [Kubernetes](../production-setup/setup) setup instead.
-:::
+**Get DevPortal V2 running locally in under 5 minutes**
 
-**Get your DevPortal instance running in under 5 minutes**
+This guide installs **DevPortal V2** (`docker.io/veecode/devportal:2.0.0`) into a local Kubernetes cluster using `vkdr devportal-platform install` — a single command that provisions Kong, applies the published `veecode-devportal-platform` Helm chart, and wires up credentials automatically.
 
-This guide provides a straightforward installation of VeeCode DevPortal in a local, containerized, and isolated environment.
-It is designed for users who want to quickly evaluate the platform in a cost-effective manner, directly on their own machine, without the need for a full-scale cluster.
+It is designed for users who want to quickly evaluate the V2 platform in a cost-effective manner, directly on their own machine, without the need for a full-scale cluster.
 
-Within just a few minutes, you will have your own DevPortal instance up and running on your computer, providing a swift, hands-on experience with the product.
+Within just a few minutes, you will have your own DevPortal V2 instance up and running on your computer, providing a swift, hands-on experience with the product.
 The local setup is ideal for safe experimentation, feature evaluation, and prototyping, while requiring minimal setup and **no prior experience with Kubernetes or Helm**.
+
+:::note
+This guide covers **DevPortal V2**, which uses the presets model (`VEECODE_PRESETS`). V2 is configured through presets — not profiles. If you are looking for the V1 local setup, refer to the V1 branch of the documentation.
+:::
 
 ## Purpose of the Local Setup
 
@@ -22,7 +23,7 @@ Here’s why the local setup is the best starting point:
 
 - **Run on your own machine**: test and explore without needing remote servers.
 - **Cost-efficient**: everything runs locally; no cloud infrastructure required.
-- **Rapid evaluation**: deploy a functional DevPortal environment quickly.
+- **Rapid evaluation**: deploy a functional DevPortal V2 environment quickly.
 - **Safe experimentation**: explore features and configurations without affecting production systems.
 - **Hands-on experience**: interact with DevPortal as if it were running in a real environment, ideal for testing or prototyping.
 
@@ -37,8 +38,8 @@ The installation is divided into **six steps**, each building on the previous on
 1. **[Local Infrastructure Setup](infra.md):**
    Launch a lightweight Kubernetes cluster using `k3d` inside Docker. This cluster serves as the runtime environment for DevPortal.
 1. **[GitHub Access Configuration](github.md):**
-   Generate and configure the required GitHub token and secrets. These credentials allow DevPortal to securely access your repositories and services.
+   Generate and configure the required GitHub credentials. These allow DevPortal to securely access your repositories and services.
 1. **[DevPortal Deployment](deployment.md):**
-   Deploy your DevPortal instance locally using `vkdr`. The tool takes care of the entire installation process in just a few commands.
+   Deploy DevPortal V2 locally using `vkdr devportal-platform install`. The tool takes care of the entire installation in just a few commands.
 1. **[Access and Verification](access-and-testing.md):**
    Open DevPortal in your browser and confirm everything is running correctly. You’ll also learn how to verify the setup and troubleshoot common issues.

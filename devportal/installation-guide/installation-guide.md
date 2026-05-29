@@ -17,9 +17,9 @@ import DocCard from '@site/src/components/DocCard';
 
 <DocCard title="Docker Run (Quickstart)" link="/devportal/installation-guide/docker-local/intro" style={style}>Quickly run DevPortal locally using Docker. Ideal for testing and exploration without Kubernetes.</DocCard>
 
-<DocCard title="VKDR (Local Kubernetes)" link="/devportal/installation-guide/vkdr-local/vkdr-setup" style={style}>Install DevPortal locally on a lightweight Kubernetes cluster using VKDR. Best for reproducing production scenarios.</DocCard>
+<DocCard title="VKDR (Local Kubernetes)" link="/devportal/installation-guide/vkdr-local/vkdr-setup" style={style}>Install DevPortal V2 locally on a lightweight Kubernetes cluster using <code>vkdr devportal-platform install</code>. Best for reproducing production scenarios.</DocCard>
 
-<DocCard title="Production Setup (Kubernetes)" link="/devportal/installation-guide/production-setup" style={style}>Deploy DevPortal to a Kubernetes cluster using plain manifests — no Helm chart required.</DocCard>
+<DocCard title="Kubernetes (Helm chart)" link="/devportal/installation-guide/production-setup" style={style}>Deploy DevPortal V2 to a Kubernetes cluster using the <code>veecode-devportal-platform</code> Helm chart from the <code>next-charts</code> repo.</DocCard>
 
 <DocCard title="Customization" link="/devportal/customization" style={style}>Learn how to customize your Developer Portal.</DocCard>
 

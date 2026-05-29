@@ -4,110 +4,128 @@ sidebar_label: DevPortal Deployment
 title: DevPortal Deployment
 ---
 
-:::note
-`vkdr devportal install` deploys a **VKDR-managed** DevPortal instance (installed via Helm, version pinned by the VKDR release cycle). This is **not** the DevPortal V2 install path. To install DevPortal V2 (`veecode/devportal:2.0.0`), use the [Docker local](../docker-local/intro.md) or [Kubernetes](../production-setup/setup.md) setup instead.
-:::
+In this step, you will deploy **DevPortal V2** (`docker.io/veecode/devportal:2.0.0`) into your local cluster using `vkdr devportal-platform install`.
 
-In this step, you will deploy and access **VeeCode DevPortal** in your local environment.
+VKDR installs the published `veecode-devportal-platform` Helm chart (version 0.1.0, appVersion 2.0.0) into the `platform` namespace and automatically wires up Kong as the ingress controller.
 
 ## Steps Overview
 
 In this section, you will:
 
-1. **Check Requirements**: Ensure Docker, Kubernetes, DNS, and GitHub token are ready.
-2. **Install Kong Gateway** as the ingress controller.
-3. **Deploy DevPortal** into your local cluster.
+1. **Check Requirements**: ensure Docker, Kubernetes, DNS, and GitHub credentials are ready.
+2. **Deploy DevPortal V2** using `vkdr devportal-platform install`.
 
-By the end, you will have a fully functional DevPortal instance running locally for testing, learning, and development.
+By the end, you will have a fully functional DevPortal V2 instance running locally.
 
 ## Step 1: Requirements Check
 
-Before deploying DevPortal, ensure the following prerequisites are ready:
+Before deploying, confirm the following are in place:
 
-- **Docker Engine** — Installed and running (completed in [Step 2: Docker Engine](requirements.md#step-2-docker-engine)).
-- **Kubernetes cluster** — Created with `vkdr infra up` (completed in [Step 3: Infrastructure Setup](infra.md#step-1-start-a-local-cluster)).
-- **DNS name** — Configured for accessing DevPortal (this guide uses `devportal.localhost`, configured in [Step 3: Infrastructure Setup](infra.md#step-2-create-host-entries)).
-- **GitHub personal access token** — Stored in the `$GITHUB_TOKEN` environment variable (set up in [Step 4: GitHub Access Configuration](github.md)).
+- **Docker Engine** — installed and running (completed in [Step 2: Docker Engine](requirements.md#step-2-docker-engine)).
+- **Kubernetes cluster** — created with `vkdr infra up` (completed in [Infrastructure Setup](infra.md#step-1-start-a-local-cluster)).
+- **DNS name** — `devportal.localhost` resolves to `127.0.0.1` (configured in [Infrastructure Setup](infra.md#step-2-create-host-entries)).
+- **GitHub credentials** — PAT and org set in your shell environment (configured in [GitHub Configuration](github.md)).
 
-Once these requirements are in place, you’re ready to deploy DevPortal.
+## Step 2: Deploy DevPortal V2
 
-## Step 2: Install Kong Gateway
+### Minimal install (core only)
 
-DevPortal requires Kong Gateway as its ingress controller. Install it first:
+No GitHub integration — useful for a quick smoke test:
 
 ```sh
-vkdr kong install --default-ic
+vkdr devportal-platform install
 ```
 
-This installs Kong Gateway and sets it as the default ingress controller for the cluster.
+### With GitHub integration and sign-in
 
-## Step 3: Deploy DevPortal
-
-The command `vkdr devportal install` installs DevPortal and **deploys all required services and sample applications** inside the Kubernetes cluster.
-
-Run:
+Adds the `github` and `github-auth` presets. This is the recommended starting point for real use:
 
 ```sh
-vkdr devportal install \
-  --github-token=$GITHUB_TOKEN \
-  --samples
+vkdr devportal-platform install \
+  --github-pat "$GITHUB_TOKEN" \
+  --github-org "$GITHUB_ORG" \
+  --github-auth-client-id "$GITHUB_AUTH_CLIENT_ID" \
+  --github-auth-client-secret "$GITHUB_AUTH_CLIENT_SECRET"
+```
+
+### With the Kubernetes workloads tab
+
+Enables the `kubernetes` preset. VKDR creates a read-only service account and token automatically:
+
+```sh
+vkdr devportal-platform install --with-kubernetes
 ```
 
 Expected output (example):
 
 ```sh
-DevPortal Install
+DevPortal Platform Install
 ==============================
 Domain: localhost
 Secure: false
-Github Token: *****sE9
-Install Sample apps: true
-Cluster LB HTTP port: 8000
-Cluster LB HTTPS port: 8001
+Presets: recommended,github,github-auth
+Install Sample apps: false
 ==============================
 
 Kong Install
-==============================
-Domain: localhost
-Mode: standard
-Image tag: 3.9.1
-Default Ingress Controller: true
-Log level: notice
-Cluster LB HTTP port: 8000
-Cluster LB HTTPS port: 8001
-==============================
-
-NAME: kong
-NAMESPACE: vkdr
-STATUS: deployed
-
-NAME: veecode-devportal
+...
+NAME: devportal
 NAMESPACE: platform
 STATUS: deployed
-
-service/petclinic created
-ingress/petclinic created
-service/cep created
-ingress/cep-ingress created
 
 Script executed successfully.
 ```
 
-This command performs a full deployment, which includes:
+:::note
+VKDR creates a `devportal-platform-secrets` Kubernetes Secret and passes it to the chart via `existingSecret`, so your credentials are never stored in the Helm release history.
+:::
 
-- **VeeCode DevPortal** — The main DevPortal application, available at [http://devportal.localhost:8000](http://devportal.localhost:8000).
-- **Kong Gateway** — The API gateway that routes and manages requests within the cluster.
-- **PetClinic (sample app)** — A demo web application for exploration, available at [http://petclinic.localhost:8000](http://petclinic.localhost:8000).
-- **ViaCEP (sample API)** — A demo API that retrieves address data based on a given Brazilian postal code (CEP), available at `http://localhost:8000/cep/<cep-code>/json`. For example: [http://localhost:8000/cep/01001000/json](http://localhost:8000/cep/01001000/json).
+### Remove DevPortal V2
 
-### Check Deployment
+```sh
+vkdr devportal-platform remove
+```
 
-Open the following URL in your browser:
+:::caution
+`remove` uninstalls the Helm release and **deletes the data PVC**. All catalog data and plugin cache stored on the PVC will be lost.
+:::
+
+## Available flags
+
+| Flag | Purpose |
+|---|---|
+| `-d, --domain` | Ingress host base (DevPortal is served at `devportal.<domain>`); add `-s/--secure` for HTTPS |
+| `--presets` | Base preset list (default: `recommended`) |
+| `--github-pat` | GitHub PAT — enables the `github` preset |
+| `--github-org` | GitHub organization — required with `--github-pat` |
+| `--github-auth-client-id` | OAuth App client ID — enables the `github-auth` sign-in preset |
+| `--github-auth-client-secret` | OAuth App client secret — required with `--github-auth-client-id` |
+| `--with-kubernetes` | Enables the `kubernetes` preset; VKDR creates a read-only SA + token in-cluster |
+| `--plugin-registry` | OCI mirror URL (`PLUGIN_REGISTRY`) — for air-gapped environments |
+| `--samples` | Install sample catalog applications |
+| `--location` | Extra catalog location URL to register |
+| `--merge <file>` | Merge a values file over the chart defaults (full V2 chart surface available) |
+| `--load-env` | Read GitHub credentials from environment variables instead of flags |
+
+:::info Presets and required credentials
+Each preset requires specific credentials in the Secret. A missing required variable causes the DevPortal pod to exit with code 78 at boot — check pod logs if it does not become Ready. See the [Helm install guide](/devportal/installation-guide/production-setup/setup) for the full per-preset variable matrix.
+:::
+
+## Check Deployment
+
+Wait for the pod to become Ready:
+
+```sh
+kubectl rollout status deploy/devportal-veecode-devportal-platform \
+  -n platform --timeout=5m
+```
+
+Then open DevPortal in your browser:
 
 > http://devportal.localhost:8000
 
-The DevPortal interface should load, confirming that the deployment was successful and the applications are running. The PetClinic sample app is available at [http://petclinic.localhost:8000](http://petclinic.localhost:8000).
+The DevPortal interface should load, confirming the deployment was successful.
 
 ---
 
-In the next section, we will guide you through the DevPortal web interface, where the deployed sample applications and APIs are fully catalogued and ready for you to explore and interact with.
+In the next section, you will verify the running instance and explore its features.
