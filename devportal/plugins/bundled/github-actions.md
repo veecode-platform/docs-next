@@ -10,7 +10,7 @@ Without this plugin, CI history lives only in GitHub — the developer has to le
 
 The GitHub Actions plugin displays GitHub Actions workflow run history in the CI tab of catalog entities. It is the standard Backstage community plugin for GitHub Actions integration.
 
-**Status:** Preloaded in the DevPortal image, **disabled by default**. Enable via `dynamic-plugins.yaml` or Marketplace.
+**Status:** Ships in the bundled catalog (`dynamic-plugins.default.yaml`) with `disabled: true`. Fetched from the OCI registry at boot when enabled — no image rebuild needed. Activated automatically by the `github` preset.
 
 ---
 
@@ -31,9 +31,13 @@ The GitHub Actions plugin displays GitHub Actions workflow run history in the CI
 
 ## Enabling the plugin
 
+The simplest path is to add the `github` preset to `VEECODE_PRESETS` — it enables the GitHub Actions plugin along with the rest of the GitHub integration. See [Presets](/devportal/concepts/presets) for details.
+
+To enable manually, add the following to your `dynamic-plugins.yaml`:
+
 ```yaml
 plugins:
-  - package: ./dynamic-plugins/dist/backstage-community-plugin-github-actions-dynamic
+  - package: oci://${PLUGIN_REGISTRY}/backstage:bs_${BACKSTAGE_VERSION}!backstage-community-plugin-github-actions-dynamic
     disabled: false
     pluginConfig:
       dynamicPlugins:

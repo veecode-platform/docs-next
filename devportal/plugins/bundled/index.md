@@ -16,16 +16,27 @@ Think of this catalog in terms of capability layers, not a flat install list. Th
 
 ## Always-on plugins (preInstalled, no YAML entry needed)
 
+These plugins are extracted into the image at build time with `preInstalled: true` and are active on every boot regardless of preset selection.
+
+| Plugin | Package | What it does |
+|---|---|---|
+| [Homepage](./homepage.md) | `veecode-platform-plugin-veecode-homepage-dynamic` | Customizable landing page at `/` |
+| [Global Header](./global-header.md) | `veecode-platform-plugin-veecode-global-header-dynamic` | Unified top navigation bar (search, notifications, profile) |
+| [About](./about.md) | `veecode-platform-backstage-plugin-about-dynamic` + `veecode-platform-backstage-plugin-about-backend-dynamic` | DevPortal version and instance info at `/about` |
+| Catalog Extensions Module | `red-hat-developer-hub-backstage-plugin-catalog-backend-module-extensions` | Registers Extension/Package/Collection entity kinds; reads `extensions-install.yaml` |
+
+---
+
+## Enabled by the `recommended` preset
+
+These plugins are in the bundled catalog with `disabled: true` and are activated when the `recommended` preset is included in `VEECODE_PRESETS`. They are not unconditionally on.
+
 | Plugin | Package | What it does |
 |---|---|---|
 | [RBAC](./rbac.md) | `backstage-community-plugin-rbac` | Role-based access control UI at `/rbac` |
-| [Homepage](./homepage.md) | `veecode-platform-plugin-veecode-homepage-dynamic` | Customizable landing page at `/` |
-| [Global Header](./global-header.md) | `veecode-platform-plugin-veecode-global-header-dynamic` | Unified top navigation bar (search, notifications, profile) |
 | [Tech Radar](./tech-radar.md) | `backstage-community-plugin-tech-radar-dynamic` + `backstage-community-plugin-tech-radar-backend-dynamic` | Technology adoption radar at `/tech-radar` |
-| [About](./about.md) | `veecode-platform-backstage-plugin-about-dynamic` + `veecode-platform-backstage-plugin-about-backend-dynamic` | DevPortal version and instance info at `/about` |
 | [Marketplace](./marketplace.md) | `devportal-marketplace-frontend-dynamic` + `devportal-marketplace-backend-dynamic-dynamic` | In-portal plugin discovery and enable/disable UI at `/marketplace` |
 | [Pending Changes](./pending-changes.md) | `devportal-pending-changes-dynamic` | Header badge indicating pending restart when plugins are enabled/disabled via Marketplace |
-| Catalog Extensions Module | `red-hat-developer-hub-backstage-plugin-catalog-backend-module-extensions` | Registers Extension/Package/Collection entity kinds; reads `extensions-install.yaml` |
 
 ---
 

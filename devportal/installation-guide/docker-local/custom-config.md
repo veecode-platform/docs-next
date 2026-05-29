@@ -6,7 +6,7 @@ title: Custom App Configuration
 
 ## Custom App Configuration
 
-You can use a combination of `docker compose`, profiles, configuration files, and environment variables to customize the behavior of the DevPortal instance.
+You can use a combination of `docker compose`, presets, configuration files, and environment variables to customize the behavior of the DevPortal instance.
 
 The recommended approach is to mount a custom `app-config.local.yaml` file. This lets you override default settings without modifying the container image.
 
@@ -23,6 +23,10 @@ All configuration files are loaded and merged in this order (later entries overr
 7. `app-config.saas.yaml` — SaaS mode only; decoded from `VEECODE_APP_CONFIG`
 
 Your `app-config.local.yaml` (layer 5) wins over the base and preset defaults, but plugin-injected config (layer 6) is loaded after it. If a setting in `local.yaml` seems to be ignored, check whether an enabled plugin's `pluginConfig` block is overriding it.
+
+:::note Layer 7 and `VEECODE_APP_CONFIG`
+`app-config.saas.yaml` (layer 7), decoded from `VEECODE_APP_CONFIG`, loads last and wins over all layers including layer 6. Use it for deployment-specific values (database URLs, ingress hosts) that must not be hardcoded in a mounted file. See [Configuration Hierarchy](/devportal/concepts/configuration-hierarchy).
+:::
 
 ## Creating a Custom Config File
 

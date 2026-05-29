@@ -129,7 +129,8 @@ The four parts:
 
 - **`${PLUGIN_REGISTRY}`** — defaults to `quay.io/veecode`; substituted by
   `entrypoint.sh`. Override it (e.g. `PLUGIN_REGISTRY=registry.internal/veecode`)
-  to redirect all OCI pulls to an internal mirror without editing any YAML.
+  to redirect all OCI pulls that use the `${PLUGIN_REGISTRY}` variable form (the
+  large majority of bundled plugins) to an internal mirror without editing any YAML.
 - **`<workspace>`** — the export-overlays workspace that produced the bundle
   (e.g. `marketplace`, `rbac`, `tech-radar`, `sonarqube`, `backstage`). One
   workspace can bundle several packages.
@@ -143,6 +144,16 @@ The four parts:
 Pre-installed chrome plugins use a bare npm package name (no `oci://` prefix)
 with `preInstalled: true`; the install script skips the pull and only merges
 their `pluginConfig:`.
+
+:::caution MCP plugin refs are hardcoded and not redirected by `PLUGIN_REGISTRY`
+The MCP plugin refs (`mcp-actions-backend`, `mcp-integrations`, `mcp-chat`) are
+hardcoded to `quay.io/veecode` and do **not** use the `${PLUGIN_REGISTRY}`
+variable form. Setting `PLUGIN_REGISTRY` does not redirect them. Air-gapped or
+mirror deployments using the `mcp` or `mcp-chat` presets must mirror those
+workspaces (`quay.io/veecode/backstage`, `quay.io/veecode/mcp-integrations`,
+`quay.io/veecode/mcp-chat`) explicitly, or override the refs in a
+`dynamic-plugins.yaml`.
+:::
 
 ---
 
@@ -191,7 +202,11 @@ Three modes are supported by design:
 - **Mirror — internal registry.** Set `PLUGIN_REGISTRY=registry.internal/veecode`
   (or any prefix mirroring `quay.io/veecode`). The entrypoint substitutes it
   into every `oci://${PLUGIN_REGISTRY}/...` reference before the install runs —
-  no YAML edits needed. The mirror must host the same workspace/tag paths.
+  no YAML edits needed for the plugins that use the variable form. The mirror must
+  host the same workspace/tag paths. Note that the MCP plugin refs
+  (`mcp-actions-backend`, `mcp-integrations`, `mcp-chat`) are hardcoded to
+  `quay.io/veecode` and are not redirected; see the caution in the
+  [OCI reference shape](#oci-reference-shape) section above.
 - **Loaded variant — air-gapped image.** Build a derived image that extracts the
   selected plugin bundles at build time and copies them into
   `/app/dynamic-plugins-root/`. Mark those entries `preInstalled: true` so the

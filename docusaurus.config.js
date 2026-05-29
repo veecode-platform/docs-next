@@ -201,6 +201,7 @@ const config = {
           // },
           {
             type: "docsVersionDropdown",
+            docsPluginId: "default",
             position: "right",
           },
           {

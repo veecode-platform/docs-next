@@ -32,9 +32,9 @@ overlapping key.
 | 2 | `app-config.production.yaml` | Container / production overrides (shipped in the image) |
 | 3 | `app-config.distro.yaml` | VeeCode distro defaults (~10 lines, escape hatch; shipped in the image) |
 | 4 | `app-config.preset-<name>.yaml` | One per selected preset, in `VEECODE_PRESETS` order |
-| 5 | `app-config.local.yaml` | **Your** operator overrides (volume mount or `VEECODE_APP_CONFIG` base64) |
+| 5 | `app-config.local.yaml` | **Your** operator overrides (volume-mounted `app-config.local.yaml` only) |
 | 6 | `dynamic-plugins-root/app-config.dynamic-plugins.yaml` | Generated at boot from each enabled plugin's `pluginConfig:` |
-| 7 | `app-config.saas.yaml` | SaaS-time overrides (database URL, etc.) |
+| 7 | `app-config.saas.yaml` | Decoded from `VEECODE_APP_CONFIG` (base64); wins over all earlier layers |
 
 Files 1–3 are always present inside the image. File 4 is emitted once per
 preset that declares an `appConfig:` block, in `VEECODE_PRESETS` order. Files

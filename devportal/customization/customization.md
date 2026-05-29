@@ -14,4 +14,8 @@ VeeCode DevPortal follows Backstage's standards for customizing the UI and adds 
 
 - **Custom header plugin:** the header shared by all pages can also be customized as a dynamic plugin. See [Custom header plugin](./custom-header.md).
 
+:::note
+The custom home and custom header techniques described in those pages apply equally in V2. Any V2-specific differences (preset wiring, OCI references) are noted inline on each page.
+:::
+
 Usually the branding option is all you need to customize the look and feel of your DevPortal. If you need to go beyond that, you can use the custom theme hacking option or even create a custom plugin if you are feeling brave.

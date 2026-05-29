@@ -60,7 +60,7 @@ Also include the `github` preset (which provides SCM catalog access via `GITHUB_
 
 ### Keycloak authentication fails at sign-in
 
-Confirm `KEYCLOAK_BASE_URL` and `KEYCLOAK_REALM` are correct — the discovery URL is built from them (`$KEYCLOAK_BASE_URL/realms/$KEYCLOAK_REALM`). The entrypoint logs the resolved value: check the container log line `VEECODE: Keycloak metadata URL: ...`.
+Confirm `KEYCLOAK_BASE_URL` and `KEYCLOAK_REALM` are correct — the discovery URL is built from them (`$KEYCLOAK_BASE_URL/realms/$KEYCLOAK_REALM`). To verify the resolved value, read the preset config directly: `docker exec devportal cat /app/app-config.preset-keycloak.yaml`.
 
 Also confirm the redirect URI in your Keycloak client:
 ```
@@ -81,7 +81,9 @@ http://localhost:7007/api/auth/oidc/handler/frame
 | Azure DevOps repos + sign-in | `recommended,veecode-theme,azure,azure-auth` |
 | Keycloak SSO | `recommended,veecode-theme,keycloak` |
 | OpenLDAP / FreeIPA | `recommended,veecode-theme,ldap` |
-| Microsoft Active Directory | `recommended,veecode-theme,ldap-ad` |
+| Microsoft Active Directory | `recommended,veecode-theme,ldap,ldap-ad` |
+
+> **Note:** `ldap-ad` is not an identity preset — it's a composition layer that overrides `ldap` defaults for Active Directory.
 
 ### I set `VEECODE_PRESETS` but nothing changed
 
@@ -100,11 +102,8 @@ If you migrated from V1 and still have `VEECODE_PROFILE` in your environment, th
 The easiest path is the in-portal Marketplace — search for the plugin and click **Enable**. Alternatively, add an entry to your operator `dynamic-plugins.yaml`:
 
 ```yaml
-includes:
-  - dynamic-plugins.default.resolved.yaml
-
 plugins:
-  - package: './dynamic-plugins/dist/backstage-plugin-kubernetes-dynamic'
+  - package: 'oci://${PLUGIN_REGISTRY}/backstage:bs_${BACKSTAGE_VERSION}!backstage-plugin-kubernetes'
     disabled: false
 ```
 
@@ -138,7 +137,7 @@ helm repo update next-charts
 helm search repo veecode-devportal-platform   # → chart 0.1.0, app 2.0.0
 ```
 
-Create a Secret with the variables required by your chosen presets (see the [per-preset matrix](/devportal/installation-guide/production-setup)), then install:
+Create a Secret with the variables required by your chosen presets (see the [per-preset matrix](/devportal/installation-guide/production-setup/plan)), then install:
 
 ```sh
 helm install devportal next-charts/veecode-devportal-platform \
@@ -148,7 +147,7 @@ helm install devportal next-charts/veecode-devportal-platform \
 
 Use `existingSecret` (a Secret you manage) for production. The `credentials: { KEY: value }` values shortcut is available for development but stores credentials in the Helm release in plaintext.
 
-If you prefer not to use Helm, the raw `examples/deploy/k8s.yaml` in the `devportal-platform` repo is the no-Helm fallback, but the Helm chart is the recommended path for any ongoing deployment. See [Kubernetes (Helm chart)](/devportal/installation-guide/production-setup) for the full install guide.
+If you prefer not to use Helm, the raw `examples/deploy/k8s.yaml` in the `devportal-platform` repo is the no-Helm fallback, but the Helm chart is the recommended path for any ongoing deployment. See [Kubernetes (Helm chart)](/devportal/installation-guide/production-setup/plan) for the full install guide.
 
 ---
 

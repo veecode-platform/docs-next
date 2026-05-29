@@ -22,7 +22,7 @@ This guide explains how to run the VeeCode DevPortal using standard Docker comma
 You can simply run the following command to start a DevPortal instance locally:
 
 ```bash
-# check for latest release
+# pinned to 2.0.0 — replace with the current release tag
 docker run --rm --name devportal -d -p 7007:7007 veecode/devportal:2.0.0
 ```
 

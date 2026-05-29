@@ -10,7 +10,7 @@ Without this plugin, build status lives in Jenkins — developers context-switch
 
 The Jenkins plugin displays Jenkins build status in catalog entity pages.
 
-**Status:** Preloaded in the DevPortal image, **disabled by default**. Enable via `dynamic-plugins.yaml` or Marketplace.
+**Status:** Ships in the bundled catalog (`dynamic-plugins.default.yaml`) with `disabled: true`. Fetched from the OCI registry at boot when enabled — no image rebuild needed. Activated automatically by the `jenkins` preset.
 
 ---
 
@@ -35,9 +35,13 @@ Both must be enabled together.
 
 ## Enabling the plugin
 
+The simplest path is to add the `jenkins` preset to `VEECODE_PRESETS` — it enables both the frontend and backend plugins together. See [Presets](/devportal/concepts/presets) for details.
+
+To enable manually, add the following to your `dynamic-plugins.yaml`:
+
 ```yaml
 plugins:
-  - package: ./dynamic-plugins/dist/backstage-community-plugin-jenkins-backend-dynamic
+  - package: oci://${PLUGIN_REGISTRY}/backstage:bs_${BACKSTAGE_VERSION}!backstage-community-plugin-jenkins-backend-dynamic
     disabled: false
     pluginConfig:
       jenkins:
@@ -47,7 +51,7 @@ plugins:
             username: ${JENKINS_USERNAME}
             apiKey: ${JENKINS_TOKEN}
 
-  - package: ./dynamic-plugins/dist/backstage-community-plugin-jenkins
+  - package: oci://${PLUGIN_REGISTRY}/backstage:bs_${BACKSTAGE_VERSION}!backstage-community-plugin-jenkins
     disabled: false
     pluginConfig:
       dynamicPlugins:

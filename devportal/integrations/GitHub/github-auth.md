@@ -3,18 +3,6 @@ sidebar_position: 2
 sidebar_label: GitHub Auth
 title: GitHub Authentication
 ---
-<!-- LLM: DO NOT TOUCH ABOVE -->
-
-<!-- LLM: Explain in this page content how to configure the github auth provider in VeeCode DevPortal (VeeCode DevPortal is a Backstage distribution).
-
-Explain what that this provider does and how to configure it.
-
-Useful links to follow (you can include these links in the page):
-- GitHub Authentication Provider Docs: https://backstage.io/docs/auth/github/provider/
-- GitHub Authentication Provider README: https://github.com/backstage/backstage/blob/master/docs/auth/github/provider.md
-
-DO NOT ERASE THIS BLOCK COMMENT
--->
 
 ## GitHub Authentication Provider
 

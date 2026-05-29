@@ -14,7 +14,7 @@ Dynamic plugins are a deep subject on their own. Please refer to the [Plugins](/
 
 ## Understanding Dynamic Plugins
 
-The DevPortal image ships with pre-installed plugins, enabled by default. You add operator-level overrides by mounting a single file:
+The image includes a catalog of optional plugins, all disabled by default. Only the core chrome plugins (global header, homepage, About) are pre-installed and always on. You activate plugins via presets or a mounted `dynamic-plugins.yaml`. You add operator-level overrides by mounting a single file:
 
 - **`dynamic-plugins.yaml`** (mounted at runtime): a top-level `plugins:` list of your overrides. The entrypoint merges it on top of the image defaults automatically — you never reference the image's internal default file.
 

@@ -25,7 +25,7 @@ DevPortal splits **source-control** (SCM) capabilities from **identity** (who ca
 | Axis | Presets | What they configure |
 |---|---|---|
 | SCM / backend | `github`, `azure` | Catalog discovery, scaffolder, CI/CD UI tabs, integration token |
-| Identity | `github-auth`, `azure-auth`, `gitlab`, `keycloak`, `ldap`, `ldap-ad` | OAuth/OIDC/LDAP sign-in + org sync (Users + Groups in the catalog) |
+| Identity | `github-auth`, `azure-auth`, `gitlab`, `keycloak`, `ldap` | OAuth/OIDC/LDAP sign-in + org sync (Users + Groups in the catalog) |
 
 :::important
 **The `identity` group is exclusive**: you can only activate one identity preset per deployment. Selecting two (e.g., `github-auth,keycloak`) will fail at boot with an exclusive-group conflict error. The presets in the identity group are: `github-auth`, `gitlab`, `azure-auth`, `keycloak`, `ldap`. (`ldap-ad` is an override layer that composes with `ldap`, not a standalone identity choice.)

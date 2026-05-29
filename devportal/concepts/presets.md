@@ -175,7 +175,7 @@ supply.
 | `azure-auth` | Microsoft (Entra ID) OAuth sign-in + msgraphOrg user sync (identity group) | `AZURE_AUTH_TENANT_ID`, `AZURE_AUTH_CLIENT_ID`, `AZURE_AUTH_CLIENT_SECRET` |
 | `keycloak` | Keycloak / OIDC sign-in + keycloakOrg user/group sync (identity group) | `KEYCLOAK_BASE_URL`, `KEYCLOAK_REALM`, `KEYCLOAK_CLIENT_ID`, `KEYCLOAK_CLIENT_SECRET`, `AUTH_SESSION_SECRET` |
 | `ldap` | LDAP sign-in + ldapOrg user/group sync, OpenLDAP defaults (identity group) | `LDAP_URL`, `LDAP_DN`, `LDAP_SECRET`, `LDAP_USERS_BASE_DN`, `LDAP_GROUPS_BASE_DN` |
-| `ldap-ad` | Active Directory overrides for `ldap` (sAMAccountName, AD object classes). **Compose with `ldap`** | none (reuses `ldap` vars) |
+| `ldap-ad` | Active Directory overrides for `ldap` (sAMAccountName, AD object classes). **Compose with `ldap`** (compose with `ldap`; not a standalone identity preset) | none (reuses `ldap` vars) |
 | `jenkins` | Jenkins CI tab on entity pages | `JENKINS_URL`, `JENKINS_USERNAME`, `JENKINS_TOKEN` |
 | `kubernetes` | Kubernetes workloads tab on entity pages | `K8S_CLUSTER_NAME`, `K8S_CLUSTER_URL`, `K8S_CLUSTER_TOKEN` |
 | `sonarqube` | SonarQube code-quality tab + scaffolder action | `SONARQUBE_BASE_URL`, `SONARQUBE_API_KEY` |

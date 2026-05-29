@@ -26,7 +26,7 @@ This controls which plugins are present at all. In V2 there are two ways to load
 ```yaml
 # dynamic-plugins.yaml — enable a bundled plugin no preset covers
 plugins:
-  - package: oci://quay.io/veecode/grafana:bs_${BACKSTAGE_VERSION}!backstage-plugin-grafana
+  - package: oci://${PLUGIN_REGISTRY}/grafana:bs_${BACKSTAGE_VERSION}!backstage-plugin-grafana
     disabled: false
 ```
 

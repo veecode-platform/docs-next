@@ -46,7 +46,7 @@ Composition is a deliberate sequence, not a one-time setup:
 
 ## Where this is configured
 
-The three-layer model is the same across DevPortal versions; what differs is the configuration surface (V2 composes plugins with `VEECODE_PRESETS`; the legacy distro used a single `VEECODE_PROFILE`). For the concrete steps — enabling plugins, the annotation reference table, the fail-fast install diagnostics, and a full worked example — follow the version-specific guide:
+The three-layer model is the same across DevPortal versions; what differs is the configuration surface (V2 composes plugins with `VEECODE_PRESETS`; the V1 distro used a single `VEECODE_PROFILE`). For the concrete steps — enabling plugins, the annotation reference table, the fail-fast install diagnostics, and a full worked example — follow the version-specific guide:
 
 - **[Composing a Portal (DevPortal)](/devportal/concepts/portal-composition)** — the load/context/backend mechanics, plugin→annotation reference, and diagnostics for your DevPortal version.
 - **[Platform Capabilities](/platform/capabilities/platform-capabilities)** — the capability layers plugins realize.

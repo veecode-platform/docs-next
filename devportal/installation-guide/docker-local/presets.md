@@ -42,7 +42,7 @@ Selecting two of these together fails the boot immediately (exit 78).
 | `azure-auth` | Azure Entra ID (Microsoft) sign-in | Yes |
 | `keycloak` | Keycloak OIDC sign-in | Yes |
 | `ldap` | LDAP authentication + org sync | Yes |
-| `ldap-ad` | LDAP (Active Directory variant) + org sync | Yes |
+| `ldap-ad` | LDAP (Active Directory variant) + org sync — override layer, must be composed with `ldap` | No |
 | `mcp` | MCP actions server | No |
 | `mcp-chat` | MCP chat provider | No |
 | `sonarqube` | SonarQube code quality integration | No |
@@ -82,7 +82,7 @@ GitHub SCM integration: catalog autodiscovery and GitHub Actions/Issues/PRs.
 
 | Variable | Description |
 |----------|-------------|
-| `GITHUB_PAT` | Personal access token with `repo` (or `public_repo`) scope |
+| `GITHUB_PAT` | Personal access token with `repo` and `read:org` scope |
 | `GITHUB_ORG` | GitHub organization name for catalog discovery |
 
 **Docker Compose example:**
@@ -297,12 +297,7 @@ For setup instructions, see the [LDAP integration guide](/devportal/integrations
 
 LDAP authentication tuned for Microsoft Active Directory (and Samba AD). Uses `sAMAccountName` as the login attribute.
 
-**Required variables:** same as `ldap`, plus:
-
-| Variable | Description |
-|----------|-------------|
-| `LDAP_USERS_FILTER` | LDAP filter for users — e.g., `(&(objectClass=user)(objectCategory=person))` |
-| `LDAP_GROUPS_FILTER` | LDAP filter for groups — e.g., `(objectClass=group)` |
+`ldap-ad` adds no new required variables — it reuses all `ldap` vars. `LDAP_USERS_FILTER` and `LDAP_GROUPS_FILTER` are optional in both presets and default to AD-appropriate filters if unset.
 
 For setup instructions, see the [LDAP integration guide](/devportal/integrations/LDAP).
 
@@ -322,9 +317,9 @@ MCP chat provider integration.
 
 | Variable | Description |
 |----------|-------------|
-| `MCP_CHAT_PROVIDER` | Chat provider name — e.g., `anthropic`, `openai` |
+| `MCP_CHAT_PROVIDER` | Chat provider name — `claude` or `openai` |
 | `MCP_CHAT_API_KEY` | API key for the chat provider |
-| `MCP_CHAT_MODEL` | Model identifier — e.g., `claude-opus-4-7` |
+| `MCP_CHAT_MODEL` | Model identifier — e.g., `claude-sonnet-4-6-latest` (check your provider's current model catalogue) |
 
 ---
 

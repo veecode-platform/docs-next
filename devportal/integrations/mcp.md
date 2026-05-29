@@ -56,7 +56,7 @@ VEECODE_PRESETS=recommended,mcp
 VEECODE_PRESETS=recommended,mcp,mcp-chat
 MCP_CHAT_PROVIDER=openai
 MCP_CHAT_API_KEY=sk-xxxx
-MCP_CHAT_MODEL=gpt-5.4
+MCP_CHAT_MODEL=gpt-4o
 ```
 
 The `mcp` preset (`presets/mcp.yaml`) has no required variables — the OAuth/DCR configuration is already baked into the base image's `app-config.production.yaml`. It enables the following plugins at boot:
@@ -72,7 +72,11 @@ The `mcp-chat` preset (`presets/mcp-chat.yaml`) requires:
 |---|---|
 | `MCP_CHAT_PROVIDER` | LLM provider ID: `openai` or `claude` |
 | `MCP_CHAT_API_KEY` | API key for the selected provider |
-| `MCP_CHAT_MODEL` | Model name (e.g., `gpt-5.4` for openai, `claude-sonnet-4-6-latest` for claude) |
+| `MCP_CHAT_MODEL` | Model name (e.g., `gpt-4o` for openai, `claude-sonnet-4-6-latest` for claude — check the provider's current model catalogue) |
+
+:::note
+For self-hosted (preset) deployments, `MCP_CHAT_PROVIDER` accepts only `openai` or `claude`. Gemini and Ollama are SaaS-only.
+:::
 
 :::warning
 `mcp-chat` talks loopback to `mcp-actions-backend`. Without the `mcp` preset, the MCP backend does not mount and every tool invocation in chat will fail. Always compose as `mcp,mcp-chat`.
