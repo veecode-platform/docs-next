@@ -22,7 +22,7 @@ The image includes a catalog of optional plugins, all disabled by default. Only 
 
 Create a `dynamic-plugins.yaml` file in your project directory. In this file you can simply enable pre-installed plugins (and use them with their default settings), disable them, or download and configure plugins from NPM or OCI registries.
 
-All *pre-installed plugins* are available in the container image at `/app/dynamic-plugins/dist/` - you can use relative paths to them. Downloaded plugins will be referenced by their NPM or OCI registry URL and fetched at runtime.
+All *pre-installed plugins* are available in the container image at `/app/dynamic-plugins-root/` - you can use relative paths to them. Downloaded plugins will be referenced by their NPM or OCI registry URL and fetched at runtime.
 
 ```yaml
 plugins:
@@ -95,7 +95,7 @@ plugins:
 
 (The entrypoint-owned shadow it prepends is `dynamic-plugins.default.resolved.yaml`, the image defaults with `${BACKSTAGE_VERSION}` and `${PLUGIN_REGISTRY}` already substituted. It exists for the entrypoint's use — you don't reference it.)
 
-After the plugin install script runs, it generates `dynamic-plugins-root/app-config.dynamic-plugins.yaml` from the `pluginConfig` blocks of all enabled plugins. This generated file is loaded last in the config chain (after your `app-config.local.yaml`).
+After the plugin install script runs, it generates `dynamic-plugins-root/app-config.dynamic-plugins.yaml` from the `pluginConfig` blocks of all enabled plugins. This generated file loads after your `app-config.local.yaml` (and before `app-config.saas.yaml` in SaaS deployments).
 
 ### `extensions-install.yaml`
 

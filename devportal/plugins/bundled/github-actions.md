@@ -16,7 +16,7 @@ The GitHub Actions plugin displays GitHub Actions workflow run history in the CI
 
 ## Package
 
-`backstage-community-plugin-github-actions-dynamic`
+`backstage-community-plugin-github-actions`
 
 ---
 
@@ -37,7 +37,7 @@ To enable manually, add the following to your `dynamic-plugins.yaml`:
 
 ```yaml
 plugins:
-  - package: oci://${PLUGIN_REGISTRY}/backstage:bs_${BACKSTAGE_VERSION}!backstage-community-plugin-github-actions-dynamic
+  - package: oci://${PLUGIN_REGISTRY}/github-actions:bs_1.48.4!backstage-community-plugin-github-actions
     disabled: false
     pluginConfig:
       dynamicPlugins:
@@ -74,5 +74,5 @@ The plugin uses `integrations.github` in `app-config.yaml`. Ensure a GitHub toke
 integrations:
   github:
     - host: github.com
-      token: ${GITHUB_TOKEN}
+      token: ${GITHUB_PAT}
 ```

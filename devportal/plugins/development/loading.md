@@ -99,7 +99,7 @@ There is no `dynamicPlugins.backend.*` key. Backend plugins never wire themselve
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/sonarqube:bs_1.49.4!backstage-community-plugin-sonarqube-backend
+  - package: oci://quay.io/veecode/sonarqube:bs_1.48.4!backstage-community-plugin-sonarqube-backend
     disabled: false
     # No pluginConfig — backend role is auto-discovered
 ```
@@ -116,7 +116,7 @@ Same pattern for `backend-plugin-module` (e.g., a scaffolder action module attac
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/roadie-backstage-plugins:bs_1.49.4!roadiehq-scaffolder-backend-argocd
+  - package: oci://quay.io/veecode/sonarqube:bs_1.48.4!backstage-community-plugin-sonarqube
     disabled: false
     # No pluginConfig — module auto-attaches to the scaffolder backend
 ```
@@ -127,7 +127,7 @@ Frontend plugins must declare where their UI components mount, because Backstage
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/sonarqube:bs_1.49.4!backstage-community-plugin-sonarqube
+  - package: oci://quay.io/veecode/sonarqube:bs_1.48.4!backstage-community-plugin-sonarqube
     disabled: false
     pluginConfig:
       dynamicPlugins:

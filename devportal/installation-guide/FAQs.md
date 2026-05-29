@@ -103,7 +103,7 @@ The easiest path is the in-portal Marketplace — search for the plugin and clic
 
 ```yaml
 plugins:
-  - package: 'oci://${PLUGIN_REGISTRY}/backstage:bs_${BACKSTAGE_VERSION}!backstage-plugin-kubernetes'
+  - package: 'oci://${PLUGIN_REGISTRY}/backstage:bs_1.49.4!backstage-plugin-kubernetes'
     disabled: false
 ```
 

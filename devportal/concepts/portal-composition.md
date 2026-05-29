@@ -86,17 +86,17 @@ docker logs devportal 2>&1 | grep -E "======= (Installing|Skipping|Using pre-ins
 A healthy load:
 
 ```
-======= Installing dynamic plugin oci://quay.io/veecode/kubernetes:bs_1.49.4!...
-	==> Successfully installed dynamic plugin oci://quay.io/veecode/kubernetes:bs_1.49.4!...
+======= Installing dynamic plugin oci://quay.io/veecode/backstage:bs_1.49.4!...
+	==> Successfully installed dynamic plugin oci://quay.io/veecode/backstage:bs_1.49.4!...
 ```
 
 A failed load ends with the summary that triggers exit 78:
 
 ```
-======= ERROR: Failed to install plugin oci://quay.io/veecode/kubernetes:...: <error>
+======= ERROR: Failed to install plugin oci://quay.io/veecode/backstage:...: <error>
 	==> Skipping this plugin and continuing with the rest...
 ======= INSTALL SUMMARY: 1 of 12 plugins failed:
-	- oci://quay.io/veecode/kubernetes:...: <error>
+	- oci://quay.io/veecode/backstage:...: <error>
 ```
 
 Common failure signatures and what they mean:
@@ -210,7 +210,7 @@ kubernetes:
 Result: each service entity has a Kubernetes tab, a GitLab CI tab, and a Code Quality tab — each scoped to that service by its annotations. Developers see the operational state of their service in one place.
 
 :::note Plugins without a preset
-Not every plugin has a dedicated preset (Grafana, Vault, GitHub Workflows, and others ship in the catalog but are enabled via `dynamic-plugins.yaml` or the marketplace UI). The composition model is identical regardless of how a plugin is loaded — once loaded, it still follows the Context (annotation) and Backend (`app-config`) rules above. See [Adding Plugins](/devportal/plugins/adding) and the [Bundled Plugin Catalog](/devportal/plugins/bundled).
+Not every plugin has a dedicated preset (Kubernetes, GitHub Actions, Jenkins, and others ship in the catalog disabled and are enabled via `dynamic-plugins.yaml` or the marketplace UI). The composition model is identical regardless of how a plugin is loaded — once loaded, it still follows the Context (annotation) and Backend (`app-config`) rules above. See [Adding Plugins](/devportal/plugins/adding) and the [Bundled Plugin Catalog](/devportal/plugins/bundled).
 :::
 
 ---
@@ -222,8 +222,7 @@ The question isn't "which plugins are available" — it's "what does my team nee
 | If your team uses... | Enable... | Required annotation |
 |---|---|---|
 | GitHub CI | GitHub Actions | `github.com/project-slug: org/repo` |
-| GitHub workflow triggers | GitHub Workflows | `github.com/project-slug` + `github.com/workflows` |
-| GitLab CI | GitLab Pipelines (`gitlab` preset) | `gitlab.com/project-slug: group/project` |
+| GitLab CI | GitLab Pipelines (OCI-only — add via `dynamic-plugins.yaml`; the `gitlab` preset covers auth + catalog only) | `gitlab.com/project-slug: group/project` |
 | Jenkins | Jenkins (`jenkins` preset) | `jenkins.io/job-full-name: folder/job` |
 | Azure Pipelines | Azure DevOps (`azure` preset) | `dev.azure.com/project-repo: project/repo` |
 | Kubernetes | Kubernetes (`kubernetes` preset) | `backstage.io/kubernetes-label-selector: app=name` |

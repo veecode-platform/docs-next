@@ -34,8 +34,8 @@ These plugins are in the bundled catalog with `disabled: true` and are activated
 | Plugin | Package | What it does |
 |---|---|---|
 | [RBAC](./rbac.md) | `backstage-community-plugin-rbac` | Role-based access control UI at `/rbac` |
-| [Tech Radar](./tech-radar.md) | `backstage-community-plugin-tech-radar-dynamic` + `backstage-community-plugin-tech-radar-backend-dynamic` | Technology adoption radar at `/tech-radar` |
-| [Marketplace](./marketplace.md) | `devportal-marketplace-frontend-dynamic` + `devportal-marketplace-backend-dynamic-dynamic` | In-portal plugin discovery and enable/disable UI at `/marketplace` |
+| [Tech Radar](./tech-radar.md) | `backstage-community-plugin-tech-radar` + `backstage-community-plugin-tech-radar-backend` | Technology adoption radar at `/tech-radar` |
+| [Marketplace](./marketplace.md) | `devportal-marketplace-frontend-dynamic` + `devportal-marketplace-backend` | In-portal plugin discovery and enable/disable UI at `/marketplace` |
 | [Pending Changes](./pending-changes.md) | `devportal-pending-changes-dynamic` | Header badge indicating pending restart when plugins are enabled/disabled via Marketplace |
 
 ---
@@ -44,15 +44,14 @@ These plugins are in the bundled catalog with `disabled: true` and are activated
 
 | Plugin | Package | What it does |
 |---|---|---|
-| [Kubernetes](../kubernetes.md) | `backstage-plugin-kubernetes-dynamic` | Kubernetes workload viewer on entity pages |
-| [GitHub Actions](./github-actions.md) | `backstage-community-plugin-github-actions-dynamic` | GitHub Actions run history on entity CI tab |
-| [GitHub Workflows](../GitHubWorkflows.md) | `veecode-platform-backstage-plugin-github-workflows-dynamic` + backend | Manual workflow trigger cards on entity overview |
-| [Azure DevOps](./azure-devops.md) | `backstage-community-plugin-azure-devops-dynamic` | Azure Pipelines and Pull Requests on entity pages |
-| [Jenkins](./jenkins.md) | `backstage-community-plugin-jenkins` + `backstage-community-plugin-jenkins-backend-dynamic` | Jenkins build status on entity CI tab |
-| [SonarQube](../Sonar.md) | `backstage-community-plugin-sonarqube` + `backstage-community-plugin-sonarqube-backend-dynamic` | Code quality metrics on entity overview and Code Quality tab |
-| Security Insights | `roadiehq-backstage-plugin-security-insights-dynamic` | GitHub Dependabot alerts and security advisories |
-| GitHub Insights | `roadiehq-backstage-plugin-github-insights-dynamic` | GitHub code insights on entity pages |
-| Global FAB | `red-hat-developer-hub-backstage-plugin-global-floating-action-button-dynamic` | Configurable floating action button |
+| [Kubernetes](../kubernetes.md) | `backstage-plugin-kubernetes` | Kubernetes workload viewer on entity pages |
+| [GitHub Actions](./github-actions.md) | `backstage-community-plugin-github-actions` | GitHub Actions run history on entity CI tab |
+| [Azure DevOps](./azure-devops.md) | `backstage-community-plugin-azure-devops` | Azure Pipelines and Pull Requests on entity pages |
+| [Jenkins](./jenkins.md) | `backstage-community-plugin-jenkins` + `backstage-community-plugin-jenkins-backend` | Jenkins build status on entity CI tab |
+| [SonarQube](../Sonar.md) | `backstage-community-plugin-sonarqube` + `backstage-community-plugin-sonarqube-backend` | Code quality metrics on entity overview and Code Quality tab |
+| Security Insights | `roadiehq-backstage-plugin-security-insights` | GitHub Dependabot alerts and security advisories |
+| GitHub Insights | `roadiehq-backstage-plugin-github-insights` | GitHub code insights on entity pages |
+| Global FAB | `red-hat-developer-hub-backstage-plugin-global-floating-action-button` | Configurable floating action button |
 
 ---
 

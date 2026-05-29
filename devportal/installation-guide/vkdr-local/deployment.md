@@ -42,7 +42,7 @@ Adds the `github` and `github-auth` presets. This is the recommended starting po
 
 ```sh
 vkdr devportal-platform install \
-  --github-pat "$GITHUB_TOKEN" \
+  --github-pat "$GITHUB_PAT" \
   --github-org "$GITHUB_ORG" \
   --github-auth-client-id "$GITHUB_AUTH_CLIENT_ID" \
   --github-auth-client-secret "$GITHUB_AUTH_CLIENT_SECRET"
@@ -116,7 +116,7 @@ Each preset requires specific credentials in the Secret. A missing required vari
 Wait for the pod to become Ready:
 
 ```sh
-kubectl rollout status deploy/devportal-veecode-devportal-platform \
+kubectl rollout status deploy/veecode-devportal-platform \
   -n platform --timeout=5m
 ```
 

@@ -20,7 +20,7 @@ The plugin ships in the **bundled catalog** (`dynamic-plugins.default.yaml`) wit
 
 | Package | Role |
 |---|---|
-| `backstage-plugin-kubernetes-dynamic` | Frontend — entity Kubernetes tab |
+| `backstage-plugin-kubernetes` | Frontend — entity Kubernetes tab |
 
 The backend for Kubernetes is a **static plugin** compiled into the DevPortal base image. The frontend is a dynamic plugin that must be enabled in `dynamic-plugins.yaml`.
 
@@ -34,7 +34,7 @@ To enable manually, add the following to your `dynamic-plugins.yaml`:
 
 ```yaml
 plugins:
-  - package: oci://${PLUGIN_REGISTRY}/backstage:bs_${BACKSTAGE_VERSION}!backstage-plugin-kubernetes
+  - package: oci://${PLUGIN_REGISTRY}/backstage:bs_1.49.4!backstage-plugin-kubernetes
     disabled: false
     pluginConfig:
       dynamicPlugins:

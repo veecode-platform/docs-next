@@ -19,7 +19,7 @@ The Jenkins plugin displays Jenkins build status in catalog entity pages.
 | Package | Role |
 |---|---|
 | `backstage-community-plugin-jenkins` | Frontend — entity CI tab card |
-| `backstage-community-plugin-jenkins-backend-dynamic` | Backend — Jenkins API proxy |
+| `backstage-community-plugin-jenkins-backend` | Backend — Jenkins API proxy |
 
 Both must be enabled together.
 
@@ -41,7 +41,7 @@ To enable manually, add the following to your `dynamic-plugins.yaml`:
 
 ```yaml
 plugins:
-  - package: oci://${PLUGIN_REGISTRY}/backstage:bs_${BACKSTAGE_VERSION}!backstage-community-plugin-jenkins-backend-dynamic
+  - package: oci://${PLUGIN_REGISTRY}/jenkins:bs_1.48.4!backstage-community-plugin-jenkins-backend
     disabled: false
     pluginConfig:
       jenkins:
@@ -51,7 +51,7 @@ plugins:
             username: ${JENKINS_USERNAME}
             apiKey: ${JENKINS_TOKEN}
 
-  - package: oci://${PLUGIN_REGISTRY}/backstage:bs_${BACKSTAGE_VERSION}!backstage-community-plugin-jenkins
+  - package: oci://${PLUGIN_REGISTRY}/jenkins:bs_1.48.4!backstage-community-plugin-jenkins
     disabled: false
     pluginConfig:
       dynamicPlugins:

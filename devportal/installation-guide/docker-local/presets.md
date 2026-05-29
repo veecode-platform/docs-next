@@ -168,7 +168,7 @@ GitLab SCM integration + GitLab OAuth sign-in. This single preset covers both ca
 
 | Variable | Description |
 |----------|-------------|
-| `GITLAB_GROUP_PATTERN` | Pattern to filter groups during sync (default: `[\s\S]*` — all groups) |
+| `GITLAB_GROUP_PATTERN` | Optional regex to filter groups during sync. No default — if unset, no group filter is applied. |
 
 **Docker Compose example:**
 

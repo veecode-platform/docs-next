@@ -23,7 +23,7 @@ In this section, you will:
 Wait for the pod to become Ready:
 
 ```sh
-kubectl rollout status deploy/devportal-veecode-devportal-platform \
+kubectl rollout status deploy/veecode-devportal-platform \
   -n platform --timeout=5m
 ```
 

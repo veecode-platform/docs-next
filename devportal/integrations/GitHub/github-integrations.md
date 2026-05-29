@@ -91,6 +91,8 @@ integrations:
       token: ${GITHUB_PAT}  # PAT as fallback for repos the App isn't installed on
 ```
 
+> No V2 preset defines `GITHUB_APP_ID`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, or `GITHUB_PRIVATE_KEY` — these are placeholder names you choose and inject yourself. Only `GITHUB_PAT` and the OAuth pair (`GITHUB_AUTH_CLIENT_ID` / `GITHUB_AUTH_CLIENT_SECRET`) come from the `github` / `github-auth` presets.
+
 ### Create a GitHub App for Integrations
 
 To create a GitHub App for backend integrations:
@@ -122,7 +124,7 @@ To create a GitHub App for backend integrations:
 
 A common source of confusion is that authentication (user login) and integrations (backend operations) are configured by separate presets:
 
-- Activating `github-auth` for sign-in does not automatically configure the backend integration token.
+- Activating `github-auth` configures both sign-in and the backend integration token (it sets integrations.github token from GITHUB_PAT). Add the `github` preset as well for catalog discovery and the GitHub Actions UI.
 - Backend plugins still need `GITHUB_PAT` (from the `github` preset) for catalog discovery, scaffolder, and plugin API calls.
 - Some API calls use GitHub App credentials while others fall back to PAT.
 

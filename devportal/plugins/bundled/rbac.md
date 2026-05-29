@@ -8,7 +8,7 @@ title: RBAC Plugin
 
 The RBAC plugin provides a UI for managing role-based access control policies in DevPortal. It adds a `/rbac` route under the **Admin** menu section.
 
-**Status:** Always loaded (preInstalled). No `dynamic-plugins.yaml` entry required.
+**Status:** Disabled by default. Enabled via `VEECODE_PRESETS=recommended` (or by an explicit `dynamic-plugins.yaml` entry).
 
 ---
 

@@ -53,7 +53,7 @@ backend:
 integrations:
   github:
     - host: github.com
-      token: ${GITHUB_TOKEN}
+      token: ${GITHUB_PAT}
 
 # Example: Add a catalog location
 catalog:
@@ -84,7 +84,7 @@ services:
     ports:
       - "7007:7007"
     environment:
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_PAT=${GITHUB_PAT}
     volumes:
       - ./app-config.local.yaml:/app/app-config.local.yaml:ro
 ```
@@ -156,7 +156,7 @@ You can reference environment variables in your config file using the `${VAR_NAM
 ```bash
 docker run --rm --name devportal -d \
   -p 7007:7007 \
-  -e GITHUB_TOKEN=your_token_here \
+  -e GITHUB_PAT=your_token_here \
   -v $(pwd)/app-config.local.yaml:/app/app-config.local.yaml:ro \
   veecode/devportal:2.0.0
 ```

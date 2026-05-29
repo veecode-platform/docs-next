@@ -45,7 +45,7 @@ If you want users to sign in with GitHub, you also need a **GitHub OAuth App**. 
 Once you have your PAT (and optionally OAuth credentials), export them as environment variables in your shell session. The deployment command in the next step reads them from these variables, or you can pass them as flags.
 
 ```bash
-export GITHUB_TOKEN=<your-pat>
+export GITHUB_PAT=<your-pat>
 export GITHUB_ORG=<your-org>
 
 # optional — only needed for sign-in via github-auth preset

@@ -86,7 +86,7 @@ with `docker compose restart` (the entrypoint re-runs at boot).
 
 ### 3. Marketplace UI
 
-The in-portal marketplace (`/extensions/marketplace`, enabled by the
+The in-portal marketplace (`/marketplace`, enabled by the
 `recommended` preset) lets end users install and uninstall plugins. The
 marketplace backend writes selections to `/app/data/extensions-install.yaml`,
 which is included in the plugin chain on the next restart and **survives
