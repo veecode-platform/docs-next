@@ -1,0 +1,30 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.Basic Commands": {
+    "message": "Basic Commands",
+    "description": "The label for category 'Basic Commands' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Database Commands": {
+    "message": "Database Commands",
+    "description": "The label for category 'Database Commands' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Ingress Commands": {
+    "message": "Ingress Commands",
+    "description": "The label for category 'Ingress Commands' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Tools Commands": {
+    "message": "Tools Commands",
+    "description": "The label for category 'Tools Commands' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.DevPortal Commands": {
+    "message": "DevPortal Commands",
+    "description": "The label for category 'DevPortal Commands' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Monitoring Commands": {
+    "message": "Monitoring Commands",
+    "description": "The label for category 'Monitoring Commands' in sidebar 'tutorialSidebar'"
+  }
+}

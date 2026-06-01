@@ -1,0 +1,22 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.Concepts": {
+    "message": "Concepts",
+    "description": "The label for category 'Concepts' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Capabilities": {
+    "message": "Capabilities",
+    "description": "The label for category 'Capabilities' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.How-to": {
+    "message": "How-to",
+    "description": "The label for category 'How-to' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.References": {
+    "message": "References",
+    "description": "The label for category 'References' in sidebar 'tutorialSidebar'"
+  }
+}
