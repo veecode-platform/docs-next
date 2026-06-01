@@ -11,14 +11,16 @@ const snapshot: Snapshot = JSON.parse(
 );
 
 describe("get_snapshot_info", () => {
-  it("returns version, source, bundled_version, counts, refresh_status", () => {
+  it("returns docs_version, version, source, bundled_version, counts, refresh_status", () => {
     const result = getSnapshotInfo({
       snapshot,
       source: "bundled",
       bundledVersion: snapshot.version,
       refreshStatus: "up-to-date",
+      docsVersion: "v2",
     });
     expect(result).toEqual({
+      docs_version: "v2",
       version: snapshot.version,
       generated_at: snapshot.generatedAt,
       source: "bundled",
@@ -27,5 +29,15 @@ describe("get_snapshot_info", () => {
       section_count: 3,
       refresh_status: "up-to-date",
     });
+  });
+
+  it("defaults docs_version to v1 when not provided", () => {
+    const result = getSnapshotInfo({
+      snapshot,
+      source: "bundled",
+      bundledVersion: snapshot.version,
+      refreshStatus: "up-to-date",
+    });
+    expect(result.docs_version).toBe("v1");
   });
 });

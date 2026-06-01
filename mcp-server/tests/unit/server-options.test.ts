@@ -27,4 +27,23 @@ describe("createServer bundledPath resolution", () => {
     expect(server).toBeTruthy();
     await dispose();
   });
+
+  it("accepts an explicit version with an explicit bundledPath", async () => {
+    for (const version of ["v1", "v2"] as const) {
+      const { server, dispose } = await createServer({
+        version,
+        bundledPath: fixturePath,
+        offline: true,
+      });
+      expect(server).toBeTruthy();
+      await dispose();
+    }
+  });
+
+  it("honors VEECODE_DOCS_MCP_VERSION env var (unknown value falls back, no throw)", async () => {
+    process.env.VEECODE_DOCS_MCP_VERSION = "bogus";
+    const { server, dispose } = await createServer({ bundledPath: fixturePath, offline: true });
+    expect(server).toBeTruthy();
+    await dispose();
+  });
 });
