@@ -14,7 +14,7 @@ Within just a few minutes, you will have your own DevPortal V2 instance up and r
 The local setup is ideal for safe experimentation, feature evaluation, and prototyping, while requiring minimal setup and **no prior experience with Kubernetes or Helm**.
 
 :::note
-This guide covers **DevPortal V2**, which uses the presets model (`VEECODE_PRESETS`). V2 is configured through presets — not profiles. If you are looking for the V1 local setup, see [V1 local setup](/devportal/v1/installation-guide/vkdr-local/vkdr-setup).
+This guide covers **DevPortal V2**, which uses the presets model (`VEECODE_PRESETS`). V2 is configured through presets — not profiles. If you are looking for the V1 local setup, see [V1 local setup](/devportal/installation-guide/vkdr-local/vkdr-setup).
 :::
 
 ## Purpose of the Local Setup
