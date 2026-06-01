@@ -81,13 +81,38 @@ const TOOLS = [
   },
 ] as const;
 
-function defaultBundledPath(): string {
-  const here = dirname(fileURLToPath(import.meta.url));
-  return join(here, "..", "bundled", "snapshot.json");
+export type DocsVersion = "v1" | "v2";
+
+// Each docs version maps to its own bundled snapshot file and refresh URL. The
+// snapshots are built separately (see plugins/mcp-snapshot): mcp-snapshot.json is
+// the current/V2 tree, mcp-snapshot-v1.json is the frozen V1 tree. Binding the
+// refresh URL per-version means the auto-refresh can never pull the other
+// version's content — no cross-version drift.
+const SNAPSHOT_SOURCES: Record<DocsVersion, { bundledFile: string; remoteUrl: string }> = {
+  v1: {
+    bundledFile: "snapshot-v1.json",
+    remoteUrl: "https://docs.platform.vee.codes/mcp-snapshot-v1.json",
+  },
+  v2: {
+    bundledFile: "snapshot.json",
+    remoteUrl: "https://docs.platform.vee.codes/mcp-snapshot.json",
+  },
+};
+
+// Default is v1: it is the production-default docs version and what most installs
+// run today. Pass --version v2 (or VEECODE_DOCS_MCP_VERSION=v2) for the preview.
+function resolveVersion(opt?: string): DocsVersion {
+  const raw = (opt ?? process.env.VEECODE_DOCS_MCP_VERSION ?? "v1").toLowerCase();
+  return raw === "v2" ? "v2" : "v1";
 }
 
-function resolveBundledPath(opt?: string): string {
-  return opt ?? process.env.VEECODE_DOCS_MCP_BUNDLED_PATH ?? defaultBundledPath();
+function defaultBundledPath(version: DocsVersion): string {
+  const here = dirname(fileURLToPath(import.meta.url));
+  return join(here, "..", "bundled", SNAPSHOT_SOURCES[version].bundledFile);
+}
+
+function resolveBundledPath(version: DocsVersion, opt?: string): string {
+  return opt ?? process.env.VEECODE_DOCS_MCP_BUNDLED_PATH ?? defaultBundledPath(version);
 }
 
 function defaultCacheDir(): string {
@@ -98,6 +123,8 @@ function defaultCacheDir(): string {
 }
 
 export interface CreateServerOptions {
+  /** Docs version to serve: "v1" (default) or "v2" (preview). */
+  version?: DocsVersion | string;
   bundledPath?: string;
   cacheDir?: string | null;
   remoteUrl?: string | null;
@@ -108,7 +135,8 @@ export async function createServer(opts: CreateServerOptions = {}): Promise<{
   server: Server;
   dispose: () => Promise<void>;
 }> {
-  const bundledPath = resolveBundledPath(opts.bundledPath);
+  const version = resolveVersion(opts.version);
+  const bundledPath = resolveBundledPath(version, opts.bundledPath);
   const cacheDir =
     opts.cacheDir === null
       ? null
@@ -116,7 +144,7 @@ export async function createServer(opts: CreateServerOptions = {}): Promise<{
   const remoteUrl =
     opts.remoteUrl ??
     process.env.VEECODE_DOCS_MCP_SNAPSHOT_URL ??
-    "https://docs.platform.vee.codes/mcp-snapshot.json";
+    SNAPSHOT_SOURCES[version].remoteUrl;
   const offline =
     opts.offline ?? process.env.VEECODE_DOCS_MCP_OFFLINE === "1";
 
@@ -160,6 +188,7 @@ export async function createServer(opts: CreateServerOptions = {}): Promise<{
           source: loaded.source,
           bundledVersion: loaded.bundledVersion,
           refreshStatus,
+          docsVersion: version,
         });
         break;
       default:
@@ -174,8 +203,18 @@ export async function createServer(opts: CreateServerOptions = {}): Promise<{
   };
 }
 
+/** Parse `--version <v1|v2>` / `--version=<v1|v2>` from argv (CLI flag wins over env). */
+function parseVersionArg(argv: string[]): string | undefined {
+  const eq = argv.find((a) => a.startsWith("--version="));
+  if (eq) return eq.slice("--version=".length);
+  const i = argv.indexOf("--version");
+  if (i !== -1 && argv[i + 1]) return argv[i + 1];
+  return undefined;
+}
+
 export async function startServer(): Promise<void> {
-  const { server } = await createServer();
+  const version = parseVersionArg(process.argv.slice(2));
+  const { server } = await createServer(version ? { version } : {});
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
