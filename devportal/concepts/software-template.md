@@ -100,7 +100,7 @@ Templates are the primary mechanism through which [Golden Paths](/platform/conce
 
 Running a template creates more than a project skeleton. The scaffolder executes a sequence of steps that leaves a durable trail in the catalog:
 
-1. **A new repository in the configured SCM** — the target provider (GitHub, GitLab, etc.) and organization are set by the configuration profile loaded at startup. The scaffolder uses those credentials; the developer doesn't configure SCM access per template.
+1. **A new repository in the configured SCM** — the target provider (GitHub, GitLab, etc.) and organization are set by the SCM preset (`github`, `gitlab`, `azure`) selected via `VEECODE_PRESETS`. The scaffolder uses those credentials; the developer doesn't configure SCM access per template.
 
 2. **A `catalog-info.yaml` committed to that repository** — this is the entity descriptor. It declares the component kind, owner, system, and — critically — the annotations that bind the entity to plugins.
 
@@ -108,7 +108,7 @@ Running a template creates more than a project skeleton. The scaffolder executes
 
 4. **An entity wired for plugins, RBAC, and TechDocs** — the component is visible immediately, and the tabs and cards that appear on it are determined by what annotations the template wrote into `catalog-info.yaml`.
 
-The last point is the key design decision for template authors. A template that emits no annotations produces a catalog entry with no plugin tabs. A template that emits the right annotations produces a component that already has its CI tab, Kubernetes tab, and Grafana cards populated — before the developer pushes a single commit.
+The last point is the key design decision for template authors. A template that emits no annotations produces a catalog entry with no plugin tabs. A template that emits the right annotations produces a component that already has its CI tab, Kubernetes tab, and code-quality cards populated — before the developer pushes a single commit.
 
 ### The annotation decision happens at template authoring time
 
@@ -126,14 +126,14 @@ metadata:
 
 Every component created from that template will have a Kubernetes tab, a GitLab CI tab, and TechDocs — provided those plugins are loaded and the backends are configured. The developer gets those surfaces automatically; the platform team controls what "automatically" means.
 
-For the full picture of how load, context, and backend interact, see [Composing a Portal](/platform/concepts/portal-composition).
+For the full picture of how load, context, and backend interact, see [Composing a Portal](./portal-composition.md).
 
 ---
 
 ## References
 
-- [Composing a Portal](/platform/concepts/portal-composition) — how plugins attach to entities via the three-layer model
-- [The Catalog](/devportal/concepts/catalog) — entity kinds, ownership, and how `catalog-info.yaml` is processed
+- [Composing a Portal](./portal-composition.md) — how plugins attach to entities via the three-layer model
+- [The Catalog](./catalog.md) — entity kinds, ownership, and how `catalog-info.yaml` is processed
 - [Golden Paths](/platform/concepts/golden-paths) — the platform strategy that templates implement
 
 ---

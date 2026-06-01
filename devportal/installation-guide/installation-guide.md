@@ -15,16 +15,14 @@ import DocCard from '@site/src/components/DocCard';
 
 <div className={style.wrapper}>
 
-<DocCard title="Docker Run (Quickstart)" link="./docker-local/intro" style={style}>Quickly run DevPortal locally using Docker. Ideal for testing and exploration without Kubernetes.</DocCard>
+<DocCard title="Docker Run (Quickstart)" link="/devportal/v2/installation-guide/docker-local/intro" style={style}>Quickly run DevPortal locally using Docker. Ideal for testing and exploration without Kubernetes.</DocCard>
 
-<DocCard title="VKDR (Local Kubernetes)" link="./vkdr-local/vkdr-setup" style={style}>Install DevPortal locally on a lightweight Kubernetes cluster using VKDR. Best for reproducing production scenarios.</DocCard>
+<DocCard title="VKDR (Local Kubernetes)" link="/devportal/v2/installation-guide/vkdr-local/vkdr-setup" style={style}>Install DevPortal V2 locally on a lightweight Kubernetes cluster using <code>vkdr devportal-platform install</code>. Best for reproducing production scenarios.</DocCard>
 
-<DocCard title="Simple Setup" link="./simple-setup" style={style}>Learn how to install a self-hosted Developer Portal with a simple setup (trial, demo or small production environment).</DocCard>
+<DocCard title="Kubernetes (Helm chart)" link="/devportal/v2/installation-guide/production-setup" style={style}>Deploy DevPortal V2 to a Kubernetes cluster using the <code>veecode-devportal-platform</code> Helm chart from the <code>next-charts</code> repo.</DocCard>
 
-<DocCard title="Production Setup" link="./production-setup" style={style}>Learn how to install a self-hosted and production-ready Developer Portal on your own infrastructure.</DocCard>
+<DocCard title="Customization" link="/devportal/v2/customization" style={style}>Learn how to customize your Developer Portal.</DocCard>
 
-<DocCard title="Customization" link="/devportal/customization" style={style}>Learn how to customize your Developer Portal.</DocCard>
-
-<DocCard title="FAQs" link="./FAQs" style={style}>Frequently Asked Questions.</DocCard>
+<DocCard title="FAQs" link="/devportal/v2/installation-guide/FAQs" style={style}>Frequently Asked Questions.</DocCard>
 
 </div>

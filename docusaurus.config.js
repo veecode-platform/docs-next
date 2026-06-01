@@ -48,7 +48,15 @@ const config = {
           path: "devportal",
           routeBasePath: "devportal",
           sidebarPath: require.resolve("./sidebars.js"),
-          // ... other options
+          // V1 is the current stable in production → it stays at the root
+          // (/devportal/) as the default. V2 is shipped as an opt-in preview at
+          // /devportal/v2 until the devportal-platform rollout matures, at which
+          // point lastVersion flips to "current" and the paths swap back.
+          lastVersion: "v1",
+          versions: {
+            current: { label: "v2 (preview)", path: "v2", banner: "unreleased" },
+            "v1": { label: "v1", path: "", banner: "none" },
+          },
         },
         // docs: {
         //   sidebarPath: require.resolve('./sidebars.js'),
@@ -114,6 +122,12 @@ const config = {
             from: '/devportal/installation-guide/local-setup/docker-setup',
             to: '/devportal/installation-guide/docker-local/intro'
           },
+          // NOTE: the old V1-era → V2 redirects (configuration-profiles→presets,
+          // simple-setup/*→production-setup, understand-chart, docker-local/profiles)
+          // were removed: with V1 served at the root again, those `from` paths
+          // resolve to their real V1 pages, so a redirect would collide with an
+          // existing route (build error). Re-add them (pointing at /devportal/v2/…)
+          // when the default flips to V2.
         ],
       },
     ],
@@ -151,10 +165,11 @@ const config = {
           //   type: 'localeDropdown',
           //   position: 'right',
           // },
-          // {
-          //   type: 'docsVersionDropdown',
-          //   position: 'right',
-          // },
+          {
+            type: "docsVersionDropdown",
+            docsPluginId: "default",
+            position: "right",
+          },
           {
             href: "https://github.com/veecode-platform/support",
             label: "GitHub",

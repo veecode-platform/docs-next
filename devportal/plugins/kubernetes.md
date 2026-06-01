@@ -12,7 +12,7 @@ With the plugin enabled, the entity page becomes the operational view for the se
 
 The Kubernetes plugin displays the live state of Kubernetes resources — pods, deployments, services, and more — for a catalog entity. It appears as a **Kubernetes tab on the entity page** (not a sidebar item).
 
-The plugin is **preloaded in the DevPortal image** and disabled by default. No image rebuild or support contact is needed to enable it.
+The plugin ships in the **bundled catalog** (`dynamic-plugins.default.yaml`) with `disabled: true`. It is fetched from the OCI registry at boot when enabled — no image rebuild or support contact is needed. The recommended activation path is the `kubernetes` preset.
 
 ---
 
@@ -20,7 +20,7 @@ The plugin is **preloaded in the DevPortal image** and disabled by default. No i
 
 | Package | Role |
 |---|---|
-| `backstage-plugin-kubernetes-dynamic` | Frontend — entity Kubernetes tab |
+| `backstage-plugin-kubernetes` | Frontend — entity Kubernetes tab |
 
 The backend for Kubernetes is a **static plugin** compiled into the DevPortal base image. The frontend is a dynamic plugin that must be enabled in `dynamic-plugins.yaml`.
 
@@ -28,11 +28,13 @@ The backend for Kubernetes is a **static plugin** compiled into the DevPortal ba
 
 ## Enabling the plugin
 
-Add the following to your `dynamic-plugins.yaml`:
+The simplest path is to add the `kubernetes` preset to `VEECODE_PRESETS` — it enables both the frontend dynamic plugin and the backend configuration in one step. See [Presets](/devportal/v2/concepts/presets) for details.
+
+To enable manually, add the following to your `dynamic-plugins.yaml`:
 
 ```yaml
 plugins:
-  - package: ./dynamic-plugins/dist/backstage-plugin-kubernetes-dynamic
+  - package: oci://${PLUGIN_REGISTRY}/backstage:bs_1.49.4!backstage-plugin-kubernetes
     disabled: false
     pluginConfig:
       dynamicPlugins:

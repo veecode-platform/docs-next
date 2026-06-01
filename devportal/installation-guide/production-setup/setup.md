@@ -1,263 +1,170 @@
 ---
 sidebar_position: 4
-sidebar_label: Production Setup
-title: Production Setup
+sidebar_label: Deploy to Kubernetes
+title: Deploy DevPortal to Kubernetes
 ---
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-Welcome to the VeeCode Platform DevPortal production installation guide. This guide walks through installing DevPortal on a production-grade Kubernetes cluster using the official Helm chart.
+This guide walks through deploying DevPortal V2 to a Kubernetes cluster using the `veecode-devportal-platform` Helm chart. See [Plan your setup](plan.md) before proceeding.
 
-## Overview
-
-This guide covers:
-
-1. **Prerequisites** — cluster, database, DNS, and credentials
-2. **Creating a catalog repository** in your Git provider
-3. **Configuring and deploying** DevPortal via Helm
-4. **Accessing the portal**
-
-## Prerequisites
-
-- A Kubernetes cluster (cloud-managed or self-managed)
-- `kubectl` and `helm` (v3) installed and configured
-- A PostgreSQL database accessible from the cluster
-- A DNS hostname pointing to your cluster's ingress load balancer (e.g., `devportal.example.com`)
-- An ingress controller deployed in the cluster (nginx or Kong)
-- A Git provider account (GitHub or GitLab) with credentials
-
-<Tabs groupId="providers">
-<TabItem value="github" label="GitHub">
-
-**Required GitHub credentials:**
-
-- **GitHub OAuth App** — Client ID and Client Secret for user sign-in.
-  1. Go to [GitHub Developer Settings](https://github.com/settings/developers) → **New OAuth App**.
-  2. Set **Homepage URL** to `https://devportal.example.com`.
-  3. Set **Authorization callback URL** to `https://devportal.example.com/api/auth/github/handler/frame`.
-  4. Note the **Client ID** and generate a **Client Secret**.
-
-- **GitHub Personal Access Token (PAT)** — for backend catalog and API access.
-  1. Go to [GitHub Tokens](https://github.com/settings/tokens) → **Generate new token (classic)**.
-  2. Select scopes: `repo` (all), `workflow`.
-  3. Note the token; it will not be shown again.
-
-Store these as a Kubernetes Secret before deploying (see [Step 2](#step-2-create-a-kubernetes-secret-for-credentials)).
-
-</TabItem>
-<TabItem value="gitlab" label="GitLab">
-
-**Required GitLab credentials:**
-
-- **GitLab Personal Access Token** — for backend catalog and API access. Create one at **GitLab → User Settings → Access Tokens** with scopes `read_api`, `read_repository`.
-
-- **GitLab OAuth Application** (optional, for user sign-in):
-  1. Go to **GitLab → User Settings → Applications**.
-  2. Set **Redirect URI** to `https://devportal.example.com/api/auth/gitlab/handler/frame`.
-  3. Enable scopes: `read_user`, `openid`, `email`, `profile`.
-  4. Note the **Application ID** and **Secret**.
-
-Store these as a Kubernetes Secret before deploying (see [Step 2](#step-2-create-a-kubernetes-secret-for-credentials)).
-
-</TabItem>
-</Tabs>
+For environments where Helm is not available, a [no-Helm fallback](#no-helm-fallback) using raw manifests is documented at the end of this page.
 
 ---
 
-## Step 1: Fork the sample catalog
-
-Fork [veecode-platform/public-catalog](https://github.com/veecode-platform/public-catalog) into your Git account or organization. This gives you a starting catalog repository that DevPortal can index.
-
-Note the repository name — you'll reference it in your `values.yaml`.
-
----
-
-## Step 2: Create a Kubernetes Secret for credentials
-
-Never put secrets directly in `values.yaml`. Create a Kubernetes Secret in the namespace where DevPortal will run (typically `platform`):
+## Step 1: Add the Helm repository
 
 ```bash
-kubectl create namespace platform --dry-run=client -o yaml | kubectl apply -f -
+helm repo add next-charts https://veecode-platform.github.io/next-charts
+helm repo update next-charts
+helm search repo veecode-devportal-platform
+# should show: 0.1.0 / 2.0.0
 ```
 
+---
+
+## Step 2: Create the credentials Secret
+
+Credentials for the presets you select must be in a Kubernetes Secret **before** `helm install`. The chart references it via `existingSecret`.
+
+Never pass production credentials through `--set credentials.*` — that stores them in the Helm release manifest. Use `existingSecret` for production.
+
 <Tabs groupId="providers">
 <TabItem value="github" label="GitHub">
 
+For the `github` and `github-auth` presets:
+
 ```bash
-kubectl create secret generic devportal-secrets \
+kubectl create secret generic my-devportal-creds \
   --namespace platform \
+  --from-literal=GITHUB_PAT=<personal-access-token> \
+  --from-literal=GITHUB_ORG=<your-org> \
   --from-literal=GITHUB_AUTH_CLIENT_ID=<oauth-client-id> \
-  --from-literal=GITHUB_AUTH_CLIENT_SECRET=<oauth-client-secret> \
-  --from-literal=GITHUB_TOKEN=<personal-access-token>
+  --from-literal=GITHUB_AUTH_CLIENT_SECRET=<oauth-client-secret>
 ```
 
 </TabItem>
 <TabItem value="gitlab" label="GitLab">
 
+For the `gitlab` preset (identity + integration):
+
 ```bash
-kubectl create secret generic devportal-secrets \
+kubectl create secret generic my-devportal-creds \
   --namespace platform \
+  --from-literal=GITLAB_HOST=gitlab.com \
   --from-literal=GITLAB_TOKEN=<personal-access-token> \
   --from-literal=GITLAB_AUTH_CLIENT_ID=<oauth-app-id> \
-  --from-literal=GITLAB_AUTH_CLIENT_SECRET=<oauth-app-secret>
+  --from-literal=GITLAB_AUTH_CLIENT_SECRET=<oauth-app-secret> \
+  --from-literal=GITLAB_GROUP=<root-group>
 ```
 
 </TabItem>
-</Tabs>
+<TabItem value="azure" label="Azure">
 
----
-
-## Step 3: Create your `values.yaml`
-
-The chart name is `veecode-devportal` from the `veecode-devportal` Helm repository. See [Understand the Helm Chart](../understand-chart.md) for a full reference of available keys.
-
-<Tabs groupId="providers">
-<TabItem value="github" label="GitHub">
-
-```yaml
-global:
-  host: devportal.example.com   # your DNS hostname
-  protocol: https
-  port: ''
-
-upstream:
-  enabled: true
-  ingress:
-    enabled: true
-    className: nginx             # or 'kong'
-    tls:
-      - secretName: devportal-tls
-        hosts:
-          - devportal.example.com
-  backstage:
-    image:
-      repository: veecode/devportal
-      tag: "1.4.5"
-    extraEnvVarsSecret: devportal-secrets
-    appConfig:
-      app:
-        title: "VeeCode DevPortal"
-      backend:
-        database:
-          client: pg
-          connection:
-            host: <db-host>
-            port: 5432
-            database: platform_devportal
-            user: <db-user>
-            password: ${POSTGRES_PASSWORD} # injected from the devportal-secrets Secret — do not inline a real password in values.yaml
-      integrations:
-        github:
-          - host: github.com
-            token: ${GITHUB_TOKEN}
-      auth:
-        providers:
-          github:
-            development:
-              clientId: ${GITHUB_AUTH_CLIENT_ID}
-              clientSecret: ${GITHUB_AUTH_CLIENT_SECRET}
-      catalog:
-        providers:
-          github:
-            myOrg:
-              organization: <your-github-org>
-              catalogPath: /catalog-info.yaml
-              filters:
-                branch: main
-                repository: public-catalog
-```
-
-</TabItem>
-<TabItem value="gitlab" label="GitLab">
-
-```yaml
-global:
-  host: devportal.example.com   # your DNS hostname
-  protocol: https
-  port: ''
-
-upstream:
-  enabled: true
-  ingress:
-    enabled: true
-    className: nginx             # or 'kong'
-    tls:
-      - secretName: devportal-tls
-        hosts:
-          - devportal.example.com
-  backstage:
-    image:
-      repository: veecode/devportal
-      tag: "1.4.5"
-    extraEnvVarsSecret: devportal-secrets
-    appConfig:
-      app:
-        title: "VeeCode DevPortal"
-      backend:
-        database:
-          client: pg
-          connection:
-            host: <db-host>
-            port: 5432
-            database: platform_devportal
-            user: <db-user>
-            password: ${POSTGRES_PASSWORD} # injected from the devportal-secrets Secret — do not inline a real password in values.yaml
-      integrations:
-        gitlab:
-          - host: gitlab.com    # or your self-hosted hostname
-            token: ${GITLAB_TOKEN}
-      auth:
-        providers:
-          gitlab:
-            development:
-              clientId: ${GITLAB_AUTH_CLIENT_ID}
-              clientSecret: ${GITLAB_AUTH_CLIENT_SECRET}
-      catalog:
-        providers:
-          gitlab:
-            myGroup:
-              host: gitlab.com
-              group: <your-gitlab-group>
-              branch: main
-              entityFilename: catalog-info.yaml
-```
-
-</TabItem>
-</Tabs>
-
-Replace all `<placeholder>` values with your actual configuration. Database credentials can also be supplied via a Kubernetes Secret and `extraEnvVarsSecret` instead of inline values.
-
----
-
-## Step 4: Deploy with Helm
+For the `azure` (integration) and `azure-auth` (identity) presets:
 
 ```bash
-helm repo add veecode-devportal https://veecode-platform.github.io/next-charts
-helm repo update veecode-devportal
-helm upgrade --install veecode-devportal \
+kubectl create secret generic my-devportal-creds \
+  --namespace platform \
+  --from-literal=AZURE_DEVOPS_TOKEN=<pat> \
+  --from-literal=AZURE_DEVOPS_HOST=dev.azure.com \
+  --from-literal=AZURE_DEVOPS_ORG=<org> \
+  --from-literal=AZURE_DEVOPS_PROJECT=<project> \
+  --from-literal=AZURE_AUTH_TENANT_ID=<tenant-id> \
+  --from-literal=AZURE_AUTH_CLIENT_ID=<client-id> \
+  --from-literal=AZURE_AUTH_CLIENT_SECRET=<client-secret>
+```
+
+</TabItem>
+</Tabs>
+
+For GitOps workflows, use an external secrets operator (External Secrets Operator, Vault Agent, Sealed Secrets) to populate the Secret from your secrets store.
+
+---
+
+## Step 3: Install the chart
+
+```bash
+helm install devportal next-charts/veecode-devportal-platform \
   --namespace platform \
   --create-namespace \
-  --values values.yaml \
-  veecode-devportal/veecode-devportal
+  --set 'presets={recommended,github,github-auth}' \
+  --set existingSecret=my-devportal-creds
+```
+
+To enable ingress at install time:
+
+```bash
+helm install devportal next-charts/veecode-devportal-platform \
+  --namespace platform \
+  --create-namespace \
+  --set 'presets={recommended,github,github-auth}' \
+  --set existingSecret=my-devportal-creds \
+  --set ingress.enabled=true \
+  --set ingress.hostname=devportal.example.com \
+  --set ingress.ingressClassName=nginx
+```
+
+For the `kubernetes` preset, also pass `--set rbac.clusterRoles.create=true` so the chart creates the necessary `ClusterRole` and `ClusterRoleBinding`.
+
+---
+
+## Step 4: Verify the deployment
+
+```bash
+kubectl rollout status deploy/devportal-veecode-devportal-platform \
+  --namespace platform --timeout=10m
+
+# quick smoke-test without ingress
+kubectl port-forward svc/devportal-veecode-devportal-platform \
+  --namespace platform 7007:7007
+curl -sf localhost:7007/healthcheck && echo OK
+```
+
+A successful boot logs lines like:
+
+```
+VEECODE: preset resolver — VEECODE_PRESETS=recommended,github,github-auth
+VEECODE: applying preset "recommended"
+...
+Running in PRODUCTION mode
+```
+
+If a required variable is missing, the container exits with **code 78** and logs exactly which variable to set — the pod will not enter a crash loop silently.
+
+---
+
+## Upgrading
+
+```bash
+helm upgrade devportal next-charts/veecode-devportal-platform \
+  --namespace platform \
+  --reuse-values \
+  --set existingSecret=my-devportal-creds
 ```
 
 ---
 
-## Step 5: Access the portal
+## No-Helm fallback
 
-Once the rollout completes, open `https://devportal.example.com` in your browser. You should reach the DevPortal login screen.
+If Helm is not available, use the reference manifest from the [devportal-platform repository](https://github.com/veecode-platform/devportal-platform/blob/main/examples/deploy/k8s.yaml). This manifest applies the same two PVCs, a `Deployment`, and a `Service` using plain `kubectl`:
 
 ```bash
-kubectl rollout status deployment/veecode-devportal-backstage -n platform
+kubectl apply -f https://raw.githubusercontent.com/veecode-platform/devportal-platform/main/examples/deploy/k8s.yaml
 ```
+
+You will need to edit the manifest to:
+- Set `VEECODE_PRESETS` in the `Deployment` env block.
+- Add an `envFrom` referencing a Secret with the required variables for your preset combination.
+- Add an `Ingress` resource (see [Plan your setup](plan.md)).
+
+The Helm chart is the recommended path for production because it handles PVC provisioning, RBAC, ingress, and upgrades consistently. The raw manifest is suitable for minimal or air-gapped environments.
 
 ---
 
 ## Next steps
 
-- Configure additional integrations and plugins — see the [Auth & Integrations](/devportal/integrations) section.
-- Review RBAC roles (`role:default/admin`, `role:default/developer`, `role:default/viewer`) and assign them to users.
-- For a deeper explanation of chart keys, see [Understand the Helm Chart](../understand-chart.md) or the [chart page on ArtifactHub](https://artifacthub.io/packages/helm/veecode-platform-next/veecode-devportal).
-
-If you encounter issues, reach out via [support](https://platform.vee.codes/contact-us/) or join the [community](https://github.com/orgs/veecode-platform/discussions).
+- Configure additional integrations — see [Auth & Integrations](/devportal/v2/integrations)
+- Review RBAC roles and assign them to users — see [RBAC](/devportal/v2/rbac/permissions)
+- Enable additional plugins via the marketplace in the DevPortal UI

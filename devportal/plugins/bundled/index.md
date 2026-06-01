@@ -10,22 +10,33 @@ DevPortal ships with a set of **preinstalled dynamic plugins** baked into the di
 
 A few core plugins (`preInstalled: true` in `dynamic-plugins.default.yaml`) are always loaded — they power the UI shell, navigation, and marketplace itself.
 
-Think of this catalog in terms of capability layers, not a flat install list. The always-on plugins establish the shell. The disabled-by-default plugins represent operational capabilities — CI/CD visibility, infrastructure observability, code quality — that your team activates based on what context-switches it wants to eliminate. Each plugin connects to a service entity via an annotation; the right question before enabling any plugin is "which entities will carry this annotation, and what does it replace for their developers?" See [Composing a Portal](/platform/concepts/portal-composition) for the full three-layer model.
+Think of this catalog in terms of capability layers, not a flat install list. The always-on plugins establish the shell. The disabled-by-default plugins represent operational capabilities — CI/CD visibility, infrastructure observability, code quality — that your team activates based on what context-switches it wants to eliminate. Each plugin connects to a service entity via an annotation; the right question before enabling any plugin is "which entities will carry this annotation, and what does it replace for their developers?" See [Composing a Portal](/devportal/v2/concepts/portal-composition) for the full three-layer model.
 
 ---
 
 ## Always-on plugins (preInstalled, no YAML entry needed)
 
+These plugins are extracted into the image at build time with `preInstalled: true` and are active on every boot regardless of preset selection.
+
+| Plugin | Package | What it does |
+|---|---|---|
+| [Homepage](./homepage.md) | `veecode-platform-plugin-veecode-homepage-dynamic` | Customizable landing page at `/` |
+| [Global Header](./global-header.md) | `veecode-platform-plugin-veecode-global-header-dynamic` | Unified top navigation bar (search, notifications, profile) |
+| [About](./about.md) | `veecode-platform-backstage-plugin-about-dynamic` + `veecode-platform-backstage-plugin-about-backend-dynamic` | DevPortal version and instance info at `/about` |
+| Catalog Extensions Module | `red-hat-developer-hub-backstage-plugin-catalog-backend-module-extensions` | Registers Extension/Package/Collection entity kinds; reads `extensions-install.yaml` |
+
+---
+
+## Enabled by the `recommended` preset
+
+These plugins are in the bundled catalog with `disabled: true` and are activated when the `recommended` preset is included in `VEECODE_PRESETS`. They are not unconditionally on.
+
 | Plugin | Package | What it does |
 |---|---|---|
 | [RBAC](./rbac.md) | `backstage-community-plugin-rbac` | Role-based access control UI at `/rbac` |
-| [Homepage](./homepage.md) | `veecode-platform-plugin-veecode-homepage-dynamic` | Customizable landing page at `/` |
-| [Global Header](./global-header.md) | `veecode-platform-plugin-veecode-global-header-dynamic` | Unified top navigation bar (search, notifications, profile) |
-| [Tech Radar](./tech-radar.md) | `backstage-community-plugin-tech-radar-dynamic` + `backstage-community-plugin-tech-radar-backend-dynamic` | Technology adoption radar at `/tech-radar` |
-| [About](./about.md) | `veecode-platform-backstage-plugin-about-dynamic` + `veecode-platform-backstage-plugin-about-backend-dynamic` | DevPortal version and instance info at `/about` |
-| [Marketplace](./marketplace.md) | `devportal-marketplace-frontend-dynamic` + `devportal-marketplace-backend-dynamic-dynamic` | In-portal plugin discovery and enable/disable UI at `/marketplace` |
+| [Tech Radar](./tech-radar.md) | `backstage-community-plugin-tech-radar` + `backstage-community-plugin-tech-radar-backend` | Technology adoption radar at `/tech-radar` |
+| [Marketplace](./marketplace.md) | `devportal-marketplace-frontend-dynamic` + `devportal-marketplace-backend` | In-portal plugin discovery and enable/disable UI at `/marketplace` |
 | [Pending Changes](./pending-changes.md) | `devportal-pending-changes-dynamic` | Header badge indicating pending restart when plugins are enabled/disabled via Marketplace |
-| Catalog Extensions Module | `red-hat-developer-hub-backstage-plugin-catalog-backend-module-extensions` | Registers Extension/Package/Collection entity kinds; reads `extensions-install.yaml` |
 
 ---
 
@@ -33,15 +44,14 @@ Think of this catalog in terms of capability layers, not a flat install list. Th
 
 | Plugin | Package | What it does |
 |---|---|---|
-| [Kubernetes](../kubernetes.md) | `backstage-plugin-kubernetes-dynamic` | Kubernetes workload viewer on entity pages |
-| [GitHub Actions](./github-actions.md) | `backstage-community-plugin-github-actions-dynamic` | GitHub Actions run history on entity CI tab |
-| [GitHub Workflows](../GitHubWorkflows.md) | `veecode-platform-backstage-plugin-github-workflows-dynamic` + backend | Manual workflow trigger cards on entity overview |
-| [Azure DevOps](./azure-devops.md) | `backstage-community-plugin-azure-devops-dynamic` | Azure Pipelines and Pull Requests on entity pages |
-| [Jenkins](./jenkins.md) | `backstage-community-plugin-jenkins` + `backstage-community-plugin-jenkins-backend-dynamic` | Jenkins build status on entity CI tab |
-| [SonarQube](../Sonar.md) | `backstage-community-plugin-sonarqube` + `backstage-community-plugin-sonarqube-backend-dynamic` | Code quality metrics on entity overview and Code Quality tab |
-| Security Insights | `roadiehq-backstage-plugin-security-insights-dynamic` | GitHub Dependabot alerts and security advisories |
-| GitHub Insights | `roadiehq-backstage-plugin-github-insights-dynamic` | GitHub code insights on entity pages |
-| Global FAB | `red-hat-developer-hub-backstage-plugin-global-floating-action-button-dynamic` | Configurable floating action button |
+| [Kubernetes](../kubernetes.md) | `backstage-plugin-kubernetes` | Kubernetes workload viewer on entity pages |
+| [GitHub Actions](./github-actions.md) | `backstage-community-plugin-github-actions` | GitHub Actions run history on entity CI tab |
+| [Azure DevOps](./azure-devops.md) | `backstage-community-plugin-azure-devops` | Azure Pipelines and Pull Requests on entity pages |
+| [Jenkins](./jenkins.md) | `backstage-community-plugin-jenkins` + `backstage-community-plugin-jenkins-backend` | Jenkins build status on entity CI tab |
+| [SonarQube](../Sonar.md) | `backstage-community-plugin-sonarqube` + `backstage-community-plugin-sonarqube-backend` | Code quality metrics on entity overview and Code Quality tab |
+| Security Insights | `roadiehq-backstage-plugin-security-insights` | GitHub Dependabot alerts and security advisories |
+| GitHub Insights | `roadiehq-backstage-plugin-github-insights` | GitHub code insights on entity pages |
+| Global FAB | `red-hat-developer-hub-backstage-plugin-global-floating-action-button` | Configurable floating action button |
 
 ---
 

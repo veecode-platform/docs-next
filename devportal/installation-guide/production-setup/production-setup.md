@@ -1,34 +1,40 @@
 ---
 sidebar_position: 1
 sidebar_label: Production Setup
-title: Production Setup
+title: Production Setup (Kubernetes)
 ---
 
-This section covers deploying VeeCode DevPortal on a production Kubernetes cluster using the official `veecode-devportal` Helm chart.
+This section covers deploying VeeCode DevPortal V2 on a Kubernetes cluster. The canonical install path uses the published **`veecode-devportal-platform`** Helm chart. A no-Helm fallback using raw manifests is documented in the [Setup guide](setup.md).
 
 ## What is covered
 
-- [Plan your setup](plan.md) — sizing, database, ingress, and secrets strategy before you deploy
-- [Setup guide](setup.md) — step-by-step Helm deployment with GitHub or GitLab
+- [Plan your setup](plan.md) — namespace, secrets strategy, persistent volumes, and ingress before you install
+- [Setup guide](setup.md) — step-by-step Helm install (and raw-manifest fallback)
 
 ## When to use this guide
 
-Use this guide when you need a persistent, team-accessible DevPortal instance — for example, a staging or production environment. If you are experimenting locally, see the [Simple Setup](../simple-setup/simple-setup.md) or [VKDR Local](../vkdr-local/vkdr-setup.md) guides instead.
+Use this guide when you need a persistent, team-accessible DevPortal instance — for example, a staging or production environment. If you are experimenting locally, see the [Docker Local](../docker-local/intro) or [VKDR Local](../vkdr-local/vkdr-setup.md) guides instead.
 
 ## Key requirements
 
 - Kubernetes cluster with an ingress controller (nginx or Kong)
-- PostgreSQL database accessible from the cluster
-- DNS hostname with a valid TLS certificate (recommended: cert-manager + Let's Encrypt)
-- Git provider credentials (GitHub OAuth App + PAT, or GitLab OAuth App + PAT)
+- `helm` v3 and `kubectl` installed and configured against the target cluster
+- DNS hostname pointing to your cluster's ingress load balancer
+- Git provider credentials (see [Integrations](/devportal/v2/integrations))
 
-## Helm chart
+## Deployment approach
 
-| | |
-|---|---|
-| **Repo** | `https://veecode-platform.github.io/next-charts` |
-| **Chart** | `veecode-devportal/veecode-devportal` |
-| **Image** | `veecode/devportal:1.4.5` |
-| **ArtifactHub** | [veecode-platform-next/veecode-devportal](https://artifacthub.io/packages/helm/veecode-platform-next/veecode-devportal) |
+DevPortal V2 is distributed as the `veecode-devportal-platform` Helm chart (chart version `0.1.0`, app version `2.0.0`) published in the `next-charts` Helm repository. The chart deploys the `docker.io/veecode/devportal:2.0.0` image and manages the following resources on your behalf:
 
-See [Understand the Helm Chart](../understand-chart.md) for a detailed breakdown of chart values.
+| Resource | Purpose |
+|----------|---------|
+| `Deployment` | Runs the DevPortal container |
+| `PersistentVolumeClaim` (×2) | Persists catalog state (`/app/data`) and plugin bundles (`/app/dynamic-plugins-root`) |
+| `Secret` (optional) | Chart-managed credentials (dev convenience; `existingSecret` is recommended for production) |
+| `Service` | Exposes port 7007 within the cluster |
+| `Ingress` | Routes external traffic (opt-in via `ingress.enabled`) |
+| `ClusterRole` / `ClusterRoleBinding` | Required only when the `kubernetes` preset is enabled (`rbac.clusterRoles.create=true`) |
+
+:::note V2 vs V1
+The `veecode-devportal-platform` chart and `docker.io/veecode/devportal:2.0.0` image are V2 only. The V1 chart (`veecode-devportal`) and image remain unchanged and deploy the 1.x distribution. Do not mix V1 and V2 resources.
+:::
