@@ -6,7 +6,7 @@ title: Custom App Configuration
 
 ## Custom App Configuration
 
-You can use a combination of `docker compose`, profiles, configuration files, and environment variables to customize the behavior of the DevPortal instance.
+You can use a combination of `docker compose`, presets, configuration files, and environment variables to customize the behavior of the DevPortal instance.
 
 The recommended approach is to mount a custom `app-config.local.yaml` file. This lets you override default settings without modifying the container image.
 
@@ -16,13 +16,17 @@ All configuration files are loaded and merged in this order (later entries overr
 
 1. `app-config.yaml` — base image defaults
 2. `app-config.production.yaml` — production overrides baked into image
-3. `app-config.{profile}.yaml` — profile-specific config (if `VEECODE_PROFILE` is set)
-4. `app-config.distro.yaml` — distro-level overrides (baked in)
+3. `app-config.distro.yaml` — VeeCode distro defaults (baked in)
+4. `app-config.preset-{name}.yaml` — one file per active preset in `VEECODE_PRESETS` (resolved at boot from `/app/presets/`)
 5. **`app-config.local.yaml`** ← your custom file, mounted at `/app/app-config.local.yaml`
 6. `dynamic-plugins-root/app-config.dynamic-plugins.yaml` — generated at startup by the plugin install script
 7. `app-config.saas.yaml` — SaaS mode only; decoded from `VEECODE_APP_CONFIG`
 
-Your `app-config.local.yaml` (layer 5) wins over the base and profile defaults, but plugin-injected config (layer 6) is loaded after it. If a setting in `local.yaml` seems to be ignored, check whether an enabled plugin's `pluginConfig` block is overriding it.
+Your `app-config.local.yaml` (layer 5) wins over the base and preset defaults, but plugin-injected config (layer 6) is loaded after it. If a setting in `local.yaml` seems to be ignored, check whether an enabled plugin's `pluginConfig` block is overriding it.
+
+:::note Layer 7 and `VEECODE_APP_CONFIG`
+`app-config.saas.yaml` (layer 7), decoded from `VEECODE_APP_CONFIG`, loads last and wins over all layers including layer 6. Use it for deployment-specific values (database URLs, ingress hosts) that must not be hardcoded in a mounted file. See [Configuration Hierarchy](/devportal/v2/concepts/configuration-hierarchy).
+:::
 
 ## Creating a Custom Config File
 
@@ -49,7 +53,7 @@ backend:
 integrations:
   github:
     - host: github.com
-      token: ${GITHUB_TOKEN}
+      token: ${GITHUB_PAT}
 
 # Example: Add a catalog location
 catalog:
@@ -66,7 +70,7 @@ Use the `-v` flag to mount your config file:
 docker run --rm --name devportal -d \
   -p 7007:7007 \
   -v $(pwd)/app-config.local.yaml:/app/app-config.local.yaml:ro \
-  veecode/devportal:latest
+  veecode/devportal:2.0.0
 ```
 
 ## Mounting with Docker Compose
@@ -76,11 +80,11 @@ Update your `docker-compose.yml`:
 ```yaml
 services:
   devportal:
-    image: veecode/devportal:latest
+    image: veecode/devportal:2.0.0
     ports:
       - "7007:7007"
     environment:
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_PAT=${GITHUB_PAT}
     volumes:
       - ./app-config.local.yaml:/app/app-config.local.yaml:ro
 ```
@@ -98,7 +102,7 @@ Set `DEVELOPMENT=true` to enable nodemon hot-reload. DevPortal will watch `app-c
 ```yaml
 services:
   devportal:
-    image: veecode/devportal:latest
+    image: veecode/devportal:2.0.0
     ports:
       - "7007:7007"
     environment:
@@ -152,12 +156,12 @@ You can reference environment variables in your config file using the `${VAR_NAM
 ```bash
 docker run --rm --name devportal -d \
   -p 7007:7007 \
-  -e GITHUB_TOKEN=your_token_here \
+  -e GITHUB_PAT=your_token_here \
   -v $(pwd)/app-config.local.yaml:/app/app-config.local.yaml:ro \
-  veecode/devportal:latest
+  veecode/devportal:2.0.0
 ```
 
 ## Next Steps
 
-- [Configure Dynamic Plugins](./custom-plugins.md)
-- [Add Custom Catalog](./custom-catalog.md)
+- [Configure Dynamic Plugins](./custom-plugins)
+- [Add Custom Catalog](./custom-catalog)

@@ -8,7 +8,7 @@ Plugins are how the portal becomes useful beyond Day-0 setup. The base DevPortal
 
 VeeCode DevPortal is built on top of [Backstage](https://backstage.io/) and ships with a set of bundled plugins ready to enable. Understand what each plugin adds before enabling it — the value is in the workflow it removes, not in the YAML you write.
 
-Before choosing which plugins to enable, read [Composing a Portal](/platform/concepts/portal-composition) — it explains the three-layer activation model (load → annotation → backend) and maps plugin combinations to operational use cases.
+Before choosing which plugins to enable, read [Composing a Portal](/devportal/v2/concepts/portal-composition) — it explains the three-layer activation model (load → annotation → backend) and maps plugin combinations to operational use cases.
 
 ## Plugin Types
 
@@ -87,7 +87,7 @@ Example: TechDocs plugin.
 
 **Bundled dynamic plugins** are not linked to DevPortal as a part of its build process, but stored in a "dynamic-plugins" folder included in DevPortal distro. DevPortal configuration can be set to load these plugins at start time. These plugins can also be referred as "pre-installed plugins".
 
-Examples of always-active preInstalled plugins: VeeCode Homepage, Global Header, RBAC, Tech Radar, About, Marketplace, and Pending Changes.
+Examples of always-active preInstalled plugins: VeeCode Homepage, Global Header, About (and its backend), dynamic-plugins-info, and catalog-backend-module-extensions.
 
 Examples of bundled-but-disabled plugins: Kubernetes, GitHub Actions, Azure DevOps, Jenkins, SonarQube, GitHub Workflows.
 

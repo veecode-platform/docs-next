@@ -4,7 +4,7 @@ sidebar_label: VKDR Installation
 title: VKDR Installation
 ---
 
-In this step, you will install and initialize `vkdr` to prepare your local environment for running DevPortal.
+In this step, you will install and initialize `vkdr` to prepare your local environment for running DevPortal V2.
 
 ## About VKDR
 

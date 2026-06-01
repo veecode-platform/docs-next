@@ -8,11 +8,7 @@ Dynamic plugins can be loaded by VeeCode DevPortal at start time. They are usual
 
 ## Configuration
 
-There are two configuration surfaces depending on your deployment model:
-
-### `dynamic-plugins.yaml` (distro container / SaaS)
-
-For the standard DevPortal container (docker-compose, SaaS, or VKDR), edit `dynamic-plugins.yaml` directly:
+Mount a `dynamic-plugins.yaml` file at `/app/dynamic-plugins.yaml` with a top-level `plugins:` list:
 
 ```yaml
 plugins:
@@ -20,29 +16,14 @@ plugins:
   - package: '@yourorg/yourplugin@x.y.z'
     disabled: false
     integrity: sha512-xxxxxxxxx
-  # preloaded plugin (uses path relative to the dynamic-plugins directory)
+  # preloaded plugin (path relative to the dynamic-plugins directory)
   - package: ./dynamic-plugins/dist/another-plugin-dynamic
     disabled: false
 ```
 
-### Helm `values.yaml` (Kubernetes deployment)
+You only provide `plugins:`. The entrypoint owns the `includes:` chain — on every boot it copies your file to a writable shadow and rebuilds `includes:` to prepend the resolved image defaults (`dynamic-plugins.default.resolved.yaml`), the marketplace state, and each preset fragment. An `includes:` block you add yourself is replaced, so you never need to (and shouldn't) reference the defaults manually.
 
-For Kubernetes deployments using the VeeCode Helm chart, configure plugins under `global.dynamic.plugins`:
-
-```yaml
-global:
-  dynamic:
-    plugins:
-      # npm plugin
-      - package: '@yourorg/yourplugin@x.y.z'
-        disabled: false
-        integrity: sha512-xxxxxxxxx
-      # preloaded plugin
-      - package: ./dynamic-plugins/dist/another-plugin-dynamic
-        disabled: false
-```
-
-Both surfaces accept the same plugin entry format. The `dynamic-plugins.yaml` approach is recommended for non-Helm deployments.
+Mount it in your compose file or Kubernetes Deployment manifest — see [Adding Plugins](../adding.md) for the exact volume/ConfigMap syntax.
 
 ## Generating the `integrity` hash
 
@@ -79,26 +60,25 @@ This replicates the exact pipeline the installer uses internally (`cat archive |
 
 Due to security and compliance reasons you may not want VeeCode DevPortal to load plugins from public npm registries. You may prefer to use a private npm registry, like Nexus, Artifactory or even Verdaccio.
 
-VeeCode DevPortal can be configured to rely on a private npm registry - you just have to configure a special secret named "veecode-devportal-dynamic-plugins-npmrc" (where "veecode-devportal" is the Helm release name) in the same namespace as the DevPortal deployment:
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: veecode-devportal-dynamic-plugins-npmrc
-  namespace: <your-namespace>
-type: Opaque
-stringData:
-  .npmrc: |
-    registry=<registry-url>
-    //<registry-url>:_authToken=<auth-token>
-```
-
-Alternatively you can create the secret using the `kubectl` command:
+Mount a `.npmrc` file into the container at `/app/.npmrc` (or the path the install script reads from). For Kubernetes, create a Secret and mount it as a volume:
 
 ```bash
-kubectl create secret generic veecode-devportal-dynamic-plugins-npmrc \
-  "--from-literal=.npmrc=registry=your-registry-url"
+kubectl create secret generic devportal-npmrc \
+  --namespace platform \
+  "--from-literal=.npmrc=registry=https://your-registry-url/"
+```
+
+```yaml
+# Deployment volumeMount
+- mountPath: /app/.npmrc
+  name: npmrc
+  subPath: .npmrc
+  readOnly: true
+
+# Volume
+- name: npmrc
+  secret:
+    secretName: devportal-npmrc
 ```
 
 ## Wiring plugins
@@ -119,7 +99,7 @@ There is no `dynamicPlugins.backend.*` key. Backend plugins never wire themselve
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/sonarqube:bs_1.49.4!backstage-community-plugin-sonarqube-backend
+  - package: oci://quay.io/veecode/sonarqube:bs_1.48.4!backstage-community-plugin-sonarqube-backend
     disabled: false
     # No pluginConfig — backend role is auto-discovered
 ```
@@ -136,7 +116,7 @@ Same pattern for `backend-plugin-module` (e.g., a scaffolder action module attac
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/roadie-backstage-plugins:bs_1.49.4!roadiehq-scaffolder-backend-argocd
+  - package: oci://quay.io/veecode/sonarqube:bs_1.48.4!backstage-community-plugin-sonarqube
     disabled: false
     # No pluginConfig — module auto-attaches to the scaffolder backend
 ```
@@ -147,7 +127,7 @@ Frontend plugins must declare where their UI components mount, because Backstage
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/sonarqube:bs_1.49.4!backstage-community-plugin-sonarqube
+  - package: oci://quay.io/veecode/sonarqube:bs_1.48.4!backstage-community-plugin-sonarqube
     disabled: false
     pluginConfig:
       dynamicPlugins:

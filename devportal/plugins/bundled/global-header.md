@@ -46,4 +46,4 @@ The header mounts at `application/header` and adds the following components to t
 
 ## Customization
 
-Additional components can be injected into the header by adding entries to the `global.header/component` mount point in `dynamic-plugins.yaml`. See [Wiring a Frontend Plugin](../development/wiring.md) for the configuration syntax.
+Additional components can be injected into the header by adding entries to the `global.header/component` mount point in `dynamic-plugins.yaml`. See [Wiring a Frontend Plugin](../development/wiring) for the configuration syntax.

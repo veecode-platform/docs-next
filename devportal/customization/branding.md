@@ -8,36 +8,7 @@ There is an entire branding section in the `appConfig` section of DevPortal conf
 
 ## The default config
 
-The default branding values are defined in `app-config.yaml` (base layer). For a Helm install, override them under `upstream.backstage.appConfig`; for a Docker/distro install, place them at the top level in `app-config.local.yaml`.
-
-**Helm chart format:**
-
-```yaml
-upstream:
-  backstage:
-    appConfig:
-      app:
-        branding:
-          fullLogo: https://veecode-platform.github.io/support/logos/logo.svg
-          iconLogo: https://veecode-platform.github.io/support/logos/logo-mobile.png
-          fullLogoWidth: 150
-          theme:
-            light:
-              variant: "backstage"
-              palette:
-                navigation:
-                  background: "#222222"
-            dark:
-              variant: "backstage"
-              palette:
-                navigation:
-                  background: "#222222"
-      backend:
-        csp:
-          img-src: ["'self'","data:","https://raw.githubusercontent.com/","https://avatars.githubusercontent.com/","https://veecode-platform.github.io","https://platform.vee.codes"]
-```
-
-**Direct app-config format (Docker/distro):**
+The default branding values are defined in `app-config.yaml` (base layer). Override them in `app-config.local.yaml` (mounted at `/app/app-config.local.yaml`):
 
 ```yaml
 app:
@@ -59,7 +30,7 @@ app:
 ```
 
 :::note About `fullLogoDark`
-The `fullLogoDark` key (a separate dark-mode logo) is present in the source but is currently commented out in the default config with the note "new form breaks sidebar, check later." It is **not recommended** to use this key until it is formally supported. Use a single `fullLogo` URL that works in both themes, or style accordingly.
+`fullLogoDark` is read by `CompanyLogo.tsx` and applied as the logo when the dark theme is active. Set it to a separate URL if you want distinct light and dark logos. The "new form breaks sidebar, check later" note in the source applies to a commented-out object form of `fullLogo` (a light/dark map), not to `fullLogoDark`.
 :::
 
 Will result in this:

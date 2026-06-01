@@ -7,7 +7,7 @@ title: Adding Plugins
 You can add dynamic plugins to your DevPortal instance at any time without rebuilding the base image.
 
 :::note
-Adding a plugin is the **load** step — step 1 of 3 in the plugin activation model. A loaded plugin does nothing visible until the relevant catalog entities carry the correct annotation (context) and `app-config.yaml` configures the backend it queries. See [Composing a Portal](/platform/concepts/portal-composition) for the full model.
+Adding a plugin is the **load** step — step 1 of 3 in the plugin activation model. A loaded plugin does nothing visible until the relevant catalog entities carry the correct annotation (context) and `app-config` configures the backend it queries. See [Composing a Portal](/devportal/v2/concepts/portal-composition) for the full model.
 :::
 
 ## Prerequisites
@@ -37,12 +37,9 @@ Use this path when a plugin is not in the Marketplace, or when you need advanced
 
 ### SaaS (customer portal)
 
-In the customer portal, go to **Configure → Plugins YAML** and edit the `plugins_overrides_yaml`:
+In the customer portal, go to **Configure → Plugins YAML** and edit the `plugins_overrides_yaml`. Provide only a top-level `plugins:` list — the platform manages the `includes:` chain for you (see the self-hosted section below for how this works):
 
 ```yaml
-includes:
-  - dynamic-plugins.default.yaml
-
 plugins:
   - package: oci://quay.io/veecode/<workspace>:bs_<backstage-version>!<plugin-package>
     disabled: false
@@ -70,24 +67,25 @@ oci://quay.io/veecode/<workspace>:bs_<backstage-version>!<plugin-name>
 ```
 
 - **workspace**: directory name under `workspaces/` in the [`devportal-plugin-export-overlays`](https://github.com/veecode-platform/devportal-plugin-export-overlays) repo (e.g., `gitlab`, `tech-insights`, `roadie-backstage-plugins`). Each workspace bundles all plugins from one upstream source into a single image; the `!<plugin-name>` part of the reference selects the specific plugin inside that image.
-- **backstage-version**: Backstage version of your DevPortal instance (e.g., `bs_1.49.4`). Must match — a plugin built for `1.48.4` will not load on a `1.49.4` instance. See [Discovering your Backstage version](#discovering-your-backstage-version) below.
+- **backstage-version**: Backstage version of your DevPortal instance, as a `bs_<version>` tag (e.g., `bs_1.49.4`). Must match — a plugin built for `1.48.4` will not load on a `1.49.4` instance. See [Discovering your Backstage version](#discovering-your-backstage-version) below.
 - **plugin-name**: npm package name with `@` removed and `/` replaced by `-`. Examples: `@immobiliarelabs/backstage-plugin-gitlab` → `immobiliarelabs-backstage-plugin-gitlab`; `@roadiehq/backstage-plugin-argo-cd` → `roadiehq-backstage-plugin-argo-cd`.
+
+You rarely type this by hand — the variable form `oci://${PLUGIN_REGISTRY}/<workspace>:bs_${BACKSTAGE_VERSION}!<plugin-name>` lets the entrypoint substitute the registry and version for you at boot (see [Dynamic Plugins](/devportal/v2/concepts/dynamic-plugins)).
 
 #### Discovering your Backstage version
 
-Every OCI reference is built for a specific Backstage release. To find which release your DevPortal image is on, inspect `/app/dynamic-plugins.default.yaml` — every entry in that file carries a `bs_<version>` tag and they're all the same:
+Every OCI reference is built for a specific Backstage release, and it must match your instance. The image resolves `${BACKSTAGE_VERSION}` from `/app/backstage.json` at boot, so that file is the authoritative source:
 
 ```bash
-# On a running container
-docker exec <container> sh -c \
-  "grep -o 'bs_[0-9.]*' /app/dynamic-plugins.default.yaml | sort -u | head -1"
+# On a running container — read the version field
+docker exec <container> cat /app/backstage.json
+# {"version":"1.49.4", ...}  → use bs_1.49.4
 
 # On the image directly, without a running container
-docker run --rm veecode/devportal:latest \
-  grep -o 'bs_[0-9.]*' /app/dynamic-plugins.default.yaml | sort -u | head -1
+docker run --rm veecode/devportal:2.0.0 cat /app/backstage.json
 ```
 
-Output is the tag string to use, e.g. `bs_1.49.4`. Plug it into the `<backstage-version>` slot in your OCI reference.
+The boot log prints the same value once resolved: `VEECODE: resolving ${BACKSTAGE_VERSION} → 1.49.4`. On a running container you can also grep the resolved defaults — `docker exec <container> grep -o 'bs_[0-9.]*' /app/dynamic-plugins.default.resolved.yaml | sort -u` — since the entrypoint substitutes the real version into that shadow.
 
 :::note Why not other methods?
 - The image labels (`docker inspect`) only carry UBI/RHEL base image metadata — no Backstage version.
@@ -111,7 +109,7 @@ Common workspaces you will see in the wild:
 
 This list is not exhaustive — there are 60+ workspaces. For any plugin not in the table, use one of the two discovery paths below.
 
-**Path A — Marketplace (fastest).** Open the in-portal Marketplace, search for the plugin, and the card shows the exact `package:` reference to copy into your YAML. The Marketplace consumes `quay.io/veecode/plugin-catalog-index:latest`, which aggregates every published plugin's metadata — so this is the most up-to-date index.
+**Path A — Marketplace (fastest).** Open the in-portal Marketplace, search for the plugin, and the card shows the exact `package:` reference to copy into your YAML. The Marketplace consumes `quay.io/veecode/plugin-catalog-index:latest` — the same index the entrypoint downloads at boot — which aggregates every published plugin's metadata, so this is the most up-to-date source.
 
 **Path B — Inspect the export-overlays repo (when you need to verify or you don't have Marketplace access).**
 
@@ -153,56 +151,46 @@ The README of `devportal-plugin-export-overlays` is partially stale — it menti
 
 For a complete list of bundled (preloaded) plugins that do not require an OCI reference, see [Bundled Plugins](./bundled/index.md).
 
-### VKDR (local setup)
+### Self-hosted (Docker / Kubernetes)
 
-If you are using VKDR to manage your local DevPortal instance, add plugins using the `--merge` argument during install:
-
-```bash
-vkdr devportal install \
-  --github-token=$GITHUB_TOKEN \
-  --samples \
-  --merge ./my-plugins.yaml
-```
-
-The `my-plugins.yaml` file should have a `global.dynamic.plugins` section:
+Mount a `dynamic-plugins.yaml` override file with a top-level `plugins:` list:
 
 ```yaml
-global:
-  dynamic:
-    plugins:
-      - package: '@veecode-platform/backstage-plugin-global-floating-action-button-dynamic@1.4.0'
-        disabled: false
-        integrity: sha512-...
-        pluginConfig:
-          dynamicPlugins:
-            frontend:
-              red-hat-developer-hub.backstage-plugin-global-floating-action-button:
-                mountPoints:
-                  - mountPoint: application/listener
-                    importName: DynamicGlobalFloatingActionButton
+plugins:
+  - package: 'oci://quay.io/veecode/gitlab:bs_${BACKSTAGE_VERSION}!immobiliarelabs-backstage-plugin-gitlab'
+    disabled: false
+    pluginConfig: {}
 ```
 
-:::note `integrity:` is npm-only — and required
-The `integrity:` field is **required for remote npm packages** (unless `SKIP_INTEGRITY_CHECK=true` is set). It is **not used** for OCI packages (`oci://...`, validated by digest comparison) or local paths (`./dynamic-plugins/dist/...`, pre-bundled in the image).
+Mount the file in your compose file or Deployment manifest:
 
-To generate the `sha512-<base64>` string, see [Generating the integrity hash](./development/loading.md#generating-the-integrity-hash) — covers both `npm view <pkg>@<ver> dist.integrity` (preferred) and an `openssl`-based fallback.
-:::
-
-### Helm
-
-Add the plugin to the `global.dynamic.plugins` array in your `values.yaml`:
-
+**Docker Compose:**
 ```yaml
-global:
-  dynamic:
-    plugins:
-      - package: 'oci://quay.io/veecode/gitlab:bs_1.48.4!immobiliarelabs-backstage-plugin-gitlab'
-        disabled: false
-        pluginConfig: {}
+volumes:
+  - ./dynamic-plugins.yaml:/app/dynamic-plugins.yaml:ro
 ```
 
-:::warning
-`global.dynamic.plugins` is an array that overrides the chart default. Check the chart's [values.yaml](https://github.com/veecode-platform/next-charts/blob/main/veecode-devportal-chart/values.yaml) to understand what the baseline includes before overriding.
+**Kubernetes (ConfigMap approach):**
+```yaml
+# ConfigMap
+data:
+  dynamic-plugins.yaml: |
+    plugins:
+      - package: 'oci://...'
+        disabled: false
+
+# Deployment volumeMount
+- mountPath: /app/dynamic-plugins.yaml
+  name: dp-override
+  subPath: dynamic-plugins.yaml
+```
+
+After mounting, restart the container to apply the change (`docker compose restart devportal` or `kubectl rollout restart deployment/devportal`).
+
+:::note The entrypoint manages `includes:` — you only provide `plugins:`
+On every boot the entrypoint copies your mounted `dynamic-plugins.yaml` to a writable shadow and rebuilds the `includes:` chain, prepending `dynamic-plugins.default.resolved.yaml` (the shadow of the image defaults, with `${BACKSTAGE_VERSION}` and `${PLUGIN_REGISTRY}` substituted), the marketplace state, and each selected preset's plugin fragment. Any `includes:` you write yourself is **replaced**, so you don't need to reference the defaults — your `plugins:` entries are preserved and merged last, which is why a `disabled:` toggle here wins over a preset.
+
+`integrity:` is **required for remote npm packages** (unless `SKIP_INTEGRITY_CHECK=true`), and **not used** for OCI or local-path packages. To generate the `sha512-<base64>` string, see [Generating the integrity hash](./development/loading.md#generating-the-integrity-hash).
 :::
 
 ## Configuring credentials
