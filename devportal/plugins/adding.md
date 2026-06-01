@@ -7,7 +7,7 @@ title: Adding Plugins
 You can add dynamic plugins to your DevPortal instance at any time without rebuilding the base image.
 
 :::note
-Adding a plugin is the **load** step — step 1 of 3 in the plugin activation model. A loaded plugin does nothing visible until the relevant catalog entities carry the correct annotation (context) and `app-config` configures the backend it queries. See [Composing a Portal](/devportal/concepts/portal-composition) for the full model.
+Adding a plugin is the **load** step — step 1 of 3 in the plugin activation model. A loaded plugin does nothing visible until the relevant catalog entities carry the correct annotation (context) and `app-config` configures the backend it queries. See [Composing a Portal](/devportal/v2/concepts/portal-composition) for the full model.
 :::
 
 ## Prerequisites
@@ -70,7 +70,7 @@ oci://quay.io/veecode/<workspace>:bs_<backstage-version>!<plugin-name>
 - **backstage-version**: Backstage version of your DevPortal instance, as a `bs_<version>` tag (e.g., `bs_1.49.4`). Must match — a plugin built for `1.48.4` will not load on a `1.49.4` instance. See [Discovering your Backstage version](#discovering-your-backstage-version) below.
 - **plugin-name**: npm package name with `@` removed and `/` replaced by `-`. Examples: `@immobiliarelabs/backstage-plugin-gitlab` → `immobiliarelabs-backstage-plugin-gitlab`; `@roadiehq/backstage-plugin-argo-cd` → `roadiehq-backstage-plugin-argo-cd`.
 
-You rarely type this by hand — the variable form `oci://${PLUGIN_REGISTRY}/<workspace>:bs_${BACKSTAGE_VERSION}!<plugin-name>` lets the entrypoint substitute the registry and version for you at boot (see [Dynamic Plugins](/devportal/concepts/dynamic-plugins)).
+You rarely type this by hand — the variable form `oci://${PLUGIN_REGISTRY}/<workspace>:bs_${BACKSTAGE_VERSION}!<plugin-name>` lets the entrypoint substitute the registry and version for you at boot (see [Dynamic Plugins](/devportal/v2/concepts/dynamic-plugins)).
 
 #### Discovering your Backstage version
 

@@ -129,4 +129,4 @@ Now that you have DevPortal running, you can customize it:
 - **[Custom Configuration](./custom-config.md)**: Mount custom `app-config.local.yaml` to configure integrations, authentication, and more
 - **[Dynamic Plugins](./custom-plugins.md)**: Enable, disable, and configure plugins using `dynamic-plugins.yaml`
 - **[Custom Catalog](./custom-catalog.md)**: Add your own components, APIs, and resources to the catalog
-- **[Kubernetes (Helm chart)](/devportal/installation-guide/production-setup)**: Deploy to a real Kubernetes cluster using the `veecode-devportal-platform` Helm chart
+- **[Kubernetes (Helm chart)](/devportal/v2/installation-guide/production-setup)**: Deploy to a real Kubernetes cluster using the `veecode-devportal-platform` Helm chart

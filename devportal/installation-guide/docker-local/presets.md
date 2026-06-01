@@ -146,7 +146,7 @@ volumes:
   dp-plugins:
 ```
 
-For instructions on creating a GitHub OAuth App, see the [GitHub integration guide](/devportal/integrations/GitHub/github-auth).
+For instructions on creating a GitHub OAuth App, see the [GitHub integration guide](/devportal/v2/integrations/GitHub/github-auth).
 
 ---
 
@@ -194,7 +194,7 @@ volumes:
   dp-plugins:
 ```
 
-For instructions on creating a GitLab OAuth Application, see the [GitLab integration guide](/devportal/integrations/GitLab/gitlab-auth).
+For instructions on creating a GitLab OAuth Application, see the [GitLab integration guide](/devportal/v2/integrations/GitLab/gitlab-auth).
 
 ---
 
@@ -253,7 +253,7 @@ volumes:
   dp-plugins:
 ```
 
-For setup instructions, see the [Azure integration guide](/devportal/integrations/Azure).
+For setup instructions, see the [Azure integration guide](/devportal/v2/integrations/Azure).
 
 ---
 
@@ -271,7 +271,7 @@ Keycloak OIDC sign-in and org sync (identity provider).
 | `KEYCLOAK_CLIENT_SECRET` | Client secret |
 | `AUTH_SESSION_SECRET` | Random string for session cookie signing |
 
-For setup instructions, see the [Keycloak integration guide](/devportal/integrations/Keycloak/keycloak-auth).
+For setup instructions, see the [Keycloak integration guide](/devportal/v2/integrations/Keycloak/keycloak-auth).
 
 ---
 
@@ -289,7 +289,7 @@ LDAP authentication and org sync for standard LDAP directories (OpenLDAP, FreeIP
 | `LDAP_USERS_BASE_DN` | Base DN for user search |
 | `LDAP_GROUPS_BASE_DN` | Base DN for group search |
 
-For setup instructions, see the [LDAP integration guide](/devportal/integrations/LDAP).
+For setup instructions, see the [LDAP integration guide](/devportal/v2/integrations/LDAP).
 
 ---
 
@@ -299,13 +299,13 @@ LDAP authentication tuned for Microsoft Active Directory (and Samba AD). Uses `s
 
 `ldap-ad` adds no new required variables — it reuses all `ldap` vars. `LDAP_USERS_FILTER` and `LDAP_GROUPS_FILTER` are optional in both presets and default to AD-appropriate filters if unset.
 
-For setup instructions, see the [LDAP integration guide](/devportal/integrations/LDAP).
+For setup instructions, see the [LDAP integration guide](/devportal/v2/integrations/LDAP).
 
 ---
 
 ### `mcp`
 
-MCP (Model Context Protocol) actions server integration. No required variables — see the [MCP integration guide](/devportal/integrations/mcp) for configuration.
+MCP (Model Context Protocol) actions server integration. No required variables — see the [MCP integration guide](/devportal/v2/integrations/mcp) for configuration.
 
 ---
 

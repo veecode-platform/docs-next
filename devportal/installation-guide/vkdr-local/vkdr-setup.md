@@ -38,7 +38,7 @@ The installation is divided into **six steps**, each building on the previous on
 1. **[Local Infrastructure Setup](infra.md):**
    Launch a lightweight Kubernetes cluster using `k3d` inside Docker. This cluster serves as the runtime environment for DevPortal.
 1. **[SCM Credentials Configuration](github.md):**
-   Generate and configure the required SCM credentials. These allow DevPortal to securely access your repositories and services. This uses GitHub as the example; for GitLab or Azure DevOps see [Integrations](/devportal/integrations).
+   Generate and configure the required SCM credentials. These allow DevPortal to securely access your repositories and services. This uses GitHub as the example; for GitLab or Azure DevOps see [Integrations](/devportal/v2/integrations).
 1. **[DevPortal Deployment](deployment.md):**
    Deploy DevPortal V2 locally using `vkdr devportal-platform install`. The tool takes care of the entire installation in just a few commands.
 1. **[Access and Verification](access-and-testing.md):**

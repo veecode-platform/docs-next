@@ -20,7 +20,7 @@ Use this guide when you need a persistent, team-accessible DevPortal instance â€
 - Kubernetes cluster with an ingress controller (nginx or Kong)
 - `helm` v3 and `kubectl` installed and configured against the target cluster
 - DNS hostname pointing to your cluster's ingress load balancer
-- Git provider credentials (see [Integrations](/devportal/integrations))
+- Git provider credentials (see [Integrations](/devportal/v2/integrations))
 
 ## Deployment approach
 

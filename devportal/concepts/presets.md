@@ -248,4 +248,4 @@ sample (such as the starter tech-radar in `recommended`) is allowed.
 - [Dynamic Plugins](./dynamic-plugins.md) — how presets enable plugins via the
   OCI catalog.
 - For per-integration setup and the exact variable meanings, see the
-  [integrations guides](/devportal/integrations).
+  [integrations guides](/devportal/v2/integrations).

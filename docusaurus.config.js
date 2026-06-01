@@ -48,10 +48,14 @@ const config = {
           path: "devportal",
           routeBasePath: "devportal",
           sidebarPath: require.resolve("./sidebars.js"),
-          lastVersion: "current",
+          // V1 is the current stable in production → it stays at the root
+          // (/devportal/) as the default. V2 is shipped as an opt-in preview at
+          // /devportal/v2 until the devportal-platform rollout matures, at which
+          // point lastVersion flips to "current" and the paths swap back.
+          lastVersion: "v1",
           versions: {
-            current: { label: "v2", path: "" },
-            "v1": { label: "v1", path: "v1" },
+            current: { label: "v2 (preview)", path: "v2", banner: "unreleased" },
+            "v1": { label: "v1", path: "", banner: "none" },
           },
         },
         // docs: {
@@ -118,50 +122,12 @@ const config = {
             from: '/devportal/installation-guide/local-setup/docker-setup',
             to: '/devportal/installation-guide/docker-local/intro'
           },
-          {
-            from: '/devportal/concepts/configuration-profiles',
-            to: '/devportal/concepts/presets'
-          },
-          {
-            from: '/devportal/installation-guide/docker-local/profiles',
-            to: '/devportal/installation-guide/docker-local/presets'
-          },
-          {
-            from: '/devportal/installation-guide/understand-chart',
-            to: '/devportal/installation-guide/production-setup'
-          },
-          {
-            from: '/devportal/installation-guide/simple-setup',
-            to: '/devportal/installation-guide/production-setup'
-          },
-          {
-            from: '/devportal/installation-guide/simple-setup/simple-setup',
-            to: '/devportal/installation-guide/production-setup'
-          },
-          {
-            from: '/devportal/installation-guide/simple-setup/check-prerequisites',
-            to: '/devportal/installation-guide/production-setup'
-          },
-          {
-            from: '/devportal/installation-guide/simple-setup/choose-template-catalog',
-            to: '/devportal/installation-guide/production-setup'
-          },
-          {
-            from: '/devportal/installation-guide/simple-setup/configure-git-integrations',
-            to: '/devportal/installation-guide/production-setup/setup'
-          },
-          {
-            from: '/devportal/installation-guide/simple-setup/create-values-file',
-            to: '/devportal/installation-guide/production-setup/setup'
-          },
-          {
-            from: '/devportal/installation-guide/simple-setup/deploy-devportal',
-            to: '/devportal/installation-guide/production-setup/setup'
-          },
-          {
-            from: '/devportal/installation-guide/simple-setup/target-organization-group',
-            to: '/devportal/installation-guide/production-setup'
-          },
+          // NOTE: the old V1-era → V2 redirects (configuration-profiles→presets,
+          // simple-setup/*→production-setup, understand-chart, docker-local/profiles)
+          // were removed: with V1 served at the root again, those `from` paths
+          // resolve to their real V1 pages, so a redirect would collide with an
+          // existing route (build error). Re-add them (pointing at /devportal/v2/…)
+          // when the default flips to V2.
         ],
       },
     ],
