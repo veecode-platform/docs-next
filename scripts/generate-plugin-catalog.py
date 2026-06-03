@@ -26,8 +26,8 @@ Do not edit manually — changes will be overwritten on the next CI run.
 
 All plugins available as OCI artifacts for VeeCode DevPortal. Enable any of these via `dynamic-plugins.yaml` or a preset.
 
-| Plugin | npm Package | OCI Reference | Role | Support | Source |
-|--------|-------------|---------------|------|---------|--------|
+| Plugin | npm Package | OCI Reference | Role | Support |
+|--------|-------------|---------------|------|---------|
 """
 
 
@@ -70,8 +70,8 @@ def main():
     for p in plugins:
         oci = f"`{p['oci']}`" if p["oci"] else "—"
         pkg = f"`{p['package']}`" if p["package"] else "—"
-        src = f"[source]({p['source']})" if p["source"] else "—"
-        rows.append(f"| {p['title']} | {pkg} | {oci} | {p['role']} | {p['support']} | {src} |")
+        name = f"[{p['title']}]({p['source']})" if p["source"] else p["title"]
+        rows.append(f"| {name} | {pkg} | {oci} | {p['role']} | {p['support']} |")
 
     footer = f"\n*{len(plugins)} plugins. Updated automatically from [export-overlays](https://github.com/veecode-platform/devportal-plugin-export-overlays).*\n"
 
