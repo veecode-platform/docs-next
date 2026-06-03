@@ -6,7 +6,7 @@ title: Writing Templates
 
 # Writing Templates
 
-This guide covers how to **author** a Backstage software template — the YAML entity that drives the scaffolder wizard. It assumes you know how to run a template as a developer. If you're looking to use existing templates, see [Software Templates](/devportal/concepts/software-template).
+This guide covers how to **author** a Backstage software template — the YAML entity that drives the scaffolder wizard. It assumes you know how to run a template as a developer. If you're looking to use existing templates, see [Software Templates](./software-template).
 
 ---
 
@@ -381,7 +381,7 @@ spec:
         entityRef: ${{ steps['register'].output.entityRef }}
 ```
 
-To add more integrations, insert steps between `register` and `notify`. Each new step can use `${{ steps['publish'].output.remoteUrl }}` or `${{ parameters.* }}` as inputs. See [Available Actions](/devportal/concepts/available-actions) for the full list.
+To add more integrations, insert steps between `register` and `notify`. Each new step can use `${{ steps['publish'].output.remoteUrl }}` or `${{ parameters.* }}` as inputs. See [Available Actions](./available-actions) for the full list.
 
 ---
 
@@ -389,6 +389,6 @@ To add more integrations, insert steps between `register` and `notify`. Each new
 
 - [Backstage: Writing Templates](https://backstage.io/docs/features/software-templates/writing-templates) — upstream canonical reference
 - [Backstage: Input examples](https://backstage.io/docs/features/software-templates/input-examples) — parameter patterns and conditional fields
-- [Available Actions](/devportal/concepts/available-actions) — all pre-registered actions in VeeCode
-- [Custom Action](/devportal/plugins/development/custom-action) — write your own action in TypeScript when nothing in the list fits
-- [Software Templates](/devportal/concepts/software-template) — user guide for running templates
+- [Available Actions](./available-actions) — all pre-registered actions in VeeCode
+- [Custom Action](../plugins/development/custom-action) — write your own action in TypeScript when nothing in the list fits
+- [Software Templates](./software-template) — user guide for running templates

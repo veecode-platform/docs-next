@@ -454,5 +454,5 @@ Source: [VeeCode OpenAPI template](https://github.com/veecode-platform/devportal
 - [Backstage: Built-in actions](https://backstage.io/docs/features/software-templates/builtin-actions) — official upstream reference
 - [Roadie scaffolder actions](https://github.com/RoadieHQ/roadie-backstage-plugins/tree/main/plugins/scaffolder-actions) — source for `roadiehq:*`, `argocd:*`, `http:backstage:request`
 - [VeeCode example templates](https://github.com/veecode-platform/devportal-base/tree/main/examples) — real templates that ship with DevPortal
-- [Writing Templates](/devportal/concepts/writing-templates) — how to use these actions in a template
-- [Custom Action](/devportal/plugins/development/custom-action) — write your own action in TypeScript when nothing here fits
+- [Writing Templates](./writing-templates) — how to use these actions in a template
+- [Custom Action](../plugins/development/custom-action) — write your own action in TypeScript when nothing here fits

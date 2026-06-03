@@ -130,8 +130,8 @@ For the three-layer model that governs how the resulting entities connect to plu
 
 ## See also
 
-- [Writing Templates](/devportal/concepts/writing-templates) — YAML authoring guide for template authors
-- [Available Actions](/devportal/concepts/available-actions) — full list of pre-registered actions
+- [Writing Templates](./writing-templates) — YAML authoring guide for template authors
+- [Available Actions](./available-actions) — full list of pre-registered actions
 
 ---
 
