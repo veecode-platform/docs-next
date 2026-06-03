@@ -132,6 +132,7 @@ For the full picture of how load, context, and backend interact, see [Composing 
 
 ## References
 
+- [Writing Templates](./writing-templates.md) — author your own templates from scratch
 - [Composing a Portal](./portal-composition.md) — how plugins attach to entities via the three-layer model
 - [The Catalog](./catalog.md) — entity kinds, ownership, and how `catalog-info.yaml` is processed
 - [Golden Paths](/platform/concepts/golden-paths) — the platform strategy that templates implement

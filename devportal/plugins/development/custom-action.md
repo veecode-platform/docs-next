@@ -4,6 +4,10 @@ sidebar_label: Custom Action
 title: "Example: Custom Action"
 ---
 
+:::note
+This page covers creating a **new action** in TypeScript. If you're looking for how to use existing actions inside a template, see [Available Actions](/devportal/concepts/available-actions).
+:::
+
 A custom action for Backstage scaffolder can be bootstrapped with the command below:
 
 ```bash
