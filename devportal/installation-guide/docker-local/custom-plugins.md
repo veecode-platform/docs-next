@@ -14,9 +14,9 @@ Dynamic plugins are a deep subject on their own. Please refer to the [Plugins](/
 
 ## Understanding Dynamic Plugins
 
-The image includes a catalog of optional plugins, all disabled by default. Only the core chrome plugins (global header, homepage, About) are pre-installed and always on. You activate plugins via presets or a mounted `dynamic-plugins.yaml`. You add operator-level overrides by mounting a single file:
+The image includes a catalog of optional plugins, all disabled by default. The core chrome plugins (global header, homepage, About) are pre-installed and enabled by default — they are listed in the shipped `dynamic-plugins.yaml`. You activate plugins via presets or a mounted `dynamic-plugins.yaml`. You add operator-level overrides by mounting a single file:
 
-- **`dynamic-plugins.yaml`** (mounted at runtime): a top-level `plugins:` list of your overrides. The entrypoint merges it on top of the image defaults automatically — you never reference the image's internal default file.
+- **`dynamic-plugins.yaml`** (mounted at runtime): a top-level `plugins:` list. Mounting this file **replaces** the image's `/app/dynamic-plugins.yaml` — it does not merge with it. The entrypoint keeps your `plugins:` entries and assembles the internal `includes:` chain (marketplace state + preset fragments) itself, so you never reference the image's default file. Because it replaces: the shipped file already lists the core chrome plugins (global header, homepage, About) — keep those entries when you add your own, or those frontend plugins stop surfacing.
 
 ## Creating a Custom Plugins File
 
