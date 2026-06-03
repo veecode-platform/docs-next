@@ -1,0 +1,42 @@
+name: Update Plugin Catalog
+
+on:
+  repository_dispatch:
+    types: [plugin-catalog-update]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout docs
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout export-overlays metadata
+        uses: actions/checkout@v4
+        with:
+          repository: veecode-platform/devportal-plugin-export-overlays
+          path: _export-overlays
+          sparse-checkout: workspaces
+          sparse-checkout-cone-mode: false
+
+      - name: Install PyYAML
+        run: pip install pyyaml --quiet
+
+      - name: Generate plugin catalog page
+        run: python3 scripts/generate-plugin-catalog.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add devportal/plugins/ecosystem.md
+          git diff --staged --quiet && echo "No changes, skipping commit." && exit 0
+          git commit -m "chore: update plugin catalog from export-overlays"
+          git push origin develop
