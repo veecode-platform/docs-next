@@ -26,9 +26,18 @@ Do not edit manually — changes will be overwritten on the next CI run.
 
 All plugins available as OCI artifacts for VeeCode DevPortal. Enable any of these via `dynamic-plugins.yaml` or a preset.
 
-| Plugin | npm Package | OCI Reference | Role | Support |
-|--------|-------------|---------------|------|---------|
+| Plugin | npm Package | OCI Reference | Role | Support | Source |
+|--------|-------------|---------------|------|---------|--------|
 """
+
+
+def get_source_link(meta):
+    for link in meta.get("links", []):
+        if link.get("title") == "Source Code":
+            return link.get("url", "")
+    annotation = meta.get("annotations", {}).get("backstage.io/source-location", "")
+    return annotation[4:] if annotation.startswith("url:") else annotation
+
 
 def main():
     files = sorted(glob.glob(f"{OVERLAYS_DIR}/workspaces/*/metadata/*.yaml"))
@@ -52,6 +61,7 @@ def main():
             "oci": spec.get("dynamicArtifact", ""),
             "role": spec.get("backstage", {}).get("role", ""),
             "support": spec.get("support", ""),
+            "source": get_source_link(meta),
         })
 
     plugins.sort(key=lambda p: p["title"].lower())
@@ -60,7 +70,8 @@ def main():
     for p in plugins:
         oci = f"`{p['oci']}`" if p["oci"] else "—"
         pkg = f"`{p['package']}`" if p["package"] else "—"
-        rows.append(f"| {p['title']} | {pkg} | {oci} | {p['role']} | {p['support']} |")
+        src = f"[source]({p['source']})" if p["source"] else "—"
+        rows.append(f"| {p['title']} | {pkg} | {oci} | {p['role']} | {p['support']} | {src} |")
 
     footer = f"\n*{len(plugins)} plugins. Updated automatically from [export-overlays](https://github.com/veecode-platform/devportal-plugin-export-overlays).*\n"
 
