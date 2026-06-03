@@ -92,9 +92,33 @@ Downloads a single file.
   name: Fetch CI config
   action: fetch:plain:file
   input:
-    url: https://github.com/my-org/ci-configs/blob/main/.github/workflows/ci.yml
+    url: https://raw.githubusercontent.com/my-org/ci-configs/main/.github/workflows/ci.yml
     targetPath: .github/workflows/ci.yml
 ```
+
+---
+
+## Debug
+
+### `debug:log`
+
+Writes a message to the step execution log, or lists all files currently in the workspace. Useful while developing and troubleshooting templates.
+
+```yaml
+# Log a message
+- id: log-name
+  action: debug:log
+  input:
+    message: "Creating service: ${{ parameters.name }}"
+
+# List all files in the workspace
+- id: list-workspace
+  action: debug:log
+  input:
+    listWorkspace: true
+```
+
+Source: [Backstage API](https://backstage.io/api/stable/functions/_backstage_plugin-scaffolder-backend.index.createDebugLogAction.html)
 
 ---
 
@@ -153,6 +177,40 @@ Creates a GitHub repository and pushes the current workspace content.
 **Outputs:** `remoteUrl`, `repoContentsUrl`, `commitHash`.
 
 Source: [Backstage API](https://backstage.io/api/next/functions/_backstage_plugin-scaffolder-backend-module-github.createPublishGithubAction.html)
+
+### `github:repo:create`
+
+Creates a GitHub repository without pushing any content. Use when you want to create the repo in one step and push content in a separate step.
+
+```yaml
+- id: create-repo
+  name: Create GitHub repo
+  action: github:repo:create
+  input:
+    repoUrl: ${{ parameters.repoUrl }}
+    description: ${{ parameters.name }} service
+    repoVisibility: private
+```
+
+**Outputs:** `remoteUrl`, `repoContentsUrl`.
+
+### `github:issues:create`
+
+Creates a GitHub issue in an existing repository.
+
+```yaml
+- id: create-issue
+  name: Create onboarding issue
+  action: github:issues:create
+  input:
+    repoUrl: ${{ parameters.repoUrl }}
+    title: "Onboarding checklist for ${{ parameters.name }}"
+    body: "Follow these steps to complete your service setup."
+    assignees:
+      - ${{ parameters.owner }}
+```
+
+**Outputs:** `issueUrl`, `issueNumber`.
 
 ### `publish:gitlab`
 
@@ -305,6 +363,7 @@ Source: [Roadie README](https://github.com/RoadieHQ/roadie-backstage-plugins/blo
 ```yaml
 # Upload workspace content to S3
 - id: upload-artifacts
+  name: Upload to S3
   action: roadiehq:aws:s3:cp
   input:
     bucket: my-artifacts-bucket
@@ -312,6 +371,7 @@ Source: [Roadie README](https://github.com/RoadieHQ/roadie-backstage-plugins/blo
 
 # Create an ECR image repository
 - id: create-ecr
+  name: Create ECR repository
   action: roadiehq:aws:ecr:create
   input:
     repoName: ${{ parameters.name }}
@@ -320,6 +380,7 @@ Source: [Roadie README](https://github.com/RoadieHQ/roadie-backstage-plugins/blo
 
 # Create a secret in AWS Secrets Manager
 - id: create-secret
+  name: Create secret
   action: roadiehq:aws:secrets-manager:create
   input:
     name: ${{ parameters.name }}/api-key
