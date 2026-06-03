@@ -59,9 +59,19 @@ fails the boot with **exit code 78** naming the preset and the variable.
 Presets compose: `VEECODE_PRESETS=recommended,veecode-theme,github,sonarqube`
 adds SonarQube on top of the GitHub stack and demands both sets of vars.
 
+**"None" in the carry-over column means the preset fully reproduces that profile's
+integration config** — you don't re-supply `integrations.*`, `catalog.providers.*`,
+or the auth block. It does **not** mean "migrate nothing": every deployment still
+carries over config *outside* any preset's scope. See
+[What the preset already configures](#what-the-preset-already-configures-do-not-copy-over).
+
 :::warning Two behavior changes to plan for
 - **`GITHUB_TOKEN` → `GITHUB_PAT`.** Most variable names carry over unchanged; this one renamed. Check each preset's `requires.variables` rather than assuming the legacy name.
-- **`app.title` is baked at image build time** and cannot be overridden by a runtime-mounted `app-config.local.yaml`. Logos and palette override correctly at runtime; the title does not.
+- **The browser-tab title is baked at build time.** `app.title` is inlined into `index.html` when the frontend bundle is built, so a runtime-mounted `app-config.local.yaml` — and the `veecode-theme` preset — cannot change the browser-tab title; only a rebuilt image can. Logos and palette **do** override at runtime.
+:::
+
+:::warning One identity provider at a time
+The identity presets — `github-auth`, `azure-auth`, `gitlab`, `keycloak`, `ldap` — are mutually exclusive (they share the `identity` exclusive group). Selecting two fails the boot with **exit code 78** naming the conflict. A straight 1:1 profile migration only ever uses one, so this bites only if you start composing extra sign-in providers on top.
 :::
 
 ## What the preset already configures (do not copy over)
@@ -73,6 +83,44 @@ integration base config (`integrations.<provider>`), the catalog provider
 theme palette/branding (owned by `veecode-theme`). You **do** carry over
 everything *outside* a preset's scope: custom catalog `locations`, a custom
 RBAC policy, extra integration hosts, proxy entries, feature flags.
+
+## Self-hosted migration steps (Docker)
+
+If you run V1 via `docker run` / `docker-compose`, these are the concrete deltas
+beyond setting `VEECODE_PRESETS`:
+
+1. **Drop `VEECODE_PROFILE`.** V2 ignores it. The image logs a warning if it is
+   still set, but it selects nothing — all selection now flows through
+   `VEECODE_PRESETS`. Leaving it set won't break the boot; it just misleads.
+
+2. **Do not reuse your V1 `dynamic-plugins.yaml`.** This is the most common
+   migration break. A mounted `dynamic-plugins.yaml` **replaces** the image's
+   plugin list — it is not merged on top of it. A V1 file hurts you two ways:
+   - Its local `./dynamic-plugins/dist/...` references don't exist in the V2
+     image. The boot-time installer fails on them and the container **exits 78**.
+   - Even an OCI-only V1 file omits V2's core chrome entries (homepage, global
+     header, About). Without their `pluginConfig` merged, those frontend plugins
+     don't surface — the portal boots with broken navigation.
+
+   Let presets drive plugins. If you genuinely need operator-level plugin
+   overrides, start from a bare `plugins:` list per
+   [Dynamic Plugins](./installation-guide/docker-local/custom-plugins.md) — don't
+   carry the V1 file over.
+
+3. **Mount the two state volumes.** V2 persists state under two paths; without
+   them every restart wipes the marketplace and re-downloads every plugin bundle:
+   - `/app/data` — Backstage SQLite databases plus the marketplace's
+     `extensions-install.yaml`. Must be a **directory** volume, not a single-file
+     bind (the marketplace rewrites the file via atomic temp-file + rename).
+   - `/app/dynamic-plugins-root` — resolved plugin-bundle cache (fast restart).
+
+   **Drop the legacy `extensions-install.yaml` bind.** V1's
+   `-v …:/app/extensions-install.yaml` single-file mount is gone; V2 only reads
+   `/app/data/extensions-install.yaml`. Remove the old bind from your run command.
+
+A reference `docker-compose.yml` with both volumes and the optional
+`dynamic-plugins.yaml` mount is in
+[Run with Docker](./installation-guide/docker-local/intro.md).
 
 ## Installing V2
 
