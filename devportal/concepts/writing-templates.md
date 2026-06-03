@@ -225,19 +225,18 @@ A step only runs when its `if:` expression evaluates to truthy:
   input:
     repoUrl: ${{ parameters.repoUrl }}
 
-- id: notify-on-failure
-  name: Notify on failure
-  if: ${{ failure() }}
-  action: notification:send
+- id: register
+  name: Register in catalog
+  if: ${{ parameters.provider !== 'local' }}
+  action: catalog:register
   input:
-    recipients: broadcast
-    title: Template execution failed
-    severity: critical
+    repoContentsUrl: ${{ steps['publish-github'].output.repoContentsUrl }}
+    catalogInfoPath: /catalog-info.yaml
 ```
 
-Special status functions (verified upstream):
-- `always()` — runs regardless of whether prior steps succeeded or failed
-- `failure()` — runs only when a prior step failed
+The `if:` field accepts any expression using `===`, `!==`, `!`, `and`, `or`, and `${{ parameters.* }}` or `${{ steps.*.output.* }}` references.
+
+Source: [Backstage — Writing Templates](https://backstage.io/docs/features/software-templates/writing-templates)
 
 ### Iteration with `each:`
 
