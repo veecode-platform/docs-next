@@ -128,4 +128,11 @@ For the three-layer model that governs how the resulting entities connect to plu
 
 ---
 
+## See also
+
+- [Writing Templates](./writing-templates) — YAML authoring guide for template authors
+- [Available Actions](./available-actions) — full list of pre-registered actions
+
+---
+
 For further assistance, refer to your platform's documentation or [contact us](https://platform.vee.codes/support/).
