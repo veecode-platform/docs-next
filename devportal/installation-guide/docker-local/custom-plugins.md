@@ -82,13 +82,15 @@ plugins:
     disabled: false
 ```
 
-## How merging works — the entrypoint owns `includes:`
+## How `dynamic-plugins.yaml` is assembled
 
-You provide only a top-level `plugins:` list. You do **not** write an `includes:` key. On every boot the entrypoint copies your `dynamic-plugins.yaml` to a writable shadow and **rebuilds** the `includes:` chain itself, prepending the marketplace state and any preset fragments. Any `includes:` you add is replaced — so you cannot accidentally drop the pre-installed plugins:
+You provide only a top-level `plugins:` list. You do **not** write an `includes:` key — the entrypoint owns it. On every boot it copies your `dynamic-plugins.yaml` to a writable shadow and **rebuilds** the `includes:` chain itself (marketplace state + any preset fragments); any `includes:` you add is replaced. `dynamic-plugins.default.yaml` is documentation only (a vitrine) and is **not** part of the runtime chain.
+
+What it does **not** do is merge your `plugins:` list with the image's. A mounted file replaces `/app/dynamic-plugins.yaml` wholesale, so the core chrome plugins (global header, homepage, About) survive only because the shipped file lists them. Keep those entries in your file, then add your own:
 
 ```yaml
 plugins:
-  # Your overrides — the image defaults are preserved automatically
+  # keep the shipped core-chrome entries, then add your overrides below
   - package: './dynamic-plugins/dist/some-plugin-dynamic'
     disabled: false
 ```
