@@ -19,7 +19,7 @@ For environments where Helm is not available, a [no-Helm fallback](#no-helm-fall
 helm repo add next-charts https://veecode-platform.github.io/next-charts
 helm repo update next-charts
 helm search repo veecode-devportal-platform
-# should show: 0.1.0 / 2.0.0
+# should show: 0.1.0 / 2.1.3
 ```
 
 ---
@@ -165,6 +165,6 @@ The Helm chart is the recommended path for production because it handles PVC pro
 
 ## Next steps
 
-- Configure additional integrations — see [Auth & Integrations](/devportal/v2/integrations)
-- Review RBAC roles and assign them to users — see [RBAC](/devportal/v2/rbac/permissions)
+- Configure additional integrations — see [Auth & Integrations](/devportal/integrations)
+- Review RBAC roles and assign them to users — see [RBAC](/devportal/rbac/permissions)
 - Enable additional plugins via the marketplace in the DevPortal UI

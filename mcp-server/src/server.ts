@@ -99,11 +99,12 @@ const SNAPSHOT_SOURCES: Record<DocsVersion, { bundledFile: string; remoteUrl: st
   },
 };
 
-// Default is v1: it is the production-default docs version and what most installs
-// run today. Pass --version v2 (or VEECODE_DOCS_MCP_VERSION=v2) for the preview.
+// Default is v2: it is the current default docs version (the unified
+// devportal-platform image). Pass --version v1 (or VEECODE_DOCS_MCP_VERSION=v1)
+// for the prior split-image line.
 function resolveVersion(opt?: string): DocsVersion {
-  const raw = (opt ?? process.env.VEECODE_DOCS_MCP_VERSION ?? "v1").toLowerCase();
-  return raw === "v2" ? "v2" : "v1";
+  const raw = (opt ?? process.env.VEECODE_DOCS_MCP_VERSION ?? "v2").toLowerCase();
+  return raw === "v1" ? "v1" : "v2";
 }
 
 function defaultBundledPath(version: DocsVersion): string {
@@ -123,7 +124,7 @@ function defaultCacheDir(): string {
 }
 
 export interface CreateServerOptions {
-  /** Docs version to serve: "v1" (default) or "v2" (preview). */
+  /** Docs version to serve: "v2" (default) or "v1" (prior split-image line). */
   version?: DocsVersion | string;
   bundledPath?: string;
   cacheDir?: string | null;
