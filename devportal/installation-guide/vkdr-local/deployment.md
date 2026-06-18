@@ -108,7 +108,7 @@ vkdr devportal-platform remove
 | `--load-env` | Read GitHub credentials from environment variables instead of flags |
 
 :::info Presets and required credentials
-Each preset requires specific credentials in the Secret. A missing required variable causes the DevPortal pod to exit with code 78 at boot — check pod logs if it does not become Ready. See the [Helm install guide](/devportal/v2/installation-guide/production-setup/setup) for the full per-preset variable matrix.
+Each preset requires specific credentials in the Secret. A missing required variable causes the DevPortal pod to exit with code 78 at boot — check pod logs if it does not become Ready. See the [Helm install guide](/devportal/installation-guide/production-setup/setup) for the full per-preset variable matrix.
 :::
 
 ## Check Deployment

@@ -165,6 +165,6 @@ The Helm chart is the recommended path for production because it handles PVC pro
 
 ## Next steps
 
-- Configure additional integrations — see [Auth & Integrations](/devportal/v2/integrations)
-- Review RBAC roles and assign them to users — see [RBAC](/devportal/v2/rbac/permissions)
+- Configure additional integrations — see [Auth & Integrations](/devportal/integrations)
+- Review RBAC roles and assign them to users — see [RBAC](/devportal/rbac/permissions)
 - Enable additional plugins via the marketplace in the DevPortal UI
