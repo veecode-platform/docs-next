@@ -38,8 +38,10 @@ jobs:
               | jq -r '.results[].name' \
               | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
               | sort -V \
-              | tail -1
+              | tail -1 || true
           )
+          # `|| true` above: a zero-match grep exits 1, which under
+          # `set -o pipefail` would kill the step before this guard runs.
           if [ -z "$latest" ]; then
             echo "::error::Could not resolve a stable tag from Docker Hub"
             exit 1
@@ -56,7 +58,7 @@ jobs:
           # filesystem ordering and any stray 1.x reference in an example.
           current=$(
             grep -rhoE 'veecode/devportal:[0-9]+\.[0-9]+\.[0-9]+' devportal \
-              | sed 's|.*:||' | sort -V | tail -1
+              | sed 's|.*:||' | sort -V | tail -1 || true
           )
           if [ -z "$current" ]; then
             echo "::error::Could not find a current veecode/devportal:X.Y.Z reference under devportal/"
@@ -95,9 +97,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git add -A
+          git add devportal/
           git commit -m "docs: bump devportal image tag to ${NEW}"
-          git push -f origin "$branch"
+          git push --force-with-lease origin "$branch"
           title="docs: bump devportal image tag to ${NEW}"
           body=$(cat <<EOF
           Automated update of the \`veecode/devportal\` image tag in the V2 docs.

@@ -102,7 +102,7 @@ const SNAPSHOT_SOURCES: Record<DocsVersion, { bundledFile: string; remoteUrl: st
 // Default is v2: it is the current default docs version (the unified
 // devportal-platform image). Pass --version v1 (or VEECODE_DOCS_MCP_VERSION=v1)
 // for the prior split-image line.
-function resolveVersion(opt?: string): DocsVersion {
+export function resolveVersion(opt?: string): DocsVersion {
   const source = opt ?? process.env.VEECODE_DOCS_MCP_VERSION;
   if (source == null) return "v2"; // default: the current docs line
   const raw = source.trim().toLowerCase();
@@ -133,8 +133,12 @@ function defaultCacheDir(): string {
 }
 
 export interface CreateServerOptions {
-  /** Docs version to serve: "v2" (default) or "v1" (prior split-image line). */
-  version?: DocsVersion | string;
+  /**
+   * Docs version to serve: "v2" (default) or "v1" (prior split-image line).
+   * Already-validated value — untrusted input (CLI/env) must pass through
+   * resolveVersion() first.
+   */
+  version?: DocsVersion;
   bundledPath?: string;
   cacheDir?: string | null;
   remoteUrl?: string | null;
@@ -145,7 +149,9 @@ export async function createServer(opts: CreateServerOptions = {}): Promise<{
   server: Server;
   dispose: () => Promise<void>;
 }> {
-  const version = resolveVersion(opts.version);
+  // opts.version is already a validated DocsVersion; fall back to env/default
+  // (via resolveVersion) only when the caller didn't specify one.
+  const version = opts.version ?? resolveVersion();
   const bundledPath = resolveBundledPath(version, opts.bundledPath);
   const cacheDir =
     opts.cacheDir === null
@@ -223,8 +229,10 @@ function parseVersionArg(argv: string[]): string | undefined {
 }
 
 export async function startServer(): Promise<void> {
-  const version = parseVersionArg(process.argv.slice(2));
-  const { server } = await createServer(version ? { version } : {});
+  const versionArg = parseVersionArg(process.argv.slice(2));
+  const { server } = await createServer(
+    versionArg !== undefined ? { version: resolveVersion(versionArg) } : {},
+  );
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
