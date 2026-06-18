@@ -10,7 +10,8 @@
   "files": [
     "dist",
     "bundled",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "tsup",

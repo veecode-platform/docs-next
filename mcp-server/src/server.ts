@@ -103,8 +103,17 @@ const SNAPSHOT_SOURCES: Record<DocsVersion, { bundledFile: string; remoteUrl: st
 // devportal-platform image). Pass --version v1 (or VEECODE_DOCS_MCP_VERSION=v1)
 // for the prior split-image line.
 function resolveVersion(opt?: string): DocsVersion {
-  const raw = (opt ?? process.env.VEECODE_DOCS_MCP_VERSION ?? "v2").toLowerCase();
-  return raw === "v1" ? "v1" : "v2";
+  const source = opt ?? process.env.VEECODE_DOCS_MCP_VERSION;
+  if (source == null) return "v2"; // default: the current docs line
+  const raw = source.trim().toLowerCase();
+  if (raw === "v1") return "v1";
+  if (raw === "v2") return "v2";
+  // Fail closed: a typo'd or unexpected value must not silently serve the
+  // wrong docs line. Surfaces via index.ts as a clean fatal + exit 1.
+  throw new Error(
+    `Invalid docs version "${source}" — use "v1" or "v2" ` +
+      `(via --version or VEECODE_DOCS_MCP_VERSION).`,
+  );
 }
 
 function defaultBundledPath(version: DocsVersion): string {
