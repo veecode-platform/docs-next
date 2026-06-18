@@ -122,6 +122,57 @@ A reference `docker-compose.yml` with both volumes and the optional
 `dynamic-plugins.yaml` mount is in
 [Run with Docker](./installation-guide/docker-local/intro.md).
 
+## Helm chart migration steps (Kubernetes)
+
+If you run V1 on Kubernetes, the chart itself changes — this is **not** a
+`helm upgrade` of your existing release:
+
+| | V1 | V2 |
+|---|---|---|
+| Chart | `veecode-devportal` | `veecode-devportal-platform` |
+| Topology | wrapper around the upstream `backstage` subchart (aliased `upstream`) | standalone chart, no subchart |
+| Release / Deployment | e.g. `veecode-devportal` / `veecode-devportal-backstage` | e.g. `devportal` / `devportal-veecode-devportal-platform` |
+
+Because it is a different chart with a different release and Deployment, you
+**install V2 fresh** and decommission the V1 release once V2 is healthy. The
+`helm upgrade --reuse-values` shown in the install guide updates *within* V2 —
+it does not carry you across charts.
+
+:::warning Your `values.yaml` is rewritten, not edited
+The two charts share **no** top-level keys. Applying a V1 `values.yaml`
+against the V2 chart does not error — Helm silently ignores the unrecognized
+keys, and you get a Deployment with none of your intended configuration. Start
+the V2 `values.yaml` from scratch (this applies equally to a templated
+`values.yaml.tpl` in a GitOps repo — replace it, don't diff it).
+:::
+
+Use this table to find where each V1 setting goes. Build the new file against
+[Deploy to Kubernetes](./installation-guide/production-setup/setup.md).
+
+| V1 `veecode-devportal` | V2 `veecode-devportal-platform` |
+|---|---|
+| `upstream.backstage.appConfig.integrations.*`, `.auth`, `.catalog.providers.*` | **Provided by presets** — do not recreate. See [What the preset already configures](#what-the-preset-already-configures-do-not-copy-over). |
+| Remaining `upstream.backstage.appConfig.*` (catalog `locations`, proxy, custom RBAC, feature flags) | `appConfig:` — overrides only; rendered as a ConfigMap when non-empty |
+| `global.dynamic.includes` / `global.dynamic.plugins` | `presets:` (plus optional `dynamicPlugins:` for surgical, per-deployment overrides) |
+| `global.host` / `global.protocol` / `global.port` | `ingress.hostname` |
+| `upstream.ingress.*` | `ingress.*` |
+| `upstream.backstage.extraEnvVarsSecret` + `${VAR}` refs in `appConfig` | `existingSecret` (production) or `credentials: {}` — wired in via `envFrom` |
+| `upstream.backstage.image` (`veecode/devportal:1.4.5`) | `image` (`veecode/devportal:2.0.0`) |
+| `upstream.postgresql.*` (bundled Bitnami subchart) | `database.external.*` — no bundled database; supply external coordinates |
+| `createClusterRoles: true` | `rbac.clusterRoles.create: true` |
+| _(ephemeral; no PVCs)_ | `persistence.data` + `persistence.plugins` — **new in V2, required for production** (Backstage state + plugin-bundle cache) |
+
+Two deltas have no V1 equivalent and are easy to miss:
+
+1. **Credentials move out of `appConfig`.** In V1 you inlined `${VAR}` refs in
+   `appConfig` and fed them via `extraEnvVarsSecret`. In V2 the presets read
+   their variables from the environment, so put them in a Secret referenced by
+   `existingSecret` — see [Step 2 of the install guide](./installation-guide/production-setup/setup.md#step-2-create-the-credentials-secret).
+2. **Two PVCs are mandatory.** The V1 wrapper ran with ephemeral storage; V2
+   persists Backstage state (`persistence.data`) and the resolved plugin cache
+   (`persistence.plugins`). Without them every pod restart wipes the marketplace
+   and re-downloads every plugin bundle.
+
 ## Installing V2
 
 Pick the path that matches V1's:
