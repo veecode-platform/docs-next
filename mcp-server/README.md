@@ -6,7 +6,7 @@ MCP server exposing the VeeCode Platform documentation (DevPortal, Platform, Adm
 
 The server serves **one DevPortal docs version per instance** — it never mixes them. Choose with `--version v1|v2` (or `VEECODE_DOCS_MCP_VERSION`):
 
-- **`v2` (default)** — the unified `veecode/devportal:2.0.0` / presets release. This is the current default docs line.
+- **`v2` (default)** — the unified `veecode/devportal` / presets release. This is the current default docs line.
 - **`v1`** — the prior split-image / profiles release (`VEECODE_PROFILE`), still supported with security backports.
 
 The choice is bound for the whole session: search/get/list only return that version, and the background refresh only pulls that version's snapshot — so there is no cross-version drift. (`platform`, `admin-ui`, and `vkdr` docs are version-neutral and present in both.) Confirm the loaded version with the `get_snapshot_info` tool (`docs_version` field).
