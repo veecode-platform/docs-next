@@ -146,6 +146,7 @@ helm upgrade devportal next-charts/veecode-devportal-platform \
 
 ---
 
+<!-- dp-source: storage,pvc,helm -->
 ## No-Helm fallback
 
 If Helm is not available, use the reference manifest from the [devportal-platform repository](https://github.com/veecode-platform/devportal-platform/blob/main/examples/deploy/k8s.yaml). This manifest applies the same two PVCs, a `Deployment`, and a `Service` using plain `kubectl`:

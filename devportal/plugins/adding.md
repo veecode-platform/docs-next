@@ -16,6 +16,7 @@ Adding a plugin is the **load** step — step 1 of 3 in the plugin activation mo
 - The plugin package reference (npm specifier, local path, or OCI artifact)
 - Any credentials the plugin requires (API tokens, etc.)
 
+<!-- dp-source: plugin,entrypoint -->
 ## Via Marketplace
 
 The in-portal Marketplace is the simplest path — no YAML editing required.

@@ -12,6 +12,7 @@ DevPortal supports **dynamic plugins** that can be enabled, disabled, and config
 Dynamic plugins are a deep subject on their own. Please refer to the [Plugins](/devportal/plugins/) section for more information.
 :::
 
+<!-- dp-source: plugin,entrypoint -->
 ## Understanding Dynamic Plugins
 
 The image includes a catalog of optional plugins, all disabled by default. The core chrome plugins (global header, homepage, About) are pre-installed and enabled by default — they are listed in the shipped `dynamic-plugins.yaml`. You activate plugins via presets or a mounted `dynamic-plugins.yaml`. You add operator-level overrides by mounting a single file:
