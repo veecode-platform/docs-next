@@ -146,7 +146,7 @@ helm upgrade devportal next-charts/veecode-devportal-platform \
 
 ---
 
-<!-- dp-source: storage,pvc,helm -->
+<!-- dp-source: storage,pvc,postgres,helm -->
 ## No-Helm fallback
 
 If Helm is not available, use the reference manifest from the [devportal-platform repository](https://github.com/veecode-platform/devportal-platform/blob/main/examples/deploy/k8s.yaml). The manifest contains two `PersistentVolumeClaim` resources, a `ConfigMap`, a `Deployment`, and a `Service`. By default it runs on SQLite — the two PVCs back `/app/data` (state) and `/app/dynamic-plugins-root` (plugin cache):
