@@ -270,7 +270,7 @@ scale. Self-host the font with `@fontsource` (add it as a dependency) and import
 // src/themes/typography.ts
 import { defaultTypography } from '@backstage/theme';
 
-const family = '"Geist Sans", system-ui, -apple-system, "Segoe UI", sans-serif';
+const family = '"Geist Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
 export const typography = {
   ...defaultTypography,
@@ -403,14 +403,14 @@ The same plugin can inject a component into the app shell via a mount point. Exp
 
 ```tsx
 // src/components/BrandBadge.tsx
-import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { tokens } from '../themes/tokens';
 
 export const BrandBadge = () => {
-  useTheme(); // stays in sync with light/dark
   return (
+    // `bgcolor: 'primary.main'` resolves through the theme context, so the dot
+    // follows the active light/dark palette without an explicit useTheme() call.
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, px: 1.25, py: 0.5,
                borderRadius: 2, border: `1px solid ${tokens.hairlineDark}` }}>
       <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: 'primary.main' }} />
