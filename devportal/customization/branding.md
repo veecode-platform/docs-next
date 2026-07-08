@@ -62,12 +62,15 @@ backend:
 Backstage's config loader replaces array-valued config on override rather than appending to it. If you set `backend.csp.img-src` without including everything already in the default list, you don't just fail to add your domain — you break every other domain that was previously allowed (analytics, GitHub avatars, etc.). Read your instance's current effective `img-src` list before overriding it, and repeat it in full alongside your addition. The same rule applies to `connect-src`, `script-src`, `style-src`, and any other CSP directive.
 :::
 
+If you're embedding an external tool via `<iframe>` (a dashboard, a status page) rather than serving an image, the directive you need is `backend.csp.frame-src`, not `img-src`. A missing `frame-src` entry is worse to debug than a missing `img-src` one: there's no console error at all, just a blank space where the iframe should be.
+
 **Troubleshooting:**
 
 | Symptom | Cause | Fix |
 |---|---|---|
 | Logo/icon doesn't render, falls back to default | Domain missing from `backend.csp.img-src` | Extend `img-src` with your domain, keeping all existing entries |
 | Extending `img-src` broke unrelated images (avatars, analytics) | The override replaced the array instead of extending it | Re-add the full previous list plus your addition |
+| Embedded iframe shows blank, no console error | Domain missing from `backend.csp.frame-src` | Extend `frame-src` with your domain, keeping all existing entries |
 
 ## A Simple config
 
