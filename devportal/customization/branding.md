@@ -42,6 +42,33 @@ A few points to remember:
 - You can provide URLs to your custom resources, but remember those must be available to end users' browsers.
 - You must add the base URL of those resources to the `csp.img-src` list.
 
+## External domains and CSP
+
+DevPortal ships with a Content-Security-Policy that restricts which domains can serve images (and other resource types) to the browser. If your logo, icon, or favicon URL is on a domain not already allowed, the browser blocks it — the image silently falls back to default, and the console shows a CSP violation.
+
+Extend `backend.csp.img-src` in your `app-config.local.yaml` to add your domain:
+
+```yaml
+backend:
+  csp:
+    img-src:
+      - "'self'"
+      - "data:"
+      - "https://your-cdn.example.com"
+      # ...plus every domain your instance's current effective config already allows
+```
+
+:::warning Config overrides replace arrays, they don't merge them
+Backstage's config loader replaces array-valued config on override rather than appending to it. If you set `backend.csp.img-src` without including everything already in the default list, you don't just fail to add your domain — you break every other domain that was previously allowed (analytics, GitHub avatars, etc.). Read your instance's current effective `img-src` list before overriding it, and repeat it in full alongside your addition. The same rule applies to `connect-src`, `script-src`, `style-src`, and any other CSP directive.
+:::
+
+**Troubleshooting:**
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Logo/icon doesn't render, falls back to default | Domain missing from `backend.csp.img-src` | Extend `img-src` with your domain, keeping all existing entries |
+| Extending `img-src` broke unrelated images (avatars, analytics) | The override replaced the array instead of extending it | Re-add the full previous list plus your addition |
+
 ## A Simple config
 
 A simple and funny config just to show some settings change:
