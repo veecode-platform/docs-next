@@ -1,0 +1,92 @@
+name: External link check
+
+# Validates EXTERNAL (http/https) links in the documentation content.
+#
+# Internal links are already covered by the build (`onBrokenLinks: "throw"`)
+# and `scripts/check-links.py` in mcp-ci.yml, so this workflow deliberately
+# checks only outbound links and never blocks a merge on its own: a broken
+# external link is almost always someone else's outage, a rate limit, or a
+# bot wall — useful signal, not a reason for red CI.
+#
+# Triggers:
+#   - pull_request touching content, so authors see broken links they add
+#     (reported in the job summary; the job still succeeds).
+#   - a weekly schedule, which opens/updates a tracking issue for rot that
+#     creeps in over time (dead upstream docs, moved pages, etc.).
+#   - manual dispatch for on-demand runs.
+
+on:
+  pull_request:
+    paths:
+      - devportal/**
+      - platform/**
+      - admin-ui/**
+      - vkdr/**
+      - versioned_docs/**
+      - .lycheeignore
+      - .github/workflows/link-check.yml
+  schedule:
+    - cron: "0 7 * * 1" # weekly, Monday 07:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write # only used by the scheduled run to file a tracking issue
+
+jobs:
+  link-check:
+    if: github.repository == 'veecode-platform/docs'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check external links
+        id: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # --scheme http/https limits checking to outbound URLs; schemeless
+          # relative links (./foo.md) and bare /devportal/... paths carry no
+          # scheme and are therefore skipped — they are the build's job.
+          #
+          # Flakiness tolerance: retry transient failures, generous timeout,
+          # capped concurrency to avoid tripping rate limits, and 429 accepted
+          # as success so a rate-limited host never fails the run.
+          args: >-
+            --scheme https
+            --scheme http
+            --max-retries 3
+            --retry-wait-time 10
+            --timeout 30
+            --max-concurrency 8
+            --accept 200..=299,429
+            --exclude-all-private
+            --no-progress
+            "devportal/**/*.md"
+            "devportal/**/*.mdx"
+            "platform/**/*.md"
+            "platform/**/*.mdx"
+            "admin-ui/**/*.md"
+            "admin-ui/**/*.mdx"
+            "vkdr/**/*.md"
+            "vkdr/**/*.mdx"
+            "versioned_docs/**/*.md"
+            "versioned_docs/**/*.mdx"
+          # Never fail the job on broken external links — the value is the
+          # report (job summary on every run, tracking issue on the schedule).
+          fail: false
+          # Use GITHUB_TOKEN for higher GitHub API rate limits on github.com links.
+          token: ${{ secrets.GITHUB_TOKEN }}
+          format: markdown
+          output: ./lychee-report.md
+
+      # On the scheduled/manual run, surface accumulated rot as a single
+      # auto-updated tracking issue instead of a noisy failure.
+      - name: Report broken links as an issue
+        if: >-
+          steps.lychee.outputs.exit_code != 0 &&
+          (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "Broken external links in docs"
+          content-filepath: ./lychee-report.md
+          labels: link-rot, automated
