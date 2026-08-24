@@ -109,44 +109,20 @@ For the full precedence table when surfaces conflict, see
 ## OCI reference shape
 
 VeeCode publishes one OCI image per plugin — the image name is the plugin's
-npm package name normalized (`@scope/name` → `scope-name`). There is no
-`!selector` anymore: an image contains exactly one plugin, which the installer
-identifies from the image's own manifest annotation, not from the tag.
-
-There are two ways to reference a plugin:
-
-**Pinned** — pick a specific plugin version yourself. This is the form to use
-today for hand-written `dynamic-plugins.yaml` entries:
+npm package name normalized (`@scope/name` → `scope-name`). This page covers
+the standalone DevPortal image's entrypoint (`entrypoint.sh` +
+`install-dynamic-plugins.py`), which today still requires a `!<plugin-name>`
+selector even for a one-image-per-plugin reference — repeat the plugin name
+as its own selector:
 
 ```
-oci://quay.io/veecode/<plugin>:bs_<backstage-version>__<plugin-version>
+oci://quay.io/veecode/<plugin>:bs_<backstage-version>__<plugin-version>!<plugin>
 ```
 
 ```yaml
 # RBAC UI, pinned to Backstage 1.52.0 / plugin 1.52.4
-- package: oci://quay.io/veecode/backstage-community-plugin-rbac:bs_1.52.0__1.52.4
+- package: oci://quay.io/veecode/backstage-community-plugin-rbac:bs_1.52.0__1.52.4!backstage-community-plugin-rbac
 ```
-
-**With index** — let the catalog index resolve the version for you, so a
-plugin patch release propagates without editing YAML:
-
-```
-oci://${PLUGIN_REGISTRY}/<plugin>:{{inherit}}
-```
-
-```yaml
-# RBAC UI
-- package: oci://${PLUGIN_REGISTRY}/backstage-community-plugin-rbac:{{inherit}}
-```
-
-`{{inherit}}` is not a template variable substituted by the entrypoint — it
-tells the installer to resolve the actual pinned tag/digest for this plugin
-from the plugin catalog index pulled at boot (`plugin-catalog-index`, see
-[Distribution modes](#distribution-modes) below). This is the upstream RHDH
-convention (`dynamic-plugins.default.yaml` + `{{inherit}}` + `CATALOG_INDEX_IMAGE`).
-Whether it resolves against `quay.io/veecode/plugin-catalog-index` depends on
-your platform/chart version — if unsure, use the pinned form, which always
-works.
 
 - **`${PLUGIN_REGISTRY}`** — defaults to `quay.io/veecode`; substituted by
   `entrypoint.sh`. Override it (e.g. `PLUGIN_REGISTRY=registry.internal/veecode`)
@@ -156,6 +132,16 @@ works.
 - **`<plugin>`** — the plugin's npm package name with `@` removed and `/`
   replaced by `-` (e.g. `@immobiliarelabs/backstage-plugin-gitlab` →
   `immobiliarelabs-backstage-plugin-gitlab`).
+
+:::note The bare, index-resolved form exists — but not on this image yet
+`oci://quay.io/veecode/<plugin>:{{inherit}}` (no `!selector`, version resolved
+from the plugin catalog index at boot — the upstream RHDH convention) is the
+recommended form on DevPortal installations deployed via the `devportal-chart`
+Helm chart, version 0.1.21 or later. The standalone image this page describes
+does not yet resolve `{{inherit}}` or auto-detect a bare (no-`!`) reference —
+a future DevPortal release will add that. Until then, use the pinned form
+with the selector above on this image.
+:::
 
 Pre-installed chrome plugins use a bare npm package name (no `oci://` prefix)
 with `preInstalled: true`; the install script skips the pull and only merges
@@ -213,15 +199,13 @@ Three modes are supported by design:
 
 - **Default — runtime OCI pull.** The image ships with no optional plugin bytes.
   At boot, `install-dynamic-plugins.py` pulls each enabled plugin from
-  `quay.io/veecode/<plugin>:<tag>` (or resolves `{{inherit}}` against the
-  plugin catalog index). No operator config beyond `VEECODE_PRESETS`. Best for
-  cloud/SaaS with outbound registry access.
+  `quay.io/veecode/<plugin>:<tag>!<plugin>`. No operator config beyond
+  `VEECODE_PRESETS`. Best for cloud/SaaS with outbound registry access.
 - **Mirror — internal registry.** Set `PLUGIN_REGISTRY=registry.internal/veecode`
   (or any prefix mirroring `quay.io/veecode`). The entrypoint substitutes it
   into every `oci://${PLUGIN_REGISTRY}/...` reference before the install runs —
   no YAML edits needed for the plugins that use the variable form. The mirror must
-  host the same per-plugin image names, plus the `plugin-catalog-index` image
-  itself if any entry uses `{{inherit}}`.
+  host the same per-plugin image names.
 - **Loaded variant — air-gapped image.** Build a derived image that extracts the
   selected plugin bundles at build time and copies them into
   `/app/dynamic-plugins-root/`. Mark those entries `preInstalled: true` so the

@@ -36,7 +36,7 @@ If the OCI artifact is not available, you can still reference the upstream npm p
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/<plugin-name>:bs_<backstage-version>__<plugin-version>
+  - package: oci://quay.io/veecode/<plugin-name>:bs_<backstage-version>__<plugin-version>!<plugin-name>
     disabled: false
     pluginConfig:
       dynamicPlugins:

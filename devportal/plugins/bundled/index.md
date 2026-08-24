@@ -61,13 +61,13 @@ These must be downloaded at startup from `quay.io/veecode`. See [Adding Plugins]
 
 | Plugin | OCI Reference |
 |---|---|
-| MCP Actions Backend | `oci://quay.io/veecode/backstage-plugin-mcp-actions-backend:bs_1.52.0__0.1.14` |
-| MCP Catalog Extras | `oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-software-catalog-mcp-extras:bs_1.52.0__0.2.3` |
-| MCP TechDocs Extras | `oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-techdocs-mcp-extras:bs_1.52.0__0.2.4` |
-| MCP Scaffolder Extras | `oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-scaffolder-mcp-extras:bs_1.52.0__0.4.2` |
-| MCP Chat Backend | `oci://quay.io/veecode/backstage-community-plugin-mcp-chat-backend:bs_1.52.0__0.8.0` |
-| MCP Chat Frontend | `oci://quay.io/veecode/backstage-community-plugin-mcp-chat:bs_1.52.0__0.6.0` |
-| GitLab Pipelines | `oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:bs_1.52.0__7.0.0` |
+| MCP Actions Backend | `oci://quay.io/veecode/backstage-plugin-mcp-actions-backend:bs_1.52.0__0.1.14!backstage-plugin-mcp-actions-backend` |
+| MCP Catalog Extras | `oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-software-catalog-mcp-extras:bs_1.52.0__0.2.3!red-hat-developer-hub-backstage-plugin-software-catalog-mcp-extras` |
+| MCP TechDocs Extras | `oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-techdocs-mcp-extras:bs_1.52.0__0.2.4!red-hat-developer-hub-backstage-plugin-techdocs-mcp-extras` |
+| MCP Scaffolder Extras | `oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-scaffolder-mcp-extras:bs_1.52.0__0.4.2!red-hat-developer-hub-backstage-plugin-scaffolder-mcp-extras` |
+| MCP Chat Backend | `oci://quay.io/veecode/backstage-community-plugin-mcp-chat-backend:bs_1.52.0__0.8.0!backstage-community-plugin-mcp-chat-backend` |
+| MCP Chat Frontend | `oci://quay.io/veecode/backstage-community-plugin-mcp-chat:bs_1.52.0__0.6.0!backstage-community-plugin-mcp-chat` |
+| GitLab Pipelines | `oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:bs_1.52.0__7.0.0!immobiliarelabs-backstage-plugin-gitlab` |
 
 ---
 

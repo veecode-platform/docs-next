@@ -30,7 +30,7 @@ A typical entry looks like:
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/<plugin-name>:bs_<backstage-version>__<plugin-version>
+  - package: oci://quay.io/veecode/<plugin-name>:bs_<backstage-version>__<plugin-version>!<plugin-name>
     disabled: false
     pluginConfig:
       dynamicPlugins:

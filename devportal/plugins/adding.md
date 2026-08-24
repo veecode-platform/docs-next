@@ -42,7 +42,7 @@ In the customer portal, go to **Configure → Plugins YAML** and edit the `plugi
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/<plugin-name>:bs_<backstage-version>__<plugin-version>
+  - package: oci://quay.io/veecode/<plugin-name>:bs_<backstage-version>__<plugin-version>!<plugin-name>
     disabled: false
     pluginConfig:
       dynamicPlugins:
@@ -61,36 +61,50 @@ plugins:
 
 ### OCI artifact format
 
-VeeCode publishes one OCI image per plugin — there is no `!selector`, because
-each image contains exactly one plugin, identified from the image's own
-manifest annotation. Two forms exist:
+VeeCode publishes one OCI image per plugin, named from the plugin's npm
+package (`@` removed, `/` → `-`). Which reference format you write depends on
+how your DevPortal is deployed:
 
-**Pinned** — you choose the exact plugin version yourself. This is the form to
-use today for hand-written `dynamic-plugins.yaml` entries:
+**Deployed via the `devportal-chart` Helm chart, version 0.1.21 or later** —
+use the bare, index-resolved form. There is no `!selector`: the image
+contains exactly one plugin, and the chart's catalog index
+(`quay.io/veecode/plugin-catalog-index`) resolves the actual version for you:
 
 ```
-oci://quay.io/veecode/<plugin-name>:bs_<backstage-version>__<plugin-version>
+oci://quay.io/veecode/<plugin-name>:{{inherit}}
+```
+
+```yaml
+- package: oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:{{inherit}}
+```
+
+This is the upstream RHDH convention (`dynamic-plugins.default.yaml` +
+`{{inherit}}` + `CATALOG_INDEX_IMAGE`), and it's the recommended form on this
+path — a plugin patch release propagates without editing YAML.
+
+**Deployed as the standalone DevPortal image** (self-hosted Docker/Kubernetes
+below, or the SaaS customer portal) — pin the version and append
+`!<plugin-name>` (repeating the plugin name as the selector). The installer
+this image ships with today still requires the `!` separator even for a
+one-image-per-plugin reference:
+
+```
+oci://quay.io/veecode/<plugin-name>:bs_<backstage-version>__<plugin-version>!<plugin-name>
+```
+
+```yaml
+- package: oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:bs_1.52.0__7.0.0!immobiliarelabs-backstage-plugin-gitlab
 ```
 
 - **plugin-name**: npm package name with `@` removed and `/` replaced by `-`. Examples: `@immobiliarelabs/backstage-plugin-gitlab` → `immobiliarelabs-backstage-plugin-gitlab`; `@roadiehq/backstage-plugin-argo-cd` → `roadiehq-backstage-plugin-argo-cd`.
 - **backstage-version**: Backstage version of your DevPortal instance (e.g., `1.52.0`). Must match — a plugin built for `1.48.4` will not load on a `1.52.0` instance. See [Discovering your Backstage version](#discovering-your-backstage-version) below.
 - **plugin-version**: the exact upstream plugin release, e.g. `7.0.0`.
 
-**With index** — the tag is the literal string `{{inherit}}`, and the
-installer resolves the actual plugin version from the plugin catalog index
-pulled at boot, so a plugin patch release propagates without editing YAML:
+A future DevPortal release will drop the `!<plugin-name>` requirement and
+support `{{inherit}}` on this path too; until then, use the pinned form with
+the selector.
 
-```
-oci://quay.io/veecode/<plugin-name>:{{inherit}}
-```
-
-This is the upstream RHDH convention (`dynamic-plugins.default.yaml` +
-`{{inherit}}` + `CATALOG_INDEX_IMAGE`). Whether it resolves against
-`quay.io/veecode/plugin-catalog-index` on your instance depends on your
-platform/chart version — check the [Dynamic Plugins](/devportal/concepts/dynamic-plugins)
-page or ask your platform team if unsure; the pinned form always works.
-
-The variable form `oci://${PLUGIN_REGISTRY}/<plugin-name>:bs_<backstage-version>__<plugin-version>`
+The variable form `oci://${PLUGIN_REGISTRY}/<plugin-name>:bs_<backstage-version>__<plugin-version>!<plugin-name>`
 lets the entrypoint substitute the registry for a mirror without editing the rest of the reference.
 
 :::note Bundle images from before this migration keep working
@@ -181,7 +195,7 @@ Mount a `dynamic-plugins.yaml` override file with a top-level `plugins:` list:
 
 ```yaml
 plugins:
-  - package: 'oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:bs_1.52.0__7.0.0'
+  - package: 'oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:bs_1.52.0__7.0.0!immobiliarelabs-backstage-plugin-gitlab'
     disabled: false
     pluginConfig: {}
 ```

@@ -26,7 +26,7 @@ This controls which plugins are present at all. In V2 there are two ways to load
 ```yaml
 # dynamic-plugins.yaml — enable a bundled plugin no preset covers
 plugins:
-  - package: oci://${PLUGIN_REGISTRY}/backstage-community-plugin-grafana:bs_1.52.0__0.17.0
+  - package: oci://${PLUGIN_REGISTRY}/backstage-community-plugin-grafana:bs_1.52.0__0.17.0!backstage-community-plugin-grafana
     disabled: false
 ```
 
@@ -86,8 +86,8 @@ docker logs devportal 2>&1 | grep -E "======= (Installing|Skipping|Using pre-ins
 A healthy load:
 
 ```
-======= Installing dynamic plugin oci://quay.io/veecode/backstage-community-plugin-grafana:bs_1.52.0__0.17.0
-	==> Successfully installed dynamic plugin oci://quay.io/veecode/backstage-community-plugin-grafana:bs_1.52.0__0.17.0
+======= Installing dynamic plugin oci://quay.io/veecode/backstage-community-plugin-grafana:bs_1.52.0__0.17.0!backstage-community-plugin-grafana
+	==> Successfully installed dynamic plugin oci://quay.io/veecode/backstage-community-plugin-grafana:bs_1.52.0__0.17.0!backstage-community-plugin-grafana
 ```
 
 A failed load ends with the summary that triggers exit 78:

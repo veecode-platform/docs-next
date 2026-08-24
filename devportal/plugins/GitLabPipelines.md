@@ -27,7 +27,7 @@ The GitLab Pipelines plugin is available as an OCI artifact from `quay.io/veecod
 
 | OCI Reference | Role |
 |---|---|
-| `oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:bs_1.52.0__7.0.0` | Frontend + backend |
+| `oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:bs_1.52.0__7.0.0!immobiliarelabs-backstage-plugin-gitlab` | Frontend + backend |
 
 ---
 
@@ -37,7 +37,7 @@ Add the following to your `dynamic-plugins.yaml`:
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:bs_1.52.0__7.0.0
+  - package: oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:bs_1.52.0__7.0.0!immobiliarelabs-backstage-plugin-gitlab
     disabled: false
     pluginConfig:
       dynamicPlugins:
@@ -65,7 +65,7 @@ plugins:
 Restart DevPortal after saving.
 
 :::note
-The `bs_<backstage-version>` segment must match your DevPortal instance. Some platform/chart versions can resolve `{{inherit}}` as the tag instead, letting the plugin catalog index pick the version for you — see [Adding Plugins](./adding.md#oci-artifact-format) for when that applies. If unsure, use the pinned form above.
+The `bs_<backstage-version>` segment must match your DevPortal instance. If your DevPortal is deployed via the `devportal-chart` Helm chart (0.1.21+), use `oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:{{inherit}}` instead (no `!` needed there) — see [Adding Plugins](./adding.md#oci-artifact-format) for the full distinction.
 :::
 
 ---
