@@ -120,7 +120,7 @@ See [Adding Plugins](../plugins/adding.md#via-yaml-override) for how operator-mo
 
 ### OAuth / DCR configuration (self-hosted)
 
-External clients authenticate via OAuth 2.1 with Dynamic Client Registration (DCR) — each user authenticates as their own Backstage identity (`user:default/<name>`), established on first authorization in the client, so permissions and RBAC apply per that identity rather than a shared service account. This configuration is already baked into the base image when using the V2 unified image. For reference, the relevant app-config blocks are:
+External clients authenticate via OAuth 2.1 with Dynamic Client Registration (DCR) — each user authenticates as their own Backstage identity (`user:default/<name>`), established on first authorization in the client, so permissions and RBAC apply per that identity rather than a shared service account. This configuration is already baked into the base image when using the V2 unified image **and running its default config chain**. If your deployment assembles its own `--config` chain (an operator-rendered fork chart, an RHDH-style shell, or any setup that does not load the image's `app-config.production.yaml`), the blocks below are NOT picked up automatically — declare them explicitly in your app-config. Without them the backend never registers the root `/.well-known/oauth-protected-resource` and `/.well-known/oauth-authorization-server` routes, the frontend catch-all answers those URLs with `index.html`, and every MCP client fails at discovery with an error like `SDK auth failed: Failed to parse JSON`. The relevant app-config blocks are:
 
 ```yaml
 auth:
@@ -143,6 +143,26 @@ backend:
 Prerequisites:
 - `permission.enabled: true`
 - Persistent database (Postgres) to preserve signing keys and sessions across restarts
+
+### Consent page requirement (self-hosted)
+
+Enabling `mcp-actions-backend` and the DCR blocks above is not enough on its own: during authorization the backend redirects the user's browser to `/oauth2/authorize/:sessionId`, a **frontend** page where the user approves or rejects the client. The flow needs that page to exist:
+
+- **Default DevPortal frontend (base image / SaaS)**: the consent page ships built-in — nothing to do.
+- **Dynamic-plugin shells (RHDH-style frontends, fork charts)**: the route does not exist and the browser lands on a 404 after the redirect. Enable the `backstage-plugin-auth` dynamic plugin (upstream Backstage's `@backstage/plugin-auth` frontend, which mounts the consent page under `/oauth2/*`):
+
+```yaml
+plugins:
+  - disabled: false
+    package: oci://quay.io/veecode/backstage:bs_<backstage-version>!backstage-plugin-auth
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          backstage.plugin-auth:
+            dynamicRoutes:
+              - path: /oauth2/*
+                importName: Router
+```
 
 ## For developers
 
@@ -223,6 +243,8 @@ Use `http://localhost:7007/...` (loopback) for the DevPortal MCP entry — `mcp-
 |---|---|---|
 | `Plugin 'mcp-actions' is already registered` on boot | Activated via both static import and dynamic plugin | Remove one of the activations |
 | `401` when connecting an MCP client | Expired session or token | Re-run the OAuth authorization flow in the client |
+| `SDK auth failed: Failed to parse JSON` when connecting | `/.well-known/oauth-*` discovery routes answered by the frontend catch-all (HTML) — DCR blocks not in the active config chain | Declare the OAuth/DCR app-config blocks explicitly (see [OAuth / DCR configuration](#oauth--dcr-configuration-self-hosted)) |
+| Browser opens `/oauth2/authorize/...` and shows a portal 404 | Consent page missing from the frontend (dynamic-plugin shells don't ship it) | Enable the `backstage-plugin-auth` dynamic plugin (see [Consent page requirement](#consent-page-requirement-self-hosted)) |
 | `405` on GET `/api/mcp-actions/v1` | Expected — MCP uses POST | Validate via an MCP client, not a browser |
 | Tools missing in client | Incomplete `pluginSources` list | Review `pluginSources` in `pluginConfig` |
 | AI Chat not activating in portal | Invalid API key or wrong provider | Fix the key and reapply the configuration |
