@@ -24,7 +24,7 @@ All CI/CD plugins described here are **preloaded in the DevPortal image and disa
 | [GitHub Workflows](./GitHubWorkflows.md) | Manual GitHub workflow trigger + cards | `veecode-platform-backstage-plugin-github-workflows-dynamic` |
 | [Jenkins](./bundled/jenkins.md) | Jenkins build status | `backstage-community-plugin-jenkins` + backend |
 | [Azure DevOps](./bundled/azure-devops.md) | Azure Pipelines + Pull Requests | `backstage-community-plugin-azure-devops-dynamic` |
-| [GitLab Pipelines](./GitLabPipelines.md) | GitLab CI pipeline trigger and status | OCI: `oci://quay.io/veecode/gitlab:bs_1.48.4!immobiliarelabs-backstage-plugin-gitlab` |
+| [GitLab Pipelines](./GitLabPipelines.md) | GitLab CI pipeline trigger and status | OCI: `oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:bs_1.52.0__7.0.0!immobiliarelabs-backstage-plugin-gitlab` |
 
 ---
 

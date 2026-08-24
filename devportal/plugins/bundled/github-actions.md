@@ -37,7 +37,7 @@ To enable manually, add the following to your `dynamic-plugins.yaml`:
 
 ```yaml
 plugins:
-  - package: oci://${PLUGIN_REGISTRY}/github-actions:bs_1.48.4!backstage-community-plugin-github-actions
+  - package: oci://${PLUGIN_REGISTRY}/backstage-community-plugin-github-actions:bs_1.52.0__0.22.0!backstage-community-plugin-github-actions
     disabled: false
     pluginConfig:
       dynamicPlugins:

@@ -42,7 +42,7 @@ In the customer portal, go to **Configure → Plugins YAML** and edit the `plugi
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/<workspace>:bs_<backstage-version>!<plugin-package>
+  - package: oci://quay.io/veecode/<plugin-name>:bs_<backstage-version>__<plugin-version>!<plugin-name>
     disabled: false
     pluginConfig:
       dynamicPlugins:
@@ -61,17 +61,59 @@ plugins:
 
 ### OCI artifact format
 
-OCI artifacts published by VeeCode follow this format:
+VeeCode publishes one OCI image per plugin, named from the plugin's npm
+package (`@` removed, `/` → `-`). Which reference format you write depends on
+how your DevPortal is deployed:
+
+**Deployed via the `devportal-chart` Helm chart, version 0.1.21 or later** —
+use the bare, index-resolved form. There is no `!selector`: the image
+contains exactly one plugin, and the chart's catalog index
+(`quay.io/veecode/plugin-catalog-index`) resolves the actual version for you:
 
 ```
-oci://quay.io/veecode/<workspace>:bs_<backstage-version>!<plugin-name>
+oci://quay.io/veecode/<plugin-name>:{{inherit}}
 ```
 
-- **workspace**: directory name under `workspaces/` in the [`devportal-plugin-export-overlays`](https://github.com/veecode-platform/devportal-plugin-export-overlays) repo (e.g., `gitlab`, `tech-insights`, `roadie-backstage-plugins`). Each workspace bundles all plugins from one upstream source into a single image; the `!<plugin-name>` part of the reference selects the specific plugin inside that image.
-- **backstage-version**: Backstage version of your DevPortal instance, as a `bs_<version>` tag (e.g., `bs_1.49.4`). Must match — a plugin built for `1.48.4` will not load on a `1.49.4` instance. See [Discovering your Backstage version](#discovering-your-backstage-version) below.
+```yaml
+- package: oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:{{inherit}}
+```
+
+This is the upstream RHDH convention (`dynamic-plugins.default.yaml` +
+`{{inherit}}` + `CATALOG_INDEX_IMAGE`), and it's the recommended form on this
+path — a plugin patch release propagates without editing YAML.
+
+**Deployed as the standalone DevPortal image** (self-hosted Docker/Kubernetes
+below, or the SaaS customer portal) — pin the version and append
+`!<plugin-name>` (repeating the plugin name as the selector). The installer
+this image ships with today still requires the `!` separator even for a
+one-image-per-plugin reference:
+
+```
+oci://quay.io/veecode/<plugin-name>:bs_<backstage-version>__<plugin-version>!<plugin-name>
+```
+
+```yaml
+- package: oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:bs_1.52.0__7.0.0!immobiliarelabs-backstage-plugin-gitlab
+```
+
 - **plugin-name**: npm package name with `@` removed and `/` replaced by `-`. Examples: `@immobiliarelabs/backstage-plugin-gitlab` → `immobiliarelabs-backstage-plugin-gitlab`; `@roadiehq/backstage-plugin-argo-cd` → `roadiehq-backstage-plugin-argo-cd`.
+- **backstage-version**: Backstage version of your DevPortal instance (e.g., `1.52.0`). Must match — a plugin built for `1.48.4` will not load on a `1.52.0` instance. See [Discovering your Backstage version](#discovering-your-backstage-version) below.
+- **plugin-version**: the exact upstream plugin release, e.g. `7.0.0`.
 
-You rarely type this by hand — the variable form `oci://${PLUGIN_REGISTRY}/<workspace>:bs_${BACKSTAGE_VERSION}!<plugin-name>` lets the entrypoint substitute the registry and version for you at boot (see [Dynamic Plugins](/devportal/concepts/dynamic-plugins)).
+A future DevPortal release will drop the `!<plugin-name>` requirement and
+support `{{inherit}}` on this path too; until then, use the pinned form with
+the selector.
+
+The variable form `oci://${PLUGIN_REGISTRY}/<plugin-name>:bs_<backstage-version>__<plugin-version>!<plugin-name>`
+lets the entrypoint substitute the registry for a mirror without editing the rest of the reference.
+
+:::note Bundle images from before this migration keep working
+Older references of the form `oci://quay.io/veecode/<workspace>:bs_<version>!<plugin-name>`
+(one image per workspace, multiple plugins selected via `!`) are not going
+away — existing `dynamic-plugins.yaml` files with that syntax keep resolving
+indefinitely. The per-plugin syntax above is what new installs and new plugin
+entries should use.
+:::
 
 #### Discovering your Backstage version
 
@@ -96,60 +138,54 @@ The boot log prints the same value once resolved: `VEECODE: resolving ${BACKSTAG
 
 ### Finding the OCI reference for a plugin
 
-Common workspaces you will see in the wild:
-
-| Workspace | Provides |
-|---|---|
-| `gitlab` | GitLab integration (immobiliarelabs) |
-| `tech-insights` | Tech Insights scorecards |
-| `roadie-backstage-plugins` | Roadie community plugins (Argo CD, AWS, etc.) |
-| `argocd` | Argo CD plugin |
-| `sonarqube` | SonarQube quality scorecards |
-| `keycloak` | Keycloak SSO + group sync |
-| `aws-ecs` | AWS ECS integration |
-| `mcp-integrations` / `mcp-chat` | MCP plugins |
-
-This list is not exhaustive — there are 60+ workspaces. For any plugin not in the table, use one of the two discovery paths below.
-
 **Path A — Marketplace (fastest).** Open the in-portal Marketplace, search for the plugin, and the card shows the exact `package:` reference to copy into your YAML. The Marketplace consumes `quay.io/veecode/plugin-catalog-index:latest` — the same index the entrypoint downloads at boot — which aggregates every published plugin's metadata, so this is the most up-to-date source.
 
 **Path B — Inspect the export-overlays repo (when you need to verify or you don't have Marketplace access).**
 
-1. Open [`veecode-platform/devportal-plugin-export-overlays`](https://github.com/veecode-platform/devportal-plugin-export-overlays/tree/main/workspaces).
-2. Find the workspace that packages the plugin's upstream repo. The workspace name usually matches the upstream npm scope or repo: `@roadiehq/*` → `roadie-backstage-plugins`; `@immobiliarelabs/backstage-plugin-gitlab` → `gitlab`; standalone plugins like `argocd` get their own workspace.
-3. Open `workspaces/<workspace>/plugins-list.yaml`. **If the plugin is commented out, it is not currently published — there is no OCI artifact for it.**
-4. If active, open `workspaces/<workspace>/metadata/<plugin-name>.yaml`. The `dynamicArtifact` field is the authoritative reference to copy into your `dynamic-plugins.yaml`.
+The [`devportal-plugin-export-overlays`](https://github.com/veecode-platform/devportal-plugin-export-overlays) repo organizes plugin *sources* into `workspaces/<workspace>/` directories — one workspace per upstream repo, which can contain several plugin packages. That grouping is a build-time concept only; it no longer appears in the OCI reference itself.
+
+1. Open [`workspaces/`](https://github.com/veecode-platform/devportal-plugin-export-overlays/tree/main/workspaces) and find the workspace that packages the plugin's upstream repo. The workspace name usually matches the upstream npm scope or repo: `@roadiehq/*` → `roadie-backstage-plugins`; `@immobiliarelabs/backstage-plugin-gitlab` → `gitlab`; standalone plugins like `argocd` get their own workspace.
+2. Open `workspaces/<workspace>/plugins-list.yaml`. **If the plugin is commented out, it is not currently published — there is no OCI artifact for it.**
+3. If active, open `workspaces/<workspace>/metadata/<plugin-name>.yaml` to confirm the plugin's exact npm package name and version — normalize it (`@` removed, `/` → `-`) to get the per-plugin image name.
 
 ```bash
 # Programmatic search across all workspaces:
 git clone https://github.com/veecode-platform/devportal-plugin-export-overlays
-grep -r "dynamicArtifact" workspaces/ | grep -i "<plugin-name-substring>"
+grep -r "packageName" workspaces/ | grep -i "<plugin-name-substring>"
 ```
 
-:::caution `dynamicArtifact` can also be a local path — not all entries are OCI references
-Most `dynamicArtifact` values look like `oci://quay.io/veecode/<workspace>:bs_<version>!<plugin-name>` and are usable directly in any DevPortal. **But some entries are local paths** like `./dynamic-plugins/dist/<plugin-name>`. That syntax means the plugin is **preloaded inside the DevPortal image** — it is not available as a pull-at-runtime OCI artifact, and you cannot use that string in your own `dynamic-plugins.yaml` unless your distro already bundles the plugin's `dist/` folder. If you need the plugin and the `dynamicArtifact` is a local path, your options are: rebuild your own image with the plugin bundled, or fork `devportal-plugin-export-overlays` and add an OCI export step for it.
+:::caution `dynamicArtifact` in metadata may still show the old bundle form
+Some `workspaces/<workspace>/metadata/<plugin-name>.yaml` files have not yet been
+updated to the per-plugin image and still show `dynamicArtifact:
+oci://quay.io/veecode/<workspace>:bs_<version>!<plugin-name>`. That reference
+still works, but for new installs prefer building the per-plugin reference
+yourself from the `packageName` field (see [OCI artifact format](#oci-artifact-format)
+above) rather than copying `dynamicArtifact` verbatim. **Some entries are also
+local paths** like `./dynamic-plugins/dist/<plugin-name>`. That syntax means
+the plugin is **preloaded inside the DevPortal image** — it is not available
+as a pull-at-runtime OCI artifact, and you cannot use that string in your own
+`dynamic-plugins.yaml` unless your distro already bundles the plugin's `dist/`
+folder. If you need the plugin and it's only shipped as a local path, your
+options are: rebuild your own image with the plugin bundled, or fork
+`devportal-plugin-export-overlays` and add an OCI export step for it.
 :::
 
 :::caution Not every Backstage plugin is published as an OCI artifact by VeeCode
 If a plugin's `plugins-list.yaml` entry is commented out (or the plugin doesn't appear in any workspace), VeeCode is not currently shipping a dynamic build for it. You can still enable it by referencing the npm package directly (`package: '@npm-scope/plugin-name'`) provided the upstream publishes a dynamic build, or you can fork `devportal-plugin-export-overlays` and add the plugin to a workspace yourself.
 :::
 
-#### When two workspaces could plausibly contain the same plugin
+#### When two vendors could plausibly provide the same plugin
 
-Some upstream functionalities are implemented by **multiple independent npm packages** from different vendors — Argo CD is the canonical example. The community publishes one implementation; Roadie publishes another. Both can be found in the export-overlays repo, in different workspaces. Pick deliberately:
+Some upstream functionalities are implemented by **multiple independent npm packages** from different vendors — Argo CD is the canonical example. The community publishes one implementation; Roadie publishes another. Both are built in the export-overlays repo (in different workspaces), and each package gets its own per-plugin image. Pick deliberately:
 
-| You want... | Use workspace | Packages |
-|---|---|---|
-| Argo CD deployment status + history, OCI-available frontend + backend | `argocd` | `@backstage-community/plugin-argocd` (frontend, OCI) + `@backstage-community/plugin-argocd-backend` (backend, OCI) |
-| Roadie's Argo CD overview cards + a scaffolder action to create Argo CD resources | `roadie-backstage-plugins` | `@roadiehq/backstage-plugin-argo-cd-backend` (OCI) + `@roadiehq/scaffolder-backend-argocd` (OCI). **The Roadie frontend has no OCI artifact** (its `dynamicArtifact` is a local path) — pair the Roadie backend with a custom-bundled frontend, or use the community frontend instead. |
+| You want... | Packages |
+|---|---|
+| Argo CD deployment status + history, OCI-available frontend + backend | `@backstage-community/plugin-argocd` (frontend, OCI) + `@backstage-community/plugin-argocd-backend` (backend, OCI) |
+| Roadie's Argo CD overview cards + a scaffolder action to create Argo CD resources | `@roadiehq/backstage-plugin-argo-cd-backend` (OCI) + `@roadiehq/scaffolder-backend-argocd` (OCI). **The Roadie frontend has no OCI artifact** (it ships as a local path) — pair the Roadie backend with a custom-bundled frontend, or use the community frontend instead. |
 
 The two implementations share the same `argocd.appLocatorMethods` schema in `app-config.yaml`, so you can swap which backend you load without rewriting your config — but they expose different frontend component names and entity card layouts.
 
-The same disambiguation pattern applies whenever you see plugins from `@backstage-community/*` and `@roadiehq/*` (or any other vendor) for the same upstream tool. Check both workspaces, compare features, and pick the one whose frontend exists as OCI if you need pull-at-runtime install.
-
-:::note
-The README of `devportal-plugin-export-overlays` is partially stale — it mentions `ghcr.io/veecode-platform/...` as the registry and a `bs_<version>__<plugin-version>` tag format. The actual published artifacts use `quay.io/veecode/...` with `bs_<version>` only. Trust the `dynamicArtifact` field in each plugin's `metadata/<plugin>.yaml` — that's what the CI pipeline writes and what the Marketplace reads.
-:::
+The same disambiguation pattern applies whenever you see plugins from `@backstage-community/*` and `@roadiehq/*` (or any other vendor) for the same upstream tool. Compare features, and pick the one whose frontend exists as OCI if you need pull-at-runtime install.
 
 For a complete list of bundled (preloaded) plugins that do not require an OCI reference, see [Bundled Plugins](./bundled/index.md).
 
@@ -159,7 +195,7 @@ Mount a `dynamic-plugins.yaml` override file with a top-level `plugins:` list:
 
 ```yaml
 plugins:
-  - package: 'oci://quay.io/veecode/gitlab:bs_${BACKSTAGE_VERSION}!immobiliarelabs-backstage-plugin-gitlab'
+  - package: 'oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:bs_1.52.0__7.0.0!immobiliarelabs-backstage-plugin-gitlab'
     disabled: false
     pluginConfig: {}
 ```

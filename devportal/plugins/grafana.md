@@ -32,11 +32,11 @@ If the Marketplace shows a Grafana plugin entry (the catalog is updated continuo
 
 ### Via `dynamic-plugins.yaml`
 
-If the OCI artifact is not available, you can still reference the upstream npm package or your own build. The illustrative OCI entry below uses placeholder workspace/tag — see the caution box above for the current publishing status.
+If the OCI artifact is not available, you can still reference the upstream npm package or your own build. The illustrative OCI entry below uses a placeholder plugin name/tag — see the caution box above for the current publishing status.
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/<workspace>:<tag>!roadiehq-backstage-plugin-grafana
+  - package: oci://quay.io/veecode/<plugin-name>:bs_<backstage-version>__<plugin-version>!<plugin-name>
     disabled: false
     pluginConfig:
       dynamicPlugins:
@@ -53,7 +53,7 @@ plugins:
                       - isGrafanaAvailable
 ```
 
-Replace `<workspace>` and `<tag>` with the values that match your instance. See [Adding Plugins](./adding.md) for details on the OCI artifact format.
+The plugin image name is the npm package name normalized (`@` removed, `/` → `-`). See [Adding Plugins](./adding.md) for details on the OCI artifact format.
 
 ---
 

@@ -26,7 +26,7 @@ This controls which plugins are present at all. In V2 there are two ways to load
 ```yaml
 # dynamic-plugins.yaml — enable a bundled plugin no preset covers
 plugins:
-  - package: oci://${PLUGIN_REGISTRY}/grafana:bs_${BACKSTAGE_VERSION}!backstage-plugin-grafana
+  - package: oci://${PLUGIN_REGISTRY}/backstage-community-plugin-grafana:bs_1.52.0__0.17.0!backstage-community-plugin-grafana
     disabled: false
 ```
 
@@ -86,17 +86,17 @@ docker logs devportal 2>&1 | grep -E "======= (Installing|Skipping|Using pre-ins
 A healthy load:
 
 ```
-======= Installing dynamic plugin oci://quay.io/veecode/backstage:bs_1.49.4!...
-	==> Successfully installed dynamic plugin oci://quay.io/veecode/backstage:bs_1.49.4!...
+======= Installing dynamic plugin oci://quay.io/veecode/backstage-community-plugin-grafana:bs_1.52.0__0.17.0!backstage-community-plugin-grafana
+	==> Successfully installed dynamic plugin oci://quay.io/veecode/backstage-community-plugin-grafana:bs_1.52.0__0.17.0!backstage-community-plugin-grafana
 ```
 
 A failed load ends with the summary that triggers exit 78:
 
 ```
-======= ERROR: Failed to install plugin oci://quay.io/veecode/backstage:...: <error>
+======= ERROR: Failed to install plugin oci://quay.io/veecode/backstage-community-plugin-grafana:...: <error>
 	==> Skipping this plugin and continuing with the rest...
 ======= INSTALL SUMMARY: 1 of 12 plugins failed:
-	- oci://quay.io/veecode/backstage:...: <error>
+	- oci://quay.io/veecode/backstage-community-plugin-grafana:...: <error>
 ```
 
 Common failure signatures and what they mean:
@@ -104,7 +104,7 @@ Common failure signatures and what they mean:
 | Log signature | What happened | Likely cause |
 |---|---|---|
 | `======= ERROR: Failed to install plugin ... npm ERR! 404` | npm package or version doesn't exist | Typo in `package:`, or version not published |
-| `======= ERROR: Failed to install plugin ... skopeo ... non-zero exit status 1` | OCI image not found or unreachable | Wrong workspace/tag, registry unreachable, or a bad `PLUGIN_REGISTRY` mirror prefix — see [Finding the OCI reference](/devportal/plugins/adding) |
+| `======= ERROR: Failed to install plugin ... skopeo ... non-zero exit status 1` | OCI image not found or unreachable | Wrong plugin image name/tag, registry unreachable, or a bad `PLUGIN_REGISTRY` mirror prefix — see [Finding the OCI reference](/devportal/plugins/adding) |
 | `======= ERROR: ... hash of the downloaded package ... does not match the provided integrity hash` | Tampered or wrong-version artifact | Regenerate or remove the `integrity:` field, or set `SKIP_INTEGRITY_CHECK=true` for a trusted source |
 | `VEECODE: FATAL — /app/dynamic-plugins.yaml is not valid YAML; aborting boot` | Your mounted `dynamic-plugins.yaml` doesn't parse | YAML syntax error — boot aborts **before** install runs |
 | `InstallException: Config key '...' defined differently for 2 dynamic plugins` / duplicate ref rejection | The same plugin is enabled via two different refs | Reconcile the preset and your operator override to a single ref |

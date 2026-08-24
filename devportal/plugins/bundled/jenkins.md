@@ -41,7 +41,7 @@ To enable manually, add the following to your `dynamic-plugins.yaml`:
 
 ```yaml
 plugins:
-  - package: oci://${PLUGIN_REGISTRY}/jenkins:bs_1.48.4!backstage-community-plugin-jenkins-backend
+  - package: oci://${PLUGIN_REGISTRY}/backstage-community-plugin-jenkins-backend:bs_1.52.0__0.27.0!backstage-community-plugin-jenkins-backend
     disabled: false
     pluginConfig:
       jenkins:
@@ -51,7 +51,7 @@ plugins:
             username: ${JENKINS_USERNAME}
             apiKey: ${JENKINS_TOKEN}
 
-  - package: oci://${PLUGIN_REGISTRY}/jenkins:bs_1.48.4!backstage-community-plugin-jenkins
+  - package: oci://${PLUGIN_REGISTRY}/backstage-community-plugin-jenkins:bs_1.52.0__0.30.0!backstage-community-plugin-jenkins
     disabled: false
     pluginConfig:
       dynamicPlugins:
