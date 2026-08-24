@@ -106,7 +106,7 @@ Do not also activate `mcp-actions-backend` via a raw `dynamic-plugins.yaml` moun
 ```yaml
 plugins:
   - disabled: false
-    package: oci://quay.io/veecode/backstage:bs_<backstage-version>!backstage-plugin-mcp-actions-backend
+    package: oci://quay.io/veecode/backstage-plugin-mcp-actions-backend:bs_1.52.0__0.1.14
     pluginConfig:
       backend:
         actions:
@@ -154,7 +154,7 @@ Enabling `mcp-actions-backend` and the DCR blocks above is not enough on its own
 ```yaml
 plugins:
   - disabled: false
-    package: oci://quay.io/veecode/backstage:bs_<backstage-version>!backstage-plugin-auth
+    package: oci://quay.io/veecode/backstage-plugin-auth:bs_1.52.0__0.1.9
     pluginConfig:
       dynamicPlugins:
         frontend:

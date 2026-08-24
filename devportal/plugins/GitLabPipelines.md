@@ -23,11 +23,11 @@ The GitLab Pipelines plugin integrates GitLab CI with your DevPortal component. 
 
 ## Plugin package
 
-The GitLab Pipelines plugin is available as an OCI artifact from `quay.io/veecode/gitlab`. It is **not preloaded** in the distro image — add it via `dynamic-plugins.yaml` or the Marketplace.
+The GitLab Pipelines plugin is available as an OCI artifact from `quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab`. It is **not preloaded** in the distro image — add it via `dynamic-plugins.yaml` or the Marketplace.
 
 | OCI Reference | Role |
 |---|---|
-| `oci://quay.io/veecode/gitlab:bs_1.48.4!immobiliarelabs-backstage-plugin-gitlab` | Frontend + backend |
+| `oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:bs_1.52.0__7.0.0` | Frontend + backend |
 
 ---
 
@@ -37,7 +37,7 @@ Add the following to your `dynamic-plugins.yaml`:
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/gitlab:bs_1.48.4!immobiliarelabs-backstage-plugin-gitlab
+  - package: oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:bs_1.52.0__7.0.0
     disabled: false
     pluginConfig:
       dynamicPlugins:
@@ -65,7 +65,7 @@ plugins:
 Restart DevPortal after saving.
 
 :::note
-Replace `bs_1.48.4` with the Backstage version tag that matches your DevPortal instance. OCI workspace tags must match the deployed Backstage version.
+The `bs_<backstage-version>` segment must match your DevPortal instance. Some platform/chart versions can resolve `{{inherit}}` as the tag instead, letting the plugin catalog index pick the version for you — see [Adding Plugins](./adding.md#oci-artifact-format) for when that applies. If unsure, use the pinned form above.
 :::
 
 ---

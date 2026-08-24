@@ -34,7 +34,7 @@ To enable manually, add the following to your `dynamic-plugins.yaml`:
 
 ```yaml
 plugins:
-  - package: oci://${PLUGIN_REGISTRY}/backstage:bs_1.49.4!backstage-plugin-kubernetes
+  - package: oci://${PLUGIN_REGISTRY}/backstage-plugin-kubernetes:bs_1.52.0__0.12.20
     disabled: false
     pluginConfig:
       dynamicPlugins:

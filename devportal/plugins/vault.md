@@ -30,7 +30,7 @@ A typical entry looks like:
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/<workspace>:<tag>!backstage-community-plugin-vault
+  - package: oci://quay.io/veecode/<plugin-name>:bs_<backstage-version>__<plugin-version>
     disabled: false
     pluginConfig:
       dynamicPlugins:
@@ -47,7 +47,7 @@ plugins:
                       - isVaultAvailable
 ```
 
-Replace `<workspace>` and `<tag>` with the values that match your instance. See [Adding Plugins](./adding.md) for details on the OCI artifact format.
+The plugin image name is the npm package name normalized (`@` removed, `/` → `-`). See [Adding Plugins](./adding.md) for details on the OCI artifact format.
 
 ---
 

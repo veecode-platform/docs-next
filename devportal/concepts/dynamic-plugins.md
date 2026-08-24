@@ -108,50 +108,68 @@ For the full precedence table when surfaces conflict, see
 
 ## OCI reference shape
 
-OCI plugin references used in presets and `dynamic-plugins.yaml` follow this pattern:
+VeeCode publishes one OCI image per plugin — the image name is the plugin's
+npm package name normalized (`@scope/name` → `scope-name`). There is no
+`!selector` anymore: an image contains exactly one plugin, which the installer
+identifies from the image's own manifest annotation, not from the tag.
+
+There are two ways to reference a plugin:
+
+**Pinned** — pick a specific plugin version yourself. This is the form to use
+today for hand-written `dynamic-plugins.yaml` entries:
 
 ```
-oci://${PLUGIN_REGISTRY}/<workspace>:bs_${BACKSTAGE_VERSION}!<selector>
+oci://quay.io/veecode/<plugin>:bs_<backstage-version>__<plugin-version>
 ```
-
-For example:
 
 ```yaml
-# RBAC UI — workspace "rbac", selector "backstage-community-plugin-rbac"
-- package: oci://${PLUGIN_REGISTRY}/rbac:bs_1.49.4!backstage-community-plugin-rbac
-
-# Marketplace frontend — version tracked via BACKSTAGE_VERSION
-- package: oci://${PLUGIN_REGISTRY}/marketplace:bs_${BACKSTAGE_VERSION}!devportal-marketplace-frontend-dynamic
+# RBAC UI, pinned to Backstage 1.52.0 / plugin 1.52.4
+- package: oci://quay.io/veecode/backstage-community-plugin-rbac:bs_1.52.0__1.52.4
 ```
 
-The four parts:
+**With index** — let the catalog index resolve the version for you, so a
+plugin patch release propagates without editing YAML:
+
+```
+oci://${PLUGIN_REGISTRY}/<plugin>:{{inherit}}
+```
+
+```yaml
+# RBAC UI
+- package: oci://${PLUGIN_REGISTRY}/backstage-community-plugin-rbac:{{inherit}}
+```
+
+`{{inherit}}` is not a template variable substituted by the entrypoint — it
+tells the installer to resolve the actual pinned tag/digest for this plugin
+from the plugin catalog index pulled at boot (`plugin-catalog-index`, see
+[Distribution modes](#distribution-modes) below). This is the upstream RHDH
+convention (`dynamic-plugins.default.yaml` + `{{inherit}}` + `CATALOG_INDEX_IMAGE`).
+Whether it resolves against `quay.io/veecode/plugin-catalog-index` depends on
+your platform/chart version — if unsure, use the pinned form, which always
+works.
 
 - **`${PLUGIN_REGISTRY}`** — defaults to `quay.io/veecode`; substituted by
   `entrypoint.sh`. Override it (e.g. `PLUGIN_REGISTRY=registry.internal/veecode`)
-  to redirect all OCI pulls that use the `${PLUGIN_REGISTRY}` variable form (the
-  large majority of bundled plugins) to an internal mirror without editing any YAML.
-- **`<workspace>`** — the export-overlays workspace that produced the bundle
-  (e.g. `marketplace`, `rbac`, `tech-radar`, `sonarqube`, `backstage`). One
-  workspace can bundle several packages.
-- **`bs_${BACKSTAGE_VERSION}`** — the OCI tag. `${BACKSTAGE_VERSION}` is
-  substituted from `backstage.json`, so a Backstage bump propagates to every
-  reference that uses the variable form. Some entries pin a literal version
-  (e.g. `bs_1.48.4`, `bs_1.49.4`) when the plugin has not yet been re-published
-  under the current tag.
-- **`!<selector>`** — the specific npm package name inside the bundle.
+  to redirect all OCI pulls that use the `${PLUGIN_REGISTRY}` variable form to
+  an internal mirror without editing any YAML. The mirror must host the same
+  per-plugin image names.
+- **`<plugin>`** — the plugin's npm package name with `@` removed and `/`
+  replaced by `-` (e.g. `@immobiliarelabs/backstage-plugin-gitlab` →
+  `immobiliarelabs-backstage-plugin-gitlab`).
 
 Pre-installed chrome plugins use a bare npm package name (no `oci://` prefix)
 with `preInstalled: true`; the install script skips the pull and only merges
 their `pluginConfig:`.
 
-:::caution MCP plugin refs are hardcoded and not redirected by `PLUGIN_REGISTRY`
-The MCP plugin refs (`mcp-actions-backend`, `mcp-integrations`, `mcp-chat`) are
-hardcoded to `quay.io/veecode` and do **not** use the `${PLUGIN_REGISTRY}`
-variable form. Setting `PLUGIN_REGISTRY` does not redirect them. Air-gapped or
-mirror deployments using the `mcp` or `mcp-chat` presets must mirror those
-workspaces (`quay.io/veecode/backstage`, `quay.io/veecode/mcp-integrations`,
-`quay.io/veecode/mcp-chat`) explicitly, or override the refs in a
-`dynamic-plugins.yaml`.
+:::note Bundle images from before this migration keep working
+Instances already running a `oci://.../<workspace>:bs_<version>!<selector>`
+reference are unaffected — those workspace-bundle images are not being
+removed, and existing `dynamic-plugins.yaml` files keep resolving exactly as
+before. The per-plugin naming above is what new installs and new plugin
+entries should use going forward. Check the literal `package:` value of any
+given entry before assuming it uses `${PLUGIN_REGISTRY}` — some entries in the
+default catalog may still hardcode `quay.io/veecode/...` instead of the
+variable form.
 :::
 
 ---
@@ -195,16 +213,15 @@ Three modes are supported by design:
 
 - **Default — runtime OCI pull.** The image ships with no optional plugin bytes.
   At boot, `install-dynamic-plugins.py` pulls each enabled plugin from
-  `quay.io/veecode/<workspace>:<tag>`. No operator config beyond
-  `VEECODE_PRESETS`. Best for cloud/SaaS with outbound registry access.
+  `quay.io/veecode/<plugin>:<tag>` (or resolves `{{inherit}}` against the
+  plugin catalog index). No operator config beyond `VEECODE_PRESETS`. Best for
+  cloud/SaaS with outbound registry access.
 - **Mirror — internal registry.** Set `PLUGIN_REGISTRY=registry.internal/veecode`
   (or any prefix mirroring `quay.io/veecode`). The entrypoint substitutes it
   into every `oci://${PLUGIN_REGISTRY}/...` reference before the install runs —
   no YAML edits needed for the plugins that use the variable form. The mirror must
-  host the same workspace/tag paths. Note that the MCP plugin refs
-  (`mcp-actions-backend`, `mcp-integrations`, `mcp-chat`) are hardcoded to
-  `quay.io/veecode` and are not redirected; see the caution in the
-  [OCI reference shape](#oci-reference-shape) section above.
+  host the same per-plugin image names, plus the `plugin-catalog-index` image
+  itself if any entry uses `{{inherit}}`.
 - **Loaded variant — air-gapped image.** Build a derived image that extracts the
   selected plugin bundles at build time and copies them into
   `/app/dynamic-plugins-root/`. Mark those entries `preInstalled: true` so the
