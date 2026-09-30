@@ -31,6 +31,10 @@ docker run -d --name devportal-dev \
   veecode/devportal:latest
 ```
 
+:::note
+`veecode/devportal:latest` is the 2.x line. To develop against 3.x, use a 3.x version tag instead.
+:::
+
 Re-export and `docker rm -f && docker run` again after each change. This is a much tighter loop than round-tripping through a registry for every iteration — save publishing for when you actually need to distribute the plugin.
 
 ## The wiring surface is bigger than one example shows
