@@ -155,6 +155,10 @@ jobs:
           git add devportal/
           title="docs: bump devportal image tags to ${TITLES}"
           git commit -m "$title"
+          # A fresh checkout has no remote-tracking ref for the bot's branch, and
+          # without one --force-with-lease rejects the push ("stale info") once an
+          # earlier run has pushed the branch. Fetch it first; the first run has none.
+          git fetch origin "+refs/heads/${branch}:refs/remotes/origin/${branch}" || true
           git push --force-with-lease origin "$branch"
           body=$(cat <<EOF
           Automated update of the \`veecode/devportal\` image tags in the docs.
