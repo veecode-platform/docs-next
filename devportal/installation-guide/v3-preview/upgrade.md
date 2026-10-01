@@ -31,7 +31,8 @@ export NAMESPACE=devportal
 export RELEASE=devportal
 export DATABASE_NAME=devportal
 export DB_PREFIX=backstage_plugin_
-export BACKUP_DIR="$PWD/devportal-backup-$(date +%Y%m%d%H%M%S)"
+BACKUP_DIR="$PWD/devportal-backup-$(date +%Y%m%d%H%M%S)"
+export BACKUP_DIR
 
 list_portal_databases() {
   kubectl --namespace "$NAMESPACE" exec deployment/devportal-db -- \
