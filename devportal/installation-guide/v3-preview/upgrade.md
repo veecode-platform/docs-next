@@ -24,7 +24,7 @@ Keep the backup directory private. The database archives can contain sensitive d
 
 ## Step 1: Prepare the release and backup directory
 
-Run these commands in one Bash session. They save the current Helm values so both chart versions use the same configuration.
+Run these commands in one Bash session. They save the values stored for this release. Each chart version supplies its own defaults.
 
 ```bash
 export NAMESPACE=devportal
@@ -52,7 +52,7 @@ mkdir -m 700 "$BACKUP_DIR"
 helm repo add --force-update veecode https://veecode-platform.github.io/next-charts
 helm repo update
 helm list --namespace "$NAMESPACE" --filter "^${RELEASE}$"
-helm get values "$RELEASE" --namespace "$NAMESPACE" --all --output yaml \
+helm get values "$RELEASE" --namespace "$NAMESPACE" --output yaml \
   > "$BACKUP_DIR/values.yaml"
 ```
 
@@ -83,7 +83,7 @@ Keep `databases.txt`, every `.dump` file, `SHA256SUMS`, and `values.yaml` togeth
 
 ## Step 3: Upgrade the chart
 
-Upgrade the existing Helm release to chart version 0.1.26. The command uses the values saved in Step 1.
+Upgrade the existing Helm release to chart version 0.1.26. The command applies the saved release values and uses the defaults from chart 0.1.26.
 
 ```bash
 helm upgrade "$RELEASE" veecode/devportal \
@@ -99,10 +99,14 @@ Wait for the portal deployment and confirm Helm reports chart version 0.1.26:
 ```bash
 kubectl --namespace "$NAMESPACE" rollout status deployment/devportal-developer-hub --timeout=20m
 helm list --namespace "$NAMESPACE" --filter "^${RELEASE}$"
+kubectl --namespace "$NAMESPACE" get deployment/devportal-developer-hub \
+  -o jsonpath='{.spec.template.spec.containers[?(@.name=="backstage-backend")].image}{"\n"}'
 kubectl --namespace "$NAMESPACE" get pods
 ```
 
-Sign in with the same account you used before the upgrade. Confirm that the catalog location and entity, installed marketplace package, Scaffolder task, and user setting you noted before the upgrade are still present.
+Confirm that Helm reports chart 0.1.26. The deployment image should be `docker.io/veecode/devportal@sha256:28d1bafed0cfa3cdb3ceab1868ccc4a729410e0921b352457e167ab7cbfb3e5a`.
+
+Check that the portal pods are ready. Sign in with the same account and confirm that the catalog location and entity, installed marketplace package, Scaffolder task, and user setting you noted before the upgrade are still present.
 
 ## Step 5: Restore the backup and return to chart 0.1.25
 
@@ -139,10 +143,14 @@ Wait for the portal and confirm Helm reports chart version 0.1.25:
 ```bash
 kubectl --namespace "$NAMESPACE" rollout status deployment/devportal-developer-hub --timeout=20m
 helm list --namespace "$NAMESPACE" --filter "^${RELEASE}$"
+kubectl --namespace "$NAMESPACE" get deployment/devportal-developer-hub \
+  -o jsonpath='{.spec.template.spec.containers[?(@.name=="backstage-backend")].image}{"\n"}'
 kubectl --namespace "$NAMESPACE" get pods
 ```
 
-Sign in with the same account. Confirm that the catalog location and entity, installed marketplace package, Scaffolder task, and user setting match the state you recorded before the upgrade.
+Confirm that Helm reports chart 0.1.25. The deployment image should be `docker.io/veecode/devportal@sha256:7a3d61de5e5e8f07c5f612e8235b2dc8d46e97418e4e4d1bf40ca2c500157347`.
+
+Check that the portal pods are ready. Sign in with the same account and confirm that the catalog location and entity, installed marketplace package, Scaffolder task, and user setting match the state you recorded before the upgrade.
 
 ## Clean up the backup files
 
