@@ -329,6 +329,7 @@ When 3.x is in production and you will not go back, remove the 2.x release and i
 
 ```bash
 helm uninstall "$V2_RELEASE" -n "$NAMESPACE"
+kubectl -n "$NAMESPACE" wait --for=delete pod -l app.kubernetes.io/instance="$V2_RELEASE" --timeout=180s
 for db in $(kubectl -n "$NAMESPACE" exec pg-client -- psql -At -c "select datname from pg_database where datname like 'backstage\_plugin\_%'"); do
   kubectl -n "$NAMESPACE" exec pg-client -- psql -c "drop database \"$db\""
 done
