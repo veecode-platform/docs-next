@@ -35,10 +35,15 @@ BACKUP_DIR="$PWD/devportal-backup-$(date +%Y%m%d%H%M%S)"
 export BACKUP_DIR
 
 list_portal_databases() {
-  kubectl --namespace "$NAMESPACE" exec deployment/devportal-db -- \
+  kubectl --namespace "$NAMESPACE" exec --stdin deployment/devportal-db -- \
     psql -U devportal -d postgres -At \
-    -v database="$DATABASE_NAME" -v prefix="$DB_PREFIX" \
-    -c "SELECT datname FROM pg_database WHERE datname = :'database' OR left(datname, length(:'prefix')) = :'prefix' ORDER BY datname"
+    -v database="$DATABASE_NAME" -v prefix="$DB_PREFIX" <<'SQL'
+SELECT datname
+FROM pg_database
+WHERE datname = :'database'
+   OR left(datname, length(:'prefix')) = :'prefix'
+ORDER BY datname;
+SQL
 }
 
 umask 077
