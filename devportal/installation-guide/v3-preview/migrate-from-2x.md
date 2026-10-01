@@ -16,7 +16,20 @@ The migration goes to a **fresh database**. Nothing is converted in place:
 
 - The 3.x release gets its own databases. It never opens the 2.x databases.
 - The 2.x release stays installed but stopped. Going back to 2.x means removing the 3.x release and restoring the 2.x one, on the data it already has.
-- The portal is down from the moment you stop 2.x until the 3.x portal has started for the first time, usually a few minutes.
+- The portal is down from the moment you stop 2.x until the 3.x portal has started for the first time. Plan for several minutes: the first start of 3.x installs the default plugins.
+
+## Tested with
+
+This guide was followed end to end, command by command, with:
+
+- DevPortal 2.x: chart `veecode-devportal-platform` 0.5.2 (DevPortal 2.2.3), external PostgreSQL 16, the `recommended` and `keycloak` presets, Keycloak 26, one Ingress.
+- DevPortal 3.x: chart `devportal` 0.1.26, which installs image 3.0.0-beta.10.
+- Kubernetes: a single-node k3s 1.31 cluster. The 3.x portal was reached through `kubectl port-forward`.
+
+Two parts were not run:
+
+- **SQLite.** The test used external PostgreSQL only. A 2.x install on SQLite differs in two ways that come from reading the charts, not from a run. The 2.x data lives on a volume that the chart creates, and `helm uninstall` of that release deletes the volume, so never uninstall such a release while you still need it. The 3.x chart always connects to PostgreSQL, so you need a PostgreSQL server before step 3, and the data of the SQLite install does not move to it.
+- **An Ingress for 3.x.** Step 6 reaches the portal through a port-forward. Exposing 3.x through an Ingress follows the 3.x install guide.
 
 ## What comes back and what does not
 
@@ -28,6 +41,8 @@ The migration goes to a **fresh database**. Nothing is converted in place:
 | Locations registered in the portal (Catalog, Register existing component) | **Do not carry over.** List them in step 1 and register them again in step 7. |
 | Scaffolder task history | **Does not carry over.** |
 | User settings, such as the theme | **Do not carry over.** |
+
+Permissions also differ. See [Permissions are off in 3.x](#permissions-are-off-in-3x).
 
 Step 4 translates the settings this guide was tested with: external PostgreSQL, Keycloak sign-in and catalog locations. Any other setting in your 2.x values has no automatic translation. Map it by hand against the `values.yaml` of the 3.x chart.
 
@@ -44,8 +59,6 @@ You need:
 - a real identity provider for the 3.x portal. The examples use Keycloak, which is what the 2.x `keycloak` preset configured;
 - the 3.x install guide ("Install DevPortal 3.x"), which covers everything about installing 3.x that this page does not repeat.
 
-This guide was followed end to end with chart `veecode-devportal-platform` 0.5.2 (DevPortal 2.x) moving to chart `devportal` 0.1.26, which installs image 3.0.0-beta.10, on Kubernetes with PostgreSQL 16 and Keycloak 26.
-
 Set these variables once. Every command below uses them:
 
 ```bash
@@ -53,24 +66,27 @@ export NAMESPACE=devportal
 export V2_RELEASE=devportal
 export V2_SECRET=devportal-credentials
 export V3_RELEASE=devportal3
+export PG_IMAGE=postgres:16
 ```
 
 - `NAMESPACE` and `V2_RELEASE` come from `helm list --all-namespaces`.
 - `V2_SECRET` is the Secret named by `existingSecret` in your 2.x values (`helm get values "$V2_RELEASE" -n "$NAMESPACE"`).
 - `V3_RELEASE` is the name of the new release. It must differ from `V2_RELEASE`.
+- `PG_IMAGE` is a PostgreSQL client image. Use the major version of your server or a newer one, because `pg_dump` refuses a server newer than itself.
 
 ## Step 1: Take stock of the 2.x install
 
-Save the 2.x values and note the current revision of the release. You need both for the way back:
+Save the 2.x values, and note the chart version and the current revision of the release. You need both for the way back:
 
 ```bash
 helm get values "$V2_RELEASE" -n "$NAMESPACE" -o yaml > v2-values.yaml
+export V2_CHART_VERSION=$(helm list -n "$NAMESPACE" -o json | jq -r --arg r "$V2_RELEASE" '.[] | select(.name == $r) | .chart | sub("^veecode-devportal-platform-"; "")')
 export V2_REVISION=$(helm history "$V2_RELEASE" -n "$NAMESPACE" -o json | jq -r 'map(select(.status == "deployed")) | last | .revision')
-echo "2.x chart revision: $V2_REVISION"
+echo "2.x chart $V2_CHART_VERSION, revision $V2_REVISION"
 export V2_DEPLOYMENT=$(kubectl -n "$NAMESPACE" get deploy -l app.kubernetes.io/instance="$V2_RELEASE" -o name)
 ```
 
-List the **marketplace installs**. The 2.x portal keeps them in a file that mirrors its database:
+List the **marketplace installs**. The 2.x portal keeps them in a file that it regenerates from its database at every start:
 
 ```bash
 kubectl -n "$NAMESPACE" exec "$V2_DEPLOYMENT" -- cat /app/data/extensions-install.yaml | tee marketplace-installs-2x.yaml | grep 'package:'
@@ -78,17 +94,46 @@ kubectl -n "$NAMESPACE" exec "$V2_DEPLOYMENT" -- cat /app/data/extensions-instal
 
 List the **locations registered in the portal**. In the catalog, set the Kind filter to Location and write down the target of each entry. Locations that come from `catalog.locations` in your values need no action: they are in `v2-values.yaml` and come back by themselves.
 
-Count the entities of your own sources for the check in step 6. Compare only those. The portal also adds entities of its own, such as the marketplace catalog, and their number differs between 2.x and 3.x.
+Count the entities that come from your `catalog.locations` sources, for the check in step 6. Compare only those. The portal also adds entities of its own, such as the marketplace catalog, and their number differs between 2.x and 3.x.
 
 ## Step 2: Stop the 2.x release
 
-Scale the 2.x release to zero and remove its ingress, so that the 3.x release can take over the host name. The release, its Secret, its volumes and its databases stay where they are:
+Scale the 2.x release to zero and remove its Ingress, so that the 3.x release can take over the host name. The release, its Secret, its volumes and its databases stay where they are. Passing `--version` keeps the chart at the version that runs today, because without it Helm upgrades the release to the newest 2.x chart:
 
 ```bash
-helm upgrade "$V2_RELEASE" veecode-devportal-platform --repo https://veecode-platform.github.io/next-charts -n "$NAMESPACE" --reuse-values --set replicaCount=0 --set ingress.enabled=false
+helm upgrade "$V2_RELEASE" veecode-devportal-platform --repo https://veecode-platform.github.io/next-charts --version "$V2_CHART_VERSION" -n "$NAMESPACE" --reuse-values --set replicaCount=0 --set ingress.enabled=false
+kubectl -n "$NAMESPACE" wait --for=delete pod -l app.kubernetes.io/instance="$V2_RELEASE" --timeout=180s
 ```
 
-Add `--version` with the chart version that `helm list` shows for your release if you want to be certain that the upgrade leaves it unchanged.
+Then fingerprint the 2.x databases. Start a PostgreSQL client pod that reads the connection settings from the 2.x Secret, and record a checksum of a dump of every 2.x plugin database. Step 6 and the way back compare against this file to show that 3.x never wrote to them:
+
+```bash
+kubectl -n "$NAMESPACE" apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pg-client
+spec:
+  restartPolicy: Never
+  containers:
+    - name: psql
+      image: $PG_IMAGE
+      command: ["sleep", "infinity"]
+      env:
+        - {name: PGHOST, valueFrom: {secretKeyRef: {name: $V2_SECRET, key: PG_HOST}}}
+        - {name: PGPORT, valueFrom: {secretKeyRef: {name: $V2_SECRET, key: PG_PORT}}}
+        - {name: PGUSER, valueFrom: {secretKeyRef: {name: $V2_SECRET, key: PG_USER}}}
+        - {name: PGPASSWORD, valueFrom: {secretKeyRef: {name: $V2_SECRET, key: PG_PASSWORD}}}
+        - {name: PGDATABASE, valueFrom: {secretKeyRef: {name: $V2_SECRET, key: PG_DATABASE}}}
+EOF
+kubectl -n "$NAMESPACE" wait --for=condition=Ready pod/pg-client --timeout=180s
+cat > fingerprint.sh <<'EOF'
+for db in $(psql -At -c "select datname from pg_database where datname like 'backstage\_plugin\_%' order by 1"); do
+  echo "$(pg_dump "$db" | md5sum | cut -d' ' -f1)  $db"
+done
+EOF
+kubectl -n "$NAMESPACE" exec -i pg-client -- sh -s < fingerprint.sh | tee v2-fingerprint.txt
+```
 
 ## Step 3: Create the 3.x runtime Secret
 
@@ -119,11 +164,11 @@ upstream:
       - veecode-runtime-secrets
     appConfig:
       app:
-        baseUrl: https://devportal.example.com
+        baseUrl: http://localhost:7007
       backend:
-        baseUrl: https://devportal.example.com
+        baseUrl: http://localhost:7007
         cors:
-          origin: https://devportal.example.com
+          origin: http://localhost:7007
         database:
           prefix: devportal3_plugin_
       signInPage: oidc
@@ -162,6 +207,8 @@ upstream:
             target: https://github.com/example-org/catalog/blob/main/catalog-info.yaml
 ```
 
+The three `http://localhost:7007` addresses are the address of the port-forward in step 6. When the portal has its own address, put that address in all three keys and add it to the redirect URIs of the Keycloak client.
+
 How the 2.x settings map:
 
 | 2.x | 3.x in `values-v3.yaml` |
@@ -180,7 +227,7 @@ Backstage does not keep a plugin's data in the database named by `PG_DATABASE`. 
 
 ## Step 5: Install 3.x
 
-Add the chart repository and install the release. The first start pulls every plugin image and can take several minutes:
+Add the chart repository and install the release. The first start installs every default plugin and can take several minutes, so the command waits for up to 20 minutes:
 
 ```bash
 helm repo add veecode https://veecode-platform.github.io/next-charts
@@ -192,22 +239,48 @@ The Keycloak client of your 2.x install must list the address of the 3.x portal 
 
 ## Step 6: Check the result
 
-Wait for the 3.x portal to become ready:
+Open a port-forward to the 3.x portal and leave it running in a second terminal:
 
 ```bash
-kubectl -n "$NAMESPACE" rollout status "deploy/$V3_RELEASE-developer-hub"
+kubectl -n "$NAMESPACE" port-forward "svc/$V3_RELEASE-developer-hub" 7007:7007
 ```
 
-Then check:
+Then run these checks.
 
-1. **Sign-in.** Open the portal at its address, sign in through Keycloak as a user who signed in before, and as a second user.
-2. **Users and groups.** They appear in the catalog under Kind: User and Kind: Group, read again from Keycloak.
-3. **Catalog.** The entities from your `catalog.locations` are back, and the count of your own sources matches the count from step 1.
-4. **Guest sign-in is off.** The sign-in page offers Keycloak only.
+**Own databases.** The 3.x release created its own set of databases, and the 2.x set has the same fingerprint as in step 2:
+
+```bash
+kubectl -n "$NAMESPACE" exec pg-client -- psql -At -c "select datname from pg_database where datname like 'devportal3\_plugin\_%' order by 1"
+kubectl -n "$NAMESPACE" exec -i pg-client -- sh -s < fingerprint.sh | diff v2-fingerprint.txt - && echo "2.x databases unchanged"
+```
+
+**Sign-in.** Open `http://localhost:7007`, sign in through Keycloak as a user who signed in before, and as a second user. If the sign-in fails right after the first start with "unable to resolve user identity", wait a minute and try again: the catalog has not imported the users from Keycloak yet.
+
+**Users and groups.** They appear in the catalog under Kind: User and Kind: Group, read again from Keycloak.
+
+**Catalog.** The entities from your `catalog.locations` are back, and the count matches the count from step 1.
+
+**Guest sign-in is off.** The sign-in page offers Keycloak only, and the guest endpoint of the portal no longer exists:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' http://localhost:7007/api/auth/guest/refresh
+```
+
+The command prints `404`.
 
 ## Step 7: Install the marketplace plugins and locations again
 
-Open the Marketplace in the portal and install each plugin from `marketplace-installs-2x.yaml` again. Register again the locations you wrote down in step 1.
+Open the Marketplace in the portal and install each plugin from `marketplace-installs-2x.yaml` again. Register again the locations you wrote down in step 1: in the catalog, choose Create, then Register existing component, and enter the target.
+
+## Permissions are off in 3.x
+
+The 2.x chart runs with the permission framework on. Members of the `admins` group administer permissions, and users in other groups get a limited role. In the test, a user of the `developers` group got HTTP 403 when deleting a catalog entity, and could not list the roles that only an administrator sees.
+
+The 3.x chart ships with `permission.enabled: false`, so nothing is checked. In the test, the same user deleted the same catalog entity with HTTP 204. Anyone who signs in can do everything an administrator can do.
+
+Roles and policies that you create at run time through the portal's permission API are stored in the 2.x database and do not carry over. The test created the role `role:default/d1-reviewers` on 2.x, and 3.x did not list it. Roles that come from files or configuration are read again from them.
+
+If your 2.x install relies on these rules, decide how 3.x enforces them before you expose the portal. Turning the permission framework on in 3.x is outside this guide.
 
 ## Going back to 2.x
 
@@ -215,5 +288,34 @@ The 2.x databases were not touched, so going back is a rollback of the 2.x relea
 
 ```bash
 helm uninstall "$V3_RELEASE" -n "$NAMESPACE"
-helm rollback "$V2_RELEASE" "$V2_REVISION" -n "$NAMESPACE"
+helm rollback "$V2_RELEASE" "$V2_REVISION" -n "$NAMESPACE" --wait --timeout 10m
+kubectl -n "$NAMESPACE" exec -i pg-client -- sh -s < fingerprint.sh | diff v2-fingerprint.txt - && echo "2.x databases unchanged"
+```
+
+The rollback restores the replica count and the Ingress of revision `V2_REVISION`. The 2.x portal comes back with its catalog, its marketplace installs, its scaffolder history and its user settings. The 3.x databases stay on the server until you drop them, as the next section shows.
+
+## Clean up
+
+After you went back to 2.x, remove what the attempt left, then start again at step 3 when you are ready to retry:
+
+```bash
+kubectl -n "$NAMESPACE" delete secret veecode-runtime-secrets
+for db in $(kubectl -n "$NAMESPACE" exec pg-client -- psql -At -c "select datname from pg_database where datname like 'devportal3\_plugin\_%'"); do
+  kubectl -n "$NAMESPACE" exec pg-client -- psql -c "drop database \"$db\""
+done
+```
+
+When 3.x is in production and you will not go back, remove the 2.x release and its databases. This cannot be undone, so keep the fingerprint and a backup until you are sure. On a SQLite install, this also deletes the volume of the release:
+
+```bash
+helm uninstall "$V2_RELEASE" -n "$NAMESPACE"
+for db in $(kubectl -n "$NAMESPACE" exec pg-client -- psql -At -c "select datname from pg_database where datname like 'backstage\_plugin\_%'"); do
+  kubectl -n "$NAMESPACE" exec pg-client -- psql -c "drop database \"$db\""
+done
+```
+
+In both cases, delete the client pod last, and the files this guide wrote in the current folder (`v2-values.yaml`, `marketplace-installs-2x.yaml`, `fingerprint.sh`, `v2-fingerprint.txt`, `values-v3.yaml`) when you no longer need them:
+
+```bash
+kubectl -n "$NAMESPACE" delete pod pg-client
 ```
