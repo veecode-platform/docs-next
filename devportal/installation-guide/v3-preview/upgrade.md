@@ -115,6 +115,8 @@ If you need to return to the earlier chart with the pre-upgrade database state, 
 ```bash
 kubectl --namespace "$NAMESPACE" scale deployment/devportal-developer-hub --replicas=0
 kubectl --namespace "$NAMESPACE" rollout status deployment/devportal-developer-hub --timeout=10m
+kubectl --namespace "$NAMESPACE" wait --for=delete pod \
+  -l app.kubernetes.io/name=developer-hub --timeout=10m
 sha256sum --check "$BACKUP_DIR/SHA256SUMS"
 
 while IFS= read -r database; do
