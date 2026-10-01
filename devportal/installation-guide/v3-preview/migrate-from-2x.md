@@ -16,7 +16,7 @@ The migration goes to a **fresh database**. Nothing is converted in place:
 
 - The 3.x release gets its own databases. It never opens the 2.x databases.
 - The 2.x release stays installed but stopped. Going back to 2.x means removing the 3.x release and restoring the 2.x one, on the data it already has.
-- The portal is down from the moment you stop 2.x until the 3.x portal has started for the first time. Plan for several minutes: the first start of 3.x installs the default plugins.
+- The portal is down from the moment you stop 2.x until the 3.x portal has started for the first time. Plan for about 15 minutes: the first start of 3.x pulls the image and installs the default plugins.
 
 ## Tested with
 
@@ -38,7 +38,7 @@ Two parts were not run:
 | Catalog entities from the locations in your configuration (`catalog.locations`) | Come back on their own. The catalog reads them again from their sources at first start. |
 | Users and groups from your identity provider | Come back on their own. The catalog provider reads them again, and people sign in through the provider as before. |
 | Marketplace installs | **Do not carry over.** List them in step 1 and install them again in step 7. |
-| Locations registered in the portal (Catalog, Register existing component) | **Do not carry over.** List them in step 1 and register them again in step 7. |
+| Locations registered in the portal, not in your configuration | **Do not carry over.** List them in step 1 and register them again in step 7. |
 | Scaffolder task history | **Does not carry over.** |
 | User settings, such as the theme | **Do not carry over.** |
 
@@ -47,7 +47,7 @@ Permissions also differ. See [Permissions are off in 3.x](#permissions-are-off-i
 Step 4 translates the settings this guide was tested with: external PostgreSQL, Keycloak sign-in and catalog locations. Any other setting in your 2.x values has no automatic translation. Map it by hand against the `values.yaml` of the 3.x chart.
 
 :::danger Guest sign-in is on by default in 3.x
-The 3.x chart turns guest sign-in on and maps every guest to the `admin` user. Anyone who can reach the portal URL enters as an administrator. The values file in step 4 turns it off and configures a real identity provider. Do not expose the portal before both are in place.
+The 3.x chart turns guest sign-in on and maps every guest to the `admin` user. Anyone who can reach the portal URL gets an administrator identity without a password, even when the sign-in page shows only your identity provider. The values file in step 4 turns guest sign-in off and configures a real identity provider, and step 6 checks that the guest endpoint is gone. Do not expose the portal before both are in place.
 :::
 
 ## Before you start
@@ -55,7 +55,7 @@ The 3.x chart turns guest sign-in on and maps every guest to the `admin` user. A
 You need:
 
 - `kubectl`, `helm` 3 and `jq`, with access to the namespace of the 2.x release;
-- the PostgreSQL server of the 2.x install and its user. The 3.x portal creates its own databases, so the user needs the `CREATEDB` privilege, as in 2.x;
+- the PostgreSQL server of the 2.x install and its user. The 3.x portal creates its own databases, so the user needs the privilege to create databases (`CREATEDB`), as in 2.x;
 - a real identity provider for the 3.x portal. The examples use Keycloak, which is what the 2.x `keycloak` preset configured;
 - the 3.x install guide ("Install DevPortal 3.x"), which covers everything about installing 3.x that this page does not repeat.
 
@@ -92,7 +92,7 @@ List the **marketplace installs**. The 2.x portal keeps them in a file that it r
 kubectl -n "$NAMESPACE" exec "$V2_DEPLOYMENT" -- cat /app/data/extensions-install.yaml | tee marketplace-installs-2x.yaml | grep 'package:'
 ```
 
-List the **locations registered in the portal**. In the catalog, set the Kind filter to Location and write down the target of each entry. Locations that come from `catalog.locations` in your values need no action: they are in `v2-values.yaml` and come back by themselves.
+List the **locations registered in the portal**. In the catalog, set the Kind filter to Location and write down the target of each entry. The list also shows the locations from `catalog.locations` in your values. Those need no action: they are in `v2-values.yaml` and come back by themselves.
 
 Count the entities that come from your `catalog.locations` sources, for the check in step 6. Compare only those. The portal also adds entities of its own, such as the marketplace catalog, and their number differs between 2.x and 3.x.
 
@@ -105,7 +105,7 @@ helm upgrade "$V2_RELEASE" veecode-devportal-platform --repo https://veecode-pla
 kubectl -n "$NAMESPACE" wait --for=delete pod -l app.kubernetes.io/instance="$V2_RELEASE" --timeout=180s
 ```
 
-Then fingerprint the 2.x databases. Start a PostgreSQL client pod that reads the connection settings from the 2.x Secret, and record a checksum of a dump of every 2.x plugin database. Step 6 and the way back compare against this file to show that 3.x never wrote to them:
+Then fingerprint the 2.x databases. Start a PostgreSQL client pod that reads the connection settings from the 2.x Secret, and record a checksum of a dump of every 2.x plugin database. Step 6 and the way back compare against this file to show that 3.x never wrote to them. The `grep` removes the random `\restrict` lines that recent `pg_dump` releases add to every dump, because they would give each dump a different checksum:
 
 ```bash
 kubectl -n "$NAMESPACE" apply -f - <<EOF
@@ -129,7 +129,7 @@ EOF
 kubectl -n "$NAMESPACE" wait --for=condition=Ready pod/pg-client --timeout=180s
 cat > fingerprint.sh <<'EOF'
 for db in $(psql -At -c "select datname from pg_database where datname like 'backstage\_plugin\_%' order by 1"); do
-  echo "$(pg_dump "$db" | md5sum | cut -d' ' -f1)  $db"
+  echo "$(pg_dump "$db" | grep -v -E '^\\(un)?restrict ' | md5sum | cut -d' ' -f1)  $db"
 done
 EOF
 kubectl -n "$NAMESPACE" exec -i pg-client -- sh -s < fingerprint.sh | tee v2-fingerprint.txt
@@ -222,20 +222,20 @@ How the 2.x settings map:
 | (new in 3.x) | `backend.database.prefix` gives the 3.x release its own databases. |
 
 :::warning Always set `backend.database.prefix`
-Backstage does not keep a plugin's data in the database named by `PG_DATABASE`. It creates one database per plugin and names it after a prefix: `backstage_plugin_catalog`, `backstage_plugin_scaffolder` and so on. A new `PG_DATABASE` value isolates nothing. A 3.x release that keeps the default prefix on the same server opens the 2.x databases and changes them, and the way back is gone. The value `devportal3_plugin_` above gives 3.x its own set and leaves the 2.x set alone. If you point 3.x at a different PostgreSQL server, you do not need the prefix.
+Backstage does not keep a plugin's data in the database named by `PG_DATABASE`. It creates one database per plugin and names it after a prefix: `backstage_plugin_catalog`, `backstage_plugin_scaffolder` and so on, as on the 2.x server of the test. A new `PG_DATABASE` value isolates nothing. A 3.x release that keeps the default prefix on the same server would use those same databases and could change them in ways you cannot undo. The test did not try that. The value `devportal3_plugin_` above gives 3.x its own set and leaves the 2.x set alone. If you point 3.x at a different PostgreSQL server, you do not need the prefix.
 :::
 
 ## Step 5: Install 3.x
 
-Add the chart repository and install the release. The first start installs every default plugin and can take several minutes, so the command waits for up to 20 minutes:
+The Keycloak client of your 2.x install must list the address of the 3.x portal among its redirect URIs. If the address is the same as in 2.x, nothing changes.
+
+Add the chart repository and install the release. The first start pulls the image and installs every default plugin. It took about 14 minutes on the test host, so the command waits for up to 20 minutes:
 
 ```bash
 helm repo add veecode https://veecode-platform.github.io/next-charts
 helm repo update
 helm install "$V3_RELEASE" veecode/devportal --version 0.1.26 -n "$NAMESPACE" -f values-v3.yaml --wait --timeout 20m
 ```
-
-The Keycloak client of your 2.x install must list the address of the 3.x portal among its redirect URIs. If the address is the same as in 2.x, nothing changes.
 
 ## Step 6: Check the result
 
@@ -254,31 +254,41 @@ kubectl -n "$NAMESPACE" exec pg-client -- psql -At -c "select datname from pg_da
 kubectl -n "$NAMESPACE" exec -i pg-client -- sh -s < fingerprint.sh | diff v2-fingerprint.txt - && echo "2.x databases unchanged"
 ```
 
-**Sign-in.** Open `http://localhost:7007`, sign in through Keycloak as a user who signed in before, and as a second user. If the sign-in fails right after the first start with "unable to resolve user identity", wait a minute and try again: the catalog has not imported the users from Keycloak yet.
+**Sign-in.** Open `http://localhost:7007`, choose **Sign In** on the OIDC card, and sign in through Keycloak as a user who signed in before. Repeat with a second user. If the sign-in fails right after the first start with "unable to resolve user identity", wait a minute and try again: the catalog has not imported the users from Keycloak yet.
 
 **Users and groups.** They appear in the catalog under Kind: User and Kind: Group, read again from Keycloak.
 
 **Catalog.** The entities from your `catalog.locations` are back, and the count matches the count from step 1.
 
-**Guest sign-in is off.** The sign-in page offers Keycloak only, and the guest endpoint of the portal no longer exists:
+**Guest sign-in is off.** The sign-in page is not enough for this check, because it lists only OIDC even when guest sign-in is on. Ask the guest endpoint instead. It answers `404` when guest sign-in is off, and it returns the `admin` identity when guest sign-in is on:
 
 ```bash
 curl -s -o /dev/null -w '%{http_code}\n' http://localhost:7007/api/auth/guest/refresh
 ```
 
-The command prints `404`.
+The command must print `404`.
 
 ## Step 7: Install the marketplace plugins and locations again
 
-Open the Marketplace in the portal and install each plugin from `marketplace-installs-2x.yaml` again. Register again the locations you wrote down in step 1: in the catalog, choose Create, then Register existing component, and enter the target.
+Enable again each plugin listed in `marketplace-installs-2x.yaml`: open the **Marketplace** in the portal, find the plugin, and choose **Enable**. The 3.x chart installs plugins when the pod starts, so restart the deployment. Then check that the file 3.x regenerates from its database lists the plugins:
+
+```bash
+kubectl -n "$NAMESPACE" rollout restart "deploy/$V3_RELEASE-developer-hub"
+kubectl -n "$NAMESPACE" rollout status "deploy/$V3_RELEASE-developer-hub" --timeout 20m
+kubectl -n "$NAMESPACE" exec "deploy/$V3_RELEASE-developer-hub" -c backstage-backend -- cat /devportal-data/extensions-install.yaml | grep 'package:'
+```
+
+The package references differ from the 2.x file, because 3.x names each plugin image by its digest. Each plugin you listed in step 1 appears again. The restart takes several minutes, and it ends the port-forward of step 6, so open it again afterwards.
+
+Register again the locations you wrote down in step 1: open **Self-service**, choose **Import an existing Git repository**, enter the target and follow the wizard.
 
 ## Permissions are off in 3.x
 
 The 2.x chart runs with the permission framework on. Members of the `admins` group administer permissions, and users in other groups get a limited role. In the test, a user of the `developers` group got HTTP 403 when deleting a catalog entity, and could not list the roles that only an administrator sees.
 
-The 3.x chart ships with `permission.enabled: false`, so nothing is checked. In the test, the same user deleted the same catalog entity with HTTP 204. Anyone who signs in can do everything an administrator can do.
+The 3.x chart ships with `permission.enabled: false`, so nothing is checked. In the test, the same user deleted the same catalog entity with HTTP 204. Any signed-in user can delete catalog entities, which only administrators could do on 2.x.
 
-Roles and policies that you create at run time through the portal's permission API are stored in the 2.x database and do not carry over. The test created the role `role:default/d1-reviewers` on 2.x, and 3.x did not list it. Roles that come from files or configuration are read again from them.
+Roles and policies that you create at run time through the portal's permission API are stored in the 2.x database, so they do not carry over. The test created the role `role:default/d1-reviewers` on 2.x. On 3.x the permission API answers HTTP 404, so the role does not exist there.
 
 If your 2.x install relies on these rules, decide how 3.x enforces them before you expose the portal. Turning the permission framework on in 3.x is outside this guide.
 
@@ -314,7 +324,7 @@ for db in $(kubectl -n "$NAMESPACE" exec pg-client -- psql -At -c "select datnam
 done
 ```
 
-In both cases, delete the client pod last, and the files this guide wrote in the current folder (`v2-values.yaml`, `marketplace-installs-2x.yaml`, `fingerprint.sh`, `v2-fingerprint.txt`, `values-v3.yaml`) when you no longer need them:
+In both cases, finish by deleting the client pod. The files this guide wrote in the current folder (`v2-values.yaml`, `marketplace-installs-2x.yaml`, `fingerprint.sh`, `v2-fingerprint.txt` and `values-v3.yaml`) are yours to keep or delete:
 
 ```bash
 kubectl -n "$NAMESPACE" delete pod pg-client
