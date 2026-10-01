@@ -284,12 +284,12 @@ If your 2.x install relies on these rules, decide how 3.x enforces them before y
 
 ## Going back to 2.x
 
-The 2.x databases were not touched, so going back is a rollback of the 2.x release:
+The 2.x databases were not touched, so going back is a rollback of the 2.x release. Remove 3.x first and compare the fingerprint while no portal is running, because a running 2.x portal writes to its databases as soon as it starts:
 
 ```bash
 helm uninstall "$V3_RELEASE" -n "$NAMESPACE"
-helm rollback "$V2_RELEASE" "$V2_REVISION" -n "$NAMESPACE" --wait --timeout 10m
 kubectl -n "$NAMESPACE" exec -i pg-client -- sh -s < fingerprint.sh | diff v2-fingerprint.txt - && echo "2.x databases unchanged"
+helm rollback "$V2_RELEASE" "$V2_REVISION" -n "$NAMESPACE" --wait --timeout 10m
 ```
 
 The rollback restores the replica count and the Ingress of revision `V2_REVISION`. The 2.x portal comes back with its catalog, its marketplace installs, its scaffolder history and its user settings. The 3.x databases stay on the server until you drop them, as the next section shows.
@@ -305,7 +305,7 @@ for db in $(kubectl -n "$NAMESPACE" exec pg-client -- psql -At -c "select datnam
 done
 ```
 
-When 3.x is in production and you will not go back, remove the 2.x release and its databases. This cannot be undone, so keep the fingerprint and a backup until you are sure. On a SQLite install, this also deletes the volume of the release:
+When 3.x is in production and you will not go back, remove the 2.x release and its databases. This cannot be undone, so take a backup first. On a SQLite install, this also deletes the volume of the release:
 
 ```bash
 helm uninstall "$V2_RELEASE" -n "$NAMESPACE"
