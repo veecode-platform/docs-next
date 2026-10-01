@@ -15,8 +15,8 @@ The chart ships guest sign-in **enabled** and maps the guest identity to the `AD
 You need:
 
 - A Kubernetes cluster with an Ingress controller, and `kubectl` and Helm 3 pointed at it. The steps were followed on k3s 1.31 with its bundled Traefik controller (`className: traefik`) and Helm 3.20.
-- Two DNS names that resolve to the Ingress controller: one for the portal and one for the identity provider. The steps use `devportal.example.com` and `keycloak.example.com`.
-- `openssl` and `curl` on your machine.
+- Two DNS names that resolve to the Ingress controller: one for the portal and one for the identity provider. The steps use `devportal.example.com` and `keycloak.example.com`. The portal backend calls the identity provider's public name when a user signs out, so the cluster must resolve and reach that name too ([Step 6](#step-6-install-devportal) covers a cluster that cannot).
+- `openssl` and `curl` on your machine, and a browser that allows pop-ups from the portal: the sign-in button opens the identity provider in a pop-up window.
 
 The chart installs no database. The steps run a disposable PostgreSQL in the cluster. For production, use a PostgreSQL that you operate, and give the portal a user that can create databases, because the portal creates one database per plugin.
 
@@ -26,6 +26,7 @@ The chart installs no database. The steps run a disposable PostgreSQL in the clu
 | --- | --- | --- |
 | Hostnames | `devportal.example.com` and `keycloak.example.com` | Your own names, set once in Step 1 |
 | Certificate | A self-signed certificate that covers both names | A certificate from your certificate authority (CA), stored in the same kind of Secret in Step 2 |
+| Trust for the certificate | The portal backend trusts the self-signed certificate, through `values-trust.yaml` in Step 6 | Nothing, when a public CA signed your certificate and the cluster resolves both names. For a private CA, the CA's own certificate in place of `tls.crt` |
 | Identity provider | Keycloak in the cluster, in development mode | Your own Keycloak or another OIDC provider, which Step 4 lists the settings for |
 | Database | PostgreSQL 16 in the cluster | Your PostgreSQL, in the Secret of Step 5 |
 | Ingress class | `traefik` | The class of your controller, in the values file of Step 6 |
@@ -122,7 +123,7 @@ spec:
     - {port: 5432, targetPort: 5432}
 EOF
 
-kubectl -n "$NAMESPACE" rollout status deployment/devportal-db --timeout=5m
+kubectl -n "$NAMESPACE" rollout status deployment/devportal-db --timeout=10m
 ```
 
 ## Step 4: Start Keycloak
@@ -244,10 +245,10 @@ spec:
           - {path: /, pathType: Prefix, backend: {service: {name: keycloak, port: {number: 8080}}}}
 EOF
 
-kubectl -n "$NAMESPACE" rollout status deployment/keycloak --timeout=5m
+kubectl -n "$NAMESPACE" rollout status deployment/keycloak --timeout=10m
 ```
 
-Keycloak answers on two addresses. Browsers use the public name, `https://keycloak.example.com`, which is what `KC_HOSTNAME` sets. The portal backend uses the cluster Service, `http://keycloak:8080`, which Step 5 stores. With `KC_HOSTNAME_BACKCHANNEL_DYNAMIC` on, Keycloak lists the public address for browsers and the address of each request for the backend.
+Keycloak answers on two addresses. Browsers use the public name, `https://keycloak.example.com`, which is what `KC_HOSTNAME` sets. The portal backend uses the cluster Service, `http://keycloak:8080`, which Step 5 stores. With `KC_HOSTNAME_BACKCHANNEL_DYNAMIC` on, Keycloak gives the backend the Service address for the token, user information and signing key endpoints. It still lists the public address for the sign-out revocation endpoint, so when a user signs out the backend calls `https://keycloak.example.com`. Step 6 covers what the backend needs to reach that address.
 
 ## Step 5: Create the runtime Secret
 
@@ -280,7 +281,7 @@ helm repo update
 helm search repo veecode/devportal --versions
 ```
 
-This page was followed with chart `0.1.26`, which installs image `3.0.0-beta.10`. The chart pins its image by digest, so the install pulls exactly the image the chart names. Install the newest version in the list unless you need an earlier one.
+This page was followed with chart `0.1.26`, which installs image `3.0.0-beta.10`. The chart pins its image by digest, so the install pulls exactly the image the chart names. Install that version. If you pick a newer one from the list, read the note under `values-trust.yaml` below first.
 
 Save this as `values.yaml`:
 
@@ -343,7 +344,7 @@ What the values do:
 : Creates an Ingress for `global.host` that serves TLS from the `devportal-tls` Secret. Set `className` to the class of your controller.
 
 `auth.environment: production`
-: Marks the environment as `production`, so the sign-in page offers no guest option.
+: Selects the `production` entry of each provider under `auth.providers`, which is the `oidc.production` block of this file.
 
 `signInPage: oidc`
 : Makes the OIDC provider the sign-in method.
@@ -351,15 +352,83 @@ What the values do:
 `prompt: auto`
 : Lets the identity provider decide whether to ask for credentials or to skip the login prompt when the user has a session.
 
-The `${...}` values are read from the runtime Secret when the portal starts. The catalog entry imports your Keycloak users and groups into the portal every 5 minutes, because the portal signs a user in only when it finds a matching user in its catalog.
+The `${...}` values are read from the runtime Secret when the portal starts. The catalog entry imports your Keycloak users and groups into the portal 15 seconds after it starts and then every 5 minutes, because the portal signs a user in only when it finds a matching user in its catalog.
 
-Install the chart. The hostname is not in the file: `--set global.host` passes it.
+### Let the backend reach and trust Keycloak
+
+When a user signs out, the backend calls Keycloak at its public address (Step 4). The call fails unless the backend can resolve that name and trust its certificate. The portal then shows "Logout request failed" and keeps the user signed in. Skip the rest of this part, and drop `-f values-trust.yaml` from the install command, when a public CA signed your certificate and the cluster resolves both hostnames.
+
+Otherwise, save this as `values-trust.yaml`. It does two things:
+
+- `hostAliases` maps the Keycloak name to the cluster IP address of the ingress controller, for a cluster whose DNS does not know your names. The command reads that address from the `traefik` Service that k3s runs in `kube-system`. Use your controller's Service, or your DNS, instead.
+- `NODE_EXTRA_CA_CERTS` makes the backend trust the certificate of Step 2. For a private CA, store the CA's own certificate in the ConfigMap instead of `tls.crt`.
+
+```bash
+kubectl -n "$NAMESPACE" create configmap devportal-ca --from-file=ca.crt=tls.crt
+
+export INGRESS_IP="$(kubectl -n kube-system get service traefik -o jsonpath='{.spec.clusterIP}')"
+
+cat > values-trust.yaml <<EOF
+upstream:
+  backstage:
+    hostAliases:
+      - ip: $INGRESS_IP
+        hostnames: [$KEYCLOAK_HOST]
+    extraEnvVars:
+      - name: NODE_EXTRA_CA_CERTS
+        value: /opt/app-root/src/devportal-ca.crt
+    extraVolumeMounts:
+      - {name: dynamic-plugins-root, mountPath: /opt/app-root/src/dynamic-plugins-root}
+      - {name: extensions-catalog, mountPath: /extensions}
+      - {name: temp, mountPath: /tmp}
+      - {name: devportal-data, mountPath: /devportal-data}
+      - {name: devportal-ca, mountPath: /opt/app-root/src/devportal-ca.crt, subPath: ca.crt, readOnly: true}
+    extraVolumes:
+      - name: dynamic-plugins-root
+        ephemeral:
+          volumeClaimTemplate:
+            spec:
+              accessModes: [ReadWriteOnce]
+              resources:
+                requests:
+                  storage: 5Gi
+      - name: dynamic-plugins
+        configMap:
+          defaultMode: 420
+          name: '{{ printf "%s-dynamic-plugins" .Release.Name }}'
+          optional: true
+      - name: dynamic-plugins-npmrc
+        secret:
+          defaultMode: 420
+          optional: true
+          secretName: '{{ printf "%s-dynamic-plugins-npmrc" .Release.Name }}'
+      - name: dynamic-plugins-registry-auth
+        secret:
+          defaultMode: 416
+          optional: true
+          secretName: '{{ printf "%s-dynamic-plugins-registry-auth" .Release.Name }}'
+      - {name: npmcacache, emptyDir: {}}
+      - {name: extensions-catalog, emptyDir: {}}
+      - {name: temp, emptyDir: {}}
+      - {name: devportal-data, emptyDir: {}}
+      - {name: devportal-ca, configMap: {name: devportal-ca}}
+EOF
+```
+
+Helm replaces a list instead of merging it, so the file repeats the chart's own `extraVolumeMounts` and `extraVolumes` entries and adds one entry to each (`devportal-ca`). The entries above are the ones of chart `0.1.26`. When you change the chart version, compare them with the output of `helm show values veecode/devportal --version VERSION` under `upstream.backstage`, and copy any entry that changed.
+
+### Install the chart
+
+The hostname is not in the files: `--set global.host` passes it.
 
 ```bash
 helm install devportal veecode/devportal --version 0.1.26 \
-  -n "$NAMESPACE" -f values.yaml --set global.host="$DEVPORTAL_HOST" \
-  --wait --timeout 15m
+  -n "$NAMESPACE" -f values.yaml -f values-trust.yaml \
+  --set global.host="$DEVPORTAL_HOST" \
+  --wait --timeout 20m
 ```
+
+The install waits for the portal to be ready. The first start pulls the image (about 525 MB) and installs the plugins before the portal starts. It took 8 to 17 minutes on a shared test machine, so a slow link or a busy node needs the headroom of `--timeout 20m`.
 
 ## Step 7: Sign in and check
 
@@ -373,25 +442,60 @@ curl -sS --cacert tls.crt -o /dev/null -w '%{http_code}\n' "https://$DEVPORTAL_H
 Then open `https://devportal.example.com` in a browser (your portal hostname). Accept the certificate warning if you used the self-signed certificate.
 
 1. The sign-in page offers the OIDC provider and no guest option.
-2. Select the sign-in button. Keycloak asks for credentials. Sign in as `alice` with the value of `$KEYCLOAK_USER_PASSWORD`.
-3. The portal home page opens.
 
-The first sign-in can fail with a message that the user cannot be resolved if you try it in the first minute. The portal imports Keycloak's users shortly after it starts. Wait a minute and sign in again.
+   ![The portal sign-in page with one sign-in method, OIDC](./img/sign-in-page.png)
 
-### Check that marketplace installs persist
+2. Select **Sign In**. A pop-up window opens on Keycloak. Sign in as `alice` with the value of `$KEYCLOAK_USER_PASSWORD`.
+3. The pop-up closes and the portal home page opens.
+4. Open the menu with your name, at the top right, and select **Sign out**. You return to the sign-in page.
 
-The marketplace is the **Extensions** item in the sidebar. Plugin installations are stored in PostgreSQL and survive a restart of the portal. To check, install a plugin in the marketplace, restart the portal, sign in again, and confirm the plugin is still there:
+The portal signs a user in only after it has imported that user from Keycloak. The first import runs 15 seconds after the portal starts and the next ones every 5 minutes. For a user who is not in the portal's catalog yet, sign-in fails with "Failed to sign-in, unable to resolve user identity". Wait for the next import and sign in again.
+
+### Install a plugin from the marketplace
+
+The sidebar item **Marketplace** opens the **Extensions** page. Its **Catalog** tab lists the plugins you can install, and its **Installed packages** tab lists the packages the portal runs. This portal has no roles configured and every signed-in user can install plugins (see [What ships by default](#what-ships-by-default)).
+
+1. In the **Catalog** tab, search for `Datadog` and select **Install** on its card. Confirm with **Install**: the dialog says the change takes effect after a restart. The card now shows **Pending install**.
+2. Restart the portal with the commands below. The restart installs the plugin before the portal starts, so it takes about as long as the first start.
+3. Sign in again. **Installed packages** has one more entry, and the Datadog card offers **Disable**.
 
 ```bash
 kubectl -n "$NAMESPACE" rollout restart deployment/devportal-developer-hub
-kubectl -n "$NAMESPACE" rollout status deployment/devportal-developer-hub --timeout=10m
+kubectl -n "$NAMESPACE" rollout status deployment/devportal-developer-hub --timeout=20m
 ```
+
+The portal stores the installation in its PostgreSQL database, in the `marketplace_installations` table of the `backstage_plugin_extensions` database, which is why it survives the restart.
 
 ## Evaluate without Ingress or an identity provider
 
-For a quick look on a laptop you can skip Ingress, TLS and the identity provider and keep guest sign-in. This is for evaluation only: guest sign-in signs everyone in as `ADMIN`. Create the namespace, the database (Step 3) and the runtime Secret (Step 5, which needs only the `PG_*` and `BACKEND_SECRET` keys), then save this as `values-eval.yaml`:
+For a quick look on a laptop you can skip Ingress, TLS and the identity provider and keep guest sign-in. This is for evaluation only: guest sign-in signs everyone in as `ADMIN` (`user:default/admin`). Use a cluster that does not hold the installation above. The chart creates a ClusterRole named after the release, so a second release called `devportal` in another namespace fails.
 
-```yaml
+Set the variables and create the namespace:
+
+```bash
+export NAMESPACE=devportal
+export DB_PASSWORD="$(openssl rand -hex 16)"
+export BACKEND_SECRET="$(openssl rand -hex 16)"
+
+kubectl create namespace "$NAMESPACE"
+```
+
+Start PostgreSQL with the commands of [Step 3](#step-3-start-postgresql). Then create the runtime Secret. It needs only the database settings and the backend secret:
+
+```bash
+kubectl -n "$NAMESPACE" create secret generic veecode-runtime-secrets \
+  --from-literal=PG_HOST=devportal-db \
+  --from-literal=PG_PORT=5432 \
+  --from-literal=PG_USER=devportal \
+  --from-literal=PG_PASSWORD="$DB_PASSWORD" \
+  --from-literal=PG_DATABASE=devportal \
+  --from-literal=BACKEND_SECRET="$BACKEND_SECRET"
+```
+
+Save the values as `values-eval.yaml` and install the chart without `global.host`:
+
+```bash
+cat > values-eval.yaml <<'EOF'
 upstream:
   backstage:
     extraEnvVarsSecrets:
@@ -403,37 +507,50 @@ upstream:
         baseUrl: http://localhost:7007
         cors:
           origin: http://localhost:7007
+EOF
+
+helm repo add veecode https://veecode-platform.github.io/next-charts
+helm repo update
+
+helm install devportal veecode/devportal --version 0.1.26 \
+  -n "$NAMESPACE" -f values-eval.yaml \
+  --wait --timeout 20m
 ```
 
-Install it without `global.host`, forward the service, and open `http://localhost:7007`:
+The URLs say `http` explicitly because the chart builds `https://` URLs from `global.host` when you set it. Forward the service and open `http://localhost:7007`:
 
 ```bash
-helm install devportal veecode/devportal --version 0.1.26 -n devportal -f values-eval.yaml
-kubectl -n devportal port-forward svc/devportal-developer-hub 7007:7007
+kubectl -n "$NAMESPACE" port-forward svc/devportal-developer-hub 7007:7007
 ```
 
-On the sign-in page, choose **Guest**. The URLs say `http` explicitly because the chart builds `https://` URLs from `global.host` when you set it.
+The sign-in page offers **Guest** and a GitHub sign-in that needs an OAuth app this page does not set up. Choose **Guest** and select **Enter**: you land on the home page as `Admin`.
 
-## Enable or disable plugins
+## Disable a default plugin
 
-The default plugins are baked into the DevPortal image, not declared in the chart's `values.yaml`. `global.dynamic.plugins` only adds to them. To disable a default plugin, add an entry with its exact package reference and `disabled: true`; the chart's [product face guide](https://github.com/veecode-platform/devportal-chart/blob/main/docs/product-face-overrides.md) lists every reference:
+The default plugins are baked into the DevPortal image, not declared in the chart's `values.yaml`, and `global.dynamic.plugins` only adds to them. To disable a default plugin, add an entry with its exact package reference and `disabled: true`. The chart's [product face guide](https://github.com/veecode-platform/devportal-chart/blob/main/docs/product-face-overrides.md) lists every reference. This example disables Tech Radar:
 
 ```yaml
 global:
   dynamic:
     plugins:
-      - package: PLUGIN_PACKAGE_REFERENCE
+      - package: ./dynamic-plugins/dist/backstage-community-plugin-tech-radar
+        disabled: true
+      - package: ./dynamic-plugins/dist/backstage-community-plugin-tech-radar-backend-dynamic
         disabled: true
 ```
 
+Add the entries to the `plugins` list of your `values.yaml` and run `helm upgrade` with the same `-f` files.
+
 ## What ships by default
 
-- VeeCode analytics home
-- Global header, VeeCode theme, and About
-- Marketplace
-- TechDocs, Notifications, Signals, and Tech Radar
-- RBAC UI; enforcement is **off** by default
-- A read-only ClusterRole for the Kubernetes plugin, gated by `kubernetesPlugin.rbac`
+The image runs these plugins without an entry in your values. The **Installed packages** tab lists them, together with the Keycloak module that `values.yaml` adds:
+
+- The VeeCode home page, the global header and an About page.
+- The Marketplace, which is the **Extensions** page.
+- TechDocs, Notifications, Signals and Tech Radar.
+- The RBAC screens, without the RBAC backend. Permission checks are off: the portal reads `permission.enabled` from the `PERMISSION_ENABLED` variable and the chart does not set it. Every signed-in user can install plugins from the Marketplace.
+
+The chart also creates a read-only ClusterRole and binding for the Kubernetes plugin (`kubernetesPlugin.rbac.enabled`, on by default). The image does not load the Kubernetes plugin by default.
 
 ## Version and lineage
 
