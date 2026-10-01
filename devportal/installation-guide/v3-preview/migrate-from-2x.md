@@ -222,11 +222,7 @@ How the 2.x settings map:
 | `appConfig.app`, `appConfig.backend`, `appConfig.catalog.locations` | The same keys under `upstream.backstage.appConfig`. |
 | (new in 3.x) | `global.veecode.guestAuth.enabled: false` turns guest sign-in off. |
 | (new in 3.x) | `backend.database.prefix` gives the 3.x release its own databases. |
-| (new in 3.x) | `startupProbe.failureThreshold: 30` gives the first start up to 10 minutes. |
-
-:::warning Keep the longer startup probe
-The first start of 3.x on a fresh database creates its tables, and on a slow or busy node that takes longer than the 90 seconds the chart allows by default. Kubernetes then stops the container in the middle of a migration, and the migration lock stays set. The backend log says `MigrationLocked`, and the pod never becomes ready. This happened in the test on a busy host. If it happens to you, run `helm uninstall "$V3_RELEASE" -n "$NAMESPACE"`, then the first block of [Clean up](#clean-up), and start again at step 3.
-:::
+| (new in 3.x) | `startupProbe.failureThreshold: 30` gives the first start up to 10 minutes. The chart default allows about 90 seconds. |
 
 :::warning Always set `backend.database.prefix`
 Backstage does not keep a plugin's data in the database named by `PG_DATABASE`. It creates one database per plugin and names it after a prefix: `backstage_plugin_catalog`, `backstage_plugin_scaffolder` and so on, as on the 2.x server of the test. A new `PG_DATABASE` value isolates nothing. A 3.x release that keeps the default prefix on the same server would use those same databases and could change them in ways you cannot undo. The test did not try that. The value `devportal3_plugin_` above gives 3.x its own set and leaves the 2.x set alone. If you point 3.x at a different PostgreSQL server, you do not need the prefix.
@@ -242,6 +238,13 @@ Add the chart repository and install the release. The first start pulls the imag
 helm repo add veecode https://veecode-platform.github.io/next-charts
 helm repo update
 helm install "$V3_RELEASE" veecode/devportal --version 0.1.26 -n "$NAMESPACE" -f values-v3.yaml --wait --timeout 20m
+```
+
+If the command times out and the pod stays at `0/1`, read the backend log with `kubectl -n "$NAMESPACE" logs "deploy/$V3_RELEASE-developer-hub" -c backstage-backend`. On a busy node the first start can fail while it creates the database tables. In the test, two of three first starts on a loaded host ended with `Plugin 'catalog' startup failed; caused by MigrationLocked`. One of them had been stopped by the startup probe. The other one was not stopped, and its log does not show what interrupted the migration. The 3.x databases hold nothing yet, so release the lock of the database of the plugin named in the log line (`catalog` in the test) and restart the pod:
+
+```bash
+kubectl -n "$NAMESPACE" exec pg-client -- psql -d devportal3_plugin_catalog -c "update knex_migrations_lock set is_locked = 0"
+kubectl -n "$NAMESPACE" rollout restart "deploy/$V3_RELEASE-developer-hub"
 ```
 
 ## Step 6: Check the result
@@ -261,7 +264,7 @@ kubectl -n "$NAMESPACE" exec pg-client -- psql -At -c "select datname from pg_da
 kubectl -n "$NAMESPACE" exec -i pg-client -- sh -s < fingerprint.sh | diff v2-fingerprint.txt - && echo "2.x databases unchanged"
 ```
 
-**Sign-in.** Open `http://localhost:7007`, choose **Sign In** on the OIDC card, and sign in through Keycloak as a user who signed in before. Repeat with a second user. If the sign-in fails right after the first start with "unable to resolve user identity", wait a minute and try again: the catalog has not imported the users from Keycloak yet.
+**Sign-in.** Open `http://localhost:7007`, choose **Sign In** on the OIDC card, and sign in through Keycloak as a user who signed in before. Repeat with a second user. If the sign-in fails right after the first start, wait a minute and try again. In the test the first attempt failed and the next one, about 40 seconds later, worked, because the catalog needs a short time to import the users from Keycloak.
 
 **Users and groups.** They appear in the catalog under Kind: User and Kind: Group, read again from Keycloak.
 
