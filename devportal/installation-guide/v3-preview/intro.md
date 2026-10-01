@@ -461,8 +461,10 @@ The sidebar item **Marketplace** opens the **Extensions** page. Its **Catalog** 
 
 ```bash
 kubectl -n "$NAMESPACE" rollout restart deployment/devportal-developer-hub
-kubectl -n "$NAMESPACE" rollout status deployment/devportal-developer-hub --timeout=20m
+kubectl -n "$NAMESPACE" rollout status deployment/devportal-developer-hub
 ```
+
+Kubernetes stops waiting when a rollout shows no progress for 10 minutes, and `rollout status` then ends with "exceeded its progress deadline". On a slow node the restart is still running at that point. Run `kubectl -n "$NAMESPACE" get pods --watch` and continue when the new pod shows `1/1 Running`.
 
 The portal stores the installation in its PostgreSQL database, in the `marketplace_installations` table of the `backstage_plugin_extensions` database, which is why it survives the restart.
 
