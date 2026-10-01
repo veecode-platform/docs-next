@@ -162,6 +162,8 @@ upstream:
   backstage:
     extraEnvVarsSecrets:
       - veecode-runtime-secrets
+    startupProbe:
+      failureThreshold: 30
     appConfig:
       app:
         baseUrl: http://localhost:7007
@@ -220,6 +222,11 @@ How the 2.x settings map:
 | `appConfig.app`, `appConfig.backend`, `appConfig.catalog.locations` | The same keys under `upstream.backstage.appConfig`. |
 | (new in 3.x) | `global.veecode.guestAuth.enabled: false` turns guest sign-in off. |
 | (new in 3.x) | `backend.database.prefix` gives the 3.x release its own databases. |
+| (new in 3.x) | `startupProbe.failureThreshold: 30` gives the first start up to 10 minutes. |
+
+:::warning Keep the longer startup probe
+The first start of 3.x on a fresh database creates its tables, and on a slow or busy node that takes longer than the 90 seconds the chart allows by default. Kubernetes then stops the container in the middle of a migration, and the migration lock stays set. The backend log says `MigrationLocked`, and the pod never becomes ready. This happened in the test on a busy host. If it happens to you, run `helm uninstall "$V3_RELEASE" -n "$NAMESPACE"`, then the first block of [Clean up](#clean-up), and start again at step 3.
+:::
 
 :::warning Always set `backend.database.prefix`
 Backstage does not keep a plugin's data in the database named by `PG_DATABASE`. It creates one database per plugin and names it after a prefix: `backstage_plugin_catalog`, `backstage_plugin_scaffolder` and so on, as on the 2.x server of the test. A new `PG_DATABASE` value isolates nothing. A 3.x release that keeps the default prefix on the same server would use those same databases and could change them in ways you cannot undo. The test did not try that. The value `devportal3_plugin_` above gives 3.x its own set and leaves the 2.x set alone. If you point 3.x at a different PostgreSQL server, you do not need the prefix.
