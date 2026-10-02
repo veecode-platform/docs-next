@@ -582,25 +582,19 @@ test -s face-plugin-refs.txt
 curl -fsSLo mirror-plugins.sh \
   https://raw.githubusercontent.com/redhat-developer/rhdh-operator/refs/heads/release-1.10/.rhdh/scripts/mirror-plugins.sh
 bash mirror-plugins.sh \
-  --plugin-index "$CATALOG_INDEX_REF" \
+export CATALOG_INDEX_SOURCE="${CATALOG_INDEX_REF#oci://}"
+export CATALOG_INDEX_MIRROR_REF="$MIRROR_REGISTRY/${CATALOG_INDEX_SOURCE#*/}"
+skopeo copy --all "docker://$CATALOG_INDEX_SOURCE" \
+  "docker://$CATALOG_INDEX_MIRROR_REF"
+
+bash mirror-plugins.sh \
   --plugin-list ./face-plugin-refs.txt \
   --to-registry "$MIRROR_REGISTRY"
 ```
 
-The image contains the `dynamic-plugins.veecode.yaml` product-face file. The commands extract its OCI references and give them to the RHDH script alongside the catalog index from the chart. The script reads the index's default plugin configuration, mirrors its referenced artifacts, and writes `rhdh-plugin-mirroring-summary.txt` with the source-to-mirror mappings. If your values override the image or `global.catalogIndex.image`, use those references instead of the chart defaults above.
+The image contains the `dynamic-plugins.veecode.yaml` product-face file. The commands extract its OCI references and give them to RHDH's script with `--plugin-list`. Copy the chart's catalog index separately with Skopeo; the RHDH script reads Red Hat's index format. The script writes `rhdh-plugin-mirroring-summary.txt` with the plugin source-to-mirror mappings. If your values override the image or `global.catalogIndex.image`, use those references instead of the chart defaults above.
 
-For a fully disconnected transfer, export the same inputs to a directory on the connected machine. Transfer both that directory and `mirror-plugins.sh` to a machine that can reach the target registry, then import them there:
-
-```bash
-bash mirror-plugins.sh \
-  --plugin-index "$CATALOG_INDEX_REF" \
-  --plugin-list ./face-plugin-refs.txt \
-  --to-dir "$PWD/plugin-mirror"
-
-bash mirror-plugins.sh \
-  --from-dir "$PWD/plugin-mirror" \
-  --to-registry "$MIRROR_REGISTRY"
-```
+This procedure assumes the connected machine can reach both Quay and the mirror registry. For a fully disconnected transfer, use RHDH's documented `--to-dir` and `--from-dir` flow for the face plugin list, and copy the chart index separately with Skopeo.
 
 Create a ConfigMap with the registry mapping. Set `MIRROR_REGISTRY` to a registry name that the cluster can resolve and reach.
 
