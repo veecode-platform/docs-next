@@ -6,10 +6,6 @@ title: Migrate from DevPortal 2.x to 3.x
 
 # Migrate from DevPortal 2.x to 3.x
 
-:::warning Preview status
-DevPortal 3.x is a preview. DevPortal 2.x remains the supported production line until 3.x is released.
-:::
-
 This guide moves a self-hosted DevPortal **2.x** that you installed with the Helm chart `veecode-devportal-platform` to DevPortal **3.x**. The 2.x chart keeps its data in an external PostgreSQL database by default, or in SQLite if you chose that.
 
 The migration goes to a **fresh database**. Nothing is converted in place:
@@ -23,7 +19,7 @@ The migration goes to a **fresh database**. Nothing is converted in place:
 This guide was followed end to end, command by command, with:
 
 - DevPortal 2.x: chart `veecode-devportal-platform` 0.5.2 (DevPortal 2.2.3), external PostgreSQL 16, the `recommended` and `keycloak` presets, Keycloak 26, one Ingress.
-- DevPortal 3.x: chart `devportal` 0.1.26, which installs image 3.0.0-beta.10.
+- DevPortal 3.x: chart `devportal` 1.0.0, which installs image 3.0.0.
 - Kubernetes: a single-node k3s 1.31 cluster. The 3.x portal was reached through `kubectl port-forward`.
 
 Two parts were not run:
@@ -237,7 +233,7 @@ Add the chart repository and install the release. The first start pulls the imag
 ```bash
 helm repo add veecode https://veecode-platform.github.io/next-charts
 helm repo update
-helm install "$V3_RELEASE" veecode/devportal --version 0.1.26 -n "$NAMESPACE" -f values-v3.yaml --wait --timeout 20m
+helm install "$V3_RELEASE" veecode/devportal --version 1.0.0 -n "$NAMESPACE" -f values-v3.yaml --wait --timeout 20m
 ```
 
 If the command times out and the pod stays at `0/1`, read the backend log with `kubectl -n "$NAMESPACE" logs "deploy/$V3_RELEASE-developer-hub" -c backstage-backend`. On a busy node the first start can fail while it creates the database tables. In the test, two of three first starts on a loaded host ended with `Plugin 'catalog' startup failed; caused by MigrationLocked`. One of them had been stopped by the startup probe. The other one was not stopped, and its log does not show what interrupted the migration. The 3.x databases hold nothing yet, so release the lock of the database of the plugin named in the log line (`catalog` in the test) and restart the pod:
