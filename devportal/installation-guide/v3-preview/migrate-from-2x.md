@@ -228,7 +228,7 @@ Backstage does not keep a plugin's data in the database named by `PG_DATABASE`. 
 
 The Keycloak client of your 2.x install must list the address of the 3.x portal among its redirect URIs. If the address is the same as in 2.x, nothing changes.
 
-Add the chart repository and install the release. The first start pulls the image and installs every default plugin. It took about 14 minutes on the test host, so the command waits for up to 20 minutes:
+Add the chart repository and install the release. The first start pulls the image and installs every default plugin. It took about 9 minutes on the test host, so the command waits for up to 20 minutes:
 
 ```bash
 helm repo add veecode https://veecode-platform.github.io/next-charts
@@ -236,7 +236,7 @@ helm repo update
 helm install "$V3_RELEASE" veecode/devportal --version 1.0.0 -n "$NAMESPACE" -f values-v3.yaml --wait --timeout 20m
 ```
 
-If the command times out and the pod stays at `0/1`, read the backend log with `kubectl -n "$NAMESPACE" logs "deploy/$V3_RELEASE-developer-hub" -c backstage-backend`. On a busy node the first start can fail while it creates the database tables. In the test, two of three first starts on a loaded host ended with `Plugin 'catalog' startup failed; caused by MigrationLocked`. One of them had been stopped by the startup probe. The other one was not stopped, and its log does not show what interrupted the migration. The 3.x databases hold nothing yet, so release the lock of the database of the plugin named in the log line (`catalog` in the test) and restart the pod:
+If the command times out and the pod stays at `0/1`, read the backend log with `kubectl -n "$NAMESPACE" logs "deploy/$V3_RELEASE-developer-hub" -c backstage-backend`. On a busy node the first start can fail while it creates the database tables. With an earlier pre-release, two of three first starts on a loaded host ended with `Plugin 'catalog' startup failed; caused by MigrationLocked`; one of them had been stopped by the startup probe, and the other one's log does not show what interrupted the migration. The 3.x databases hold nothing yet, so release the lock of the database of the plugin named in the log line (`catalog` in that test) and restart the pod:
 
 ```bash
 kubectl -n "$NAMESPACE" exec pg-client -- psql -d devportal3_plugin_catalog -c "update knex_migrations_lock set is_locked = 0"
@@ -276,7 +276,7 @@ The command must print `404`.
 
 ## Step 7: Install the marketplace plugins and locations again
 
-Enable again each plugin listed in `marketplace-installs-2x.yaml`: open the **Marketplace** in the portal, find the plugin, and choose **Enable**. The 3.x chart installs plugins when the pod starts, so restart the deployment. Then check that the file 3.x regenerates from its database lists the plugins:
+Enable again each plugin listed in `marketplace-installs-2x.yaml`: open the **Marketplace** in the portal, find the plugin, and choose **Enable**. Enable only the plugins listed in that file. Leave the entries that ship disabled with 3.x alone: the Red Hat dynamic Home page and the theme must stay disabled, and re-enabling the Home entry keeps the portal from starting. The 3.x chart installs plugins when the pod starts, so restart the deployment. Then check that the file 3.x regenerates from its database lists the plugins:
 
 ```bash
 kubectl -n "$NAMESPACE" rollout restart "deploy/$V3_RELEASE-developer-hub"
