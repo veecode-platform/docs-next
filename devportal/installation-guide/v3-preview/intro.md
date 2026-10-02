@@ -39,8 +39,8 @@ Run every command in one terminal session. Later steps use the shell variables t
 export NAMESPACE=devportal
 export DEVPORTAL_HOST=devportal.example.com
 export KEYCLOAK_HOST=keycloak.example.com
-export CHART_VERSION=0.1.26
-export PORTAL_IMAGE_TAG=3.0.0-beta.10
+export CHART_VERSION=1.0.0
+export PORTAL_IMAGE_TAG=3.0.0
 
 export DB_PASSWORD="$(openssl rand -hex 16)"
 export BACKEND_SECRET="$(openssl rand -hex 16)"
@@ -363,7 +363,7 @@ When a user signs out, the backend calls Keycloak at its public address (Step 4)
 Otherwise, save this as `values-trust.yaml`. It does two things:
 
 - `hostAliases` maps the Keycloak name to the cluster IP address of the ingress controller, for a cluster whose DNS does not know your names. The command reads that address from the `traefik` Service that k3s runs in `kube-system`. Use your controller's Service, or your DNS, instead.
-- `NODE_EXTRA_CA_CERTS` makes the backend trust the certificate of Step 2. For a private CA, store the CA's own certificate in the ConfigMap instead of `tls.crt`.
+- `caBundle` makes the backend trust the certificate of Step 2. The chart mounts the bundle and points `NODE_EXTRA_CA_CERTS` at it, so the file needs no volume or mount entries. For a private CA, store the CA's own certificate in the ConfigMap instead of `tls.crt`.
 
 ```bash
 kubectl -n "$NAMESPACE" create configmap devportal-ca --from-file=ca.crt=tls.crt
@@ -371,53 +371,22 @@ kubectl -n "$NAMESPACE" create configmap devportal-ca --from-file=ca.crt=tls.crt
 export INGRESS_IP="$(kubectl -n kube-system get service traefik -o jsonpath='{.spec.clusterIP}')"
 
 cat > values-trust.yaml <<EOF
+global:
+  veecode:
+    deployment:
+      caBundle:
+        kind: ConfigMap
+        name: devportal-ca
+        key: ca.crt
 upstream:
   backstage:
     hostAliases:
       - ip: $INGRESS_IP
         hostnames: [$KEYCLOAK_HOST]
-    extraEnvVars:
-      - name: NODE_EXTRA_CA_CERTS
-        value: /opt/app-root/src/devportal-ca.crt
-    extraVolumeMounts:
-      - {name: dynamic-plugins-root, mountPath: /opt/app-root/src/dynamic-plugins-root}
-      - {name: extensions-catalog, mountPath: /extensions}
-      - {name: temp, mountPath: /tmp}
-      - {name: devportal-data, mountPath: /devportal-data}
-      - {name: devportal-ca, mountPath: /opt/app-root/src/devportal-ca.crt, subPath: ca.crt, readOnly: true}
-    extraVolumes:
-      - name: dynamic-plugins-root
-        ephemeral:
-          volumeClaimTemplate:
-            spec:
-              accessModes: [ReadWriteOnce]
-              resources:
-                requests:
-                  storage: 5Gi
-      - name: dynamic-plugins
-        configMap:
-          defaultMode: 420
-          name: '{{ printf "%s-dynamic-plugins" .Release.Name }}'
-          optional: true
-      - name: dynamic-plugins-npmrc
-        secret:
-          defaultMode: 420
-          optional: true
-          secretName: '{{ printf "%s-dynamic-plugins-npmrc" .Release.Name }}'
-      - name: dynamic-plugins-registry-auth
-        secret:
-          defaultMode: 416
-          optional: true
-          secretName: '{{ printf "%s-dynamic-plugins-registry-auth" .Release.Name }}'
-      - {name: npmcacache, emptyDir: {}}
-      - {name: extensions-catalog, emptyDir: {}}
-      - {name: temp, emptyDir: {}}
-      - {name: devportal-data, emptyDir: {}}
-      - {name: devportal-ca, configMap: {name: devportal-ca}}
 EOF
 ```
 
-Helm replaces a list instead of merging it, so the file repeats the chart's own `extraVolumeMounts` and `extraVolumes` entries and adds one entry to each (`devportal-ca`). The entries above match the chart version set in Step 1. When you change that version, compare them with the output of `helm show values veecode/devportal --version "$CHART_VERSION"` under `upstream.backstage`, and copy any entry that changed.
+The entries above match the chart version set in Step 1. When you change that version, compare them with the output of `helm show values veecode/devportal --version "$CHART_VERSION"` under `global.veecode.deployment` and `upstream.backstage`, and copy any entry that changed.
 
 ### Install the chart
 
@@ -430,7 +399,7 @@ helm install devportal veecode/devportal --version "$CHART_VERSION" \
   --wait --timeout 20m
 ```
 
-The install waits for the portal to be ready. The first start pulls the image (about 525 MB) and installs the plugins before the portal starts. It took 8 to 17 minutes on a shared test machine, so a slow link or a busy node needs the headroom of `--timeout 20m`.
+The install waits for the portal to be ready. The first start pulls the image (about 520 MB) and installs the plugins before the portal starts. It took 8 to 17 minutes on a shared test machine, so a slow link or a busy node needs the headroom of `--timeout 20m`.
 
 ## Step 7: Sign in and check
 
@@ -466,13 +435,13 @@ kubectl -n "$NAMESPACE" rollout restart deployment/devportal-developer-hub
 kubectl -n "$NAMESPACE" rollout status deployment/devportal-developer-hub
 ```
 
-Kubernetes stops waiting when a rollout shows no progress for 10 minutes, and `rollout status` then ends with "exceeded its progress deadline". On a slow node the restart is still running at that point. Run `kubectl -n "$NAMESPACE" get pods --watch` and continue when the new pod shows `1/1 Running`.
+Kubernetes stops waiting when a rollout shows no progress for 10 minutes, and `rollout status` then ends with "exceeded its progress deadline". On a slow node the restart is still running at that point. Run `kubectl -n "$NAMESPACE" get pods --watch` and continue when the new pod shows `1/1 Running`. On a slow node you can also raise the Deployment's progress deadline with `global.veecode.deployment.progressDeadlineSeconds` (0 keeps the 10-minute Kubernetes default).
 
 The portal stores the installation in its PostgreSQL database, in the `marketplace_installations` table of the `backstage_plugin_extensions` database, which is why it survives the restart.
 
 ## Evaluate without Ingress or an identity provider
 
-For a quick look on a laptop you can skip Ingress, TLS and the identity provider and keep guest sign-in. This is for evaluation only: guest sign-in signs everyone in as `ADMIN` (`user:default/admin`). Use a cluster that does not hold the installation above. The chart creates a ClusterRole named after the release, so a second release called `devportal` in another namespace fails.
+For a quick look on a laptop you can skip Ingress, TLS and the identity provider and keep guest sign-in. This is for evaluation only: guest sign-in signs everyone in as `ADMIN` (`user:default/admin`). Use a cluster that does not hold the installation above. The chart creates a ClusterRole named after the release, so a second release called `devportal` in another namespace fails (set `kubernetesPlugin.rbac.namespaceQualifiedName: true` when releases with the same name must share a cluster).
 
 Set the variables and create the namespace:
 
@@ -531,15 +500,15 @@ The sign-in page offers **Guest** and a GitHub sign-in that needs an OAuth app t
 
 ## Disable a default plugin
 
-The default plugins are baked into the DevPortal image, not declared in the chart's `values.yaml`, and `global.dynamic.plugins` only adds to them. To disable a default plugin, add an entry with its exact package reference and `disabled: true`. The chart's [product face guide](https://github.com/veecode-platform/devportal-chart/blob/main/docs/product-face-overrides.md) lists every reference. This example disables Tech Radar:
+The default plugins ship in the DevPortal image's face file `dynamic-plugins.veecode.yaml`, not in the chart's `values.yaml`. When the same plugin is configured in several places, deploy configuration (chart values or operator-supplied app-config) wins over a marketplace row, which wins over the face. An entry with a new package reference adds a plugin; an entry with the exact package reference of a face plugin overrides just that entry. To disable a default plugin, add an entry with its exact (OCI, digest-pinned) package reference and `disabled: true`. The chart's [product face guide](https://github.com/veecode-platform/devportal-chart/blob/main/docs/product-face-overrides.md) lists every reference. This example disables Tech Radar:
 
 ```yaml
 global:
   dynamic:
     plugins:
-      - package: ./dynamic-plugins/dist/backstage-community-plugin-tech-radar
+      - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar@sha256:2a5e149c22bdc02f6cf0d1ba6db0113105b284bf05b3806678cca601387f3b63!backstage-community-plugin-tech-radar
         disabled: true
-      - package: ./dynamic-plugins/dist/backstage-community-plugin-tech-radar-backend-dynamic
+      - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar-backend@sha256:71f7f6c4816156120e693bf3c2ff29ee35c3725406c996c7de58607800df3a99!backstage-community-plugin-tech-radar-backend-dynamic
         disabled: true
 ```
 
@@ -547,14 +516,14 @@ Add the entries to the `plugins` list of your `values.yaml` and run `helm upgrad
 
 ## What ships by default
 
-The image runs these plugins without an entry in your values. The **Installed packages** tab lists them, together with the Keycloak module that `values.yaml` adds:
+The image's face file `dynamic-plugins.veecode.yaml` runs 20 digest-pinned OCI plugins without an entry in your values: 18 enabled by default and 2 shipped disabled (the Red Hat dynamic Home page and the theme). The **Installed packages** tab lists them, together with the Keycloak module that `values.yaml` adds, and any marketplace rows you install:
 
 - The VeeCode home page, the global header and an About page.
 - The Marketplace, which is the **Extensions** page.
 - TechDocs, Notifications, Signals and Tech Radar.
 - The RBAC screens, without the RBAC backend. Permission checks are off: the portal reads `permission.enabled` from the `PERMISSION_ENABLED` variable and the chart does not set it. Every signed-in user can install plugins from the Marketplace.
 
-The chart also creates a read-only ClusterRole and binding for the Kubernetes plugin (`kubernetesPlugin.rbac.enabled`, on by default). The image does not load the Kubernetes plugin by default.
+The chart also creates a read-only ClusterRole and binding for the Kubernetes plugin (`kubernetesPlugin.rbac.enabled`, on by default). The image does not load the Kubernetes plugin by default. When releases with the same name share a cluster across namespaces, set `kubernetesPlugin.rbac.namespaceQualifiedName: true` so the cluster-scoped names include the release namespace.
 
 ## Install without internet access
 
