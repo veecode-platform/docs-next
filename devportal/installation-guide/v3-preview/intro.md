@@ -39,6 +39,8 @@ Run every command in one terminal session. Later steps use the shell variables t
 export NAMESPACE=devportal
 export DEVPORTAL_HOST=devportal.example.com
 export KEYCLOAK_HOST=keycloak.example.com
+export CHART_VERSION=0.1.26
+export PORTAL_IMAGE_TAG=3.0.0-beta.10
 
 export DB_PASSWORD="$(openssl rand -hex 16)"
 export BACKEND_SECRET="$(openssl rand -hex 16)"
@@ -281,7 +283,7 @@ helm repo update
 helm search repo veecode/devportal --versions
 ```
 
-This page was followed with chart `0.1.26`, which installs image `3.0.0-beta.10`. The chart pins its image by digest, so the install pulls exactly the image the chart names. Install that version. If you pick a newer one from the list, read the note under `values-trust.yaml` below first.
+This page uses the chart version set in Step 1. The chart pins its image by digest, so the install pulls exactly the image that chart version names. If you pick a newer version from the list, compare its values with the `values-trust.yaml` example below first. If the portal cannot reach Quay, complete [Install without internet access](#install-without-internet-access) before you install the chart.
 
 Save this as `values.yaml`:
 
@@ -415,14 +417,14 @@ upstream:
 EOF
 ```
 
-Helm replaces a list instead of merging it, so the file repeats the chart's own `extraVolumeMounts` and `extraVolumes` entries and adds one entry to each (`devportal-ca`). The entries above are the ones of chart `0.1.26`. When you change the chart version, compare them with the output of `helm show values veecode/devportal --version VERSION` under `upstream.backstage`, and copy any entry that changed.
+Helm replaces a list instead of merging it, so the file repeats the chart's own `extraVolumeMounts` and `extraVolumes` entries and adds one entry to each (`devportal-ca`). The entries above match the chart version set in Step 1. When you change that version, compare them with the output of `helm show values veecode/devportal --version "$CHART_VERSION"` under `upstream.backstage`, and copy any entry that changed.
 
 ### Install the chart
 
 The hostname is not in the files: `--set global.host` passes it.
 
 ```bash
-helm install devportal veecode/devportal --version 0.1.26 \
+helm install devportal veecode/devportal --version "$CHART_VERSION" \
   -n "$NAMESPACE" -f values.yaml -f values-trust.yaml \
   --set global.host="$DEVPORTAL_HOST" \
   --wait --timeout 20m
@@ -514,7 +516,7 @@ EOF
 helm repo add veecode https://veecode-platform.github.io/next-charts
 helm repo update
 
-helm install devportal veecode/devportal --version 0.1.26 \
+helm install devportal veecode/devportal --version "$CHART_VERSION" \
   -n "$NAMESPACE" -f values-eval.yaml \
   --wait --timeout 20m
 ```
@@ -554,12 +556,99 @@ The image runs these plugins without an entry in your values. The **Installed pa
 
 The chart also creates a read-only ClusterRole and binding for the Kubernetes plugin (`kubernetesPlugin.rbac.enabled`, on by default). The image does not load the Kubernetes plugin by default.
 
+## Install without internet access
+
+The `install-dynamic-plugins` init container uses `skopeo` to pull the catalog index and OCI plugins directly. Kubernetes cluster-level image-mirror settings do not redirect these pulls. Red Hat Developer Hub documents a `registries.conf` mirror for the same installer and provides the [`mirror-plugins.sh` script](https://github.com/redhat-developer/rhdh-operator/blob/release-1.10/.rhdh/scripts/mirror-plugins.sh) to copy the index and its plugins. See [RHDH's air-gapped installation guide](https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.10/html-single/installing_red_hat_developer_hub_in_an_air-gapped_environment/index).
+
+On a connected machine, install Docker, Helm, `yq` 4, Skopeo 1.20 or later, GNU `tar`, and `jq`. Make sure the machine can reach Quay and your mirror registry. Authenticate to both registries before you run the mirror script.
+
+Set the mirror registry name, then read the image and catalog index references from the selected chart. The image digest and catalog index tag come from the chart values, so the commands follow the chart version in Step 1.
+
+```bash
+export MIRROR_REGISTRY=registry.example.com
+
+helm show values veecode/devportal --version "$CHART_VERSION" > chart-values.yaml
+
+export PORTAL_IMAGE="$(yq -r '"\(.upstream.backstage.image.registry)/\(.upstream.backstage.image.repository)@\(.upstream.backstage.image.digest)"' chart-values.yaml)"
+export CATALOG_INDEX_REF="$(yq -r '"oci://\(.global.catalogIndex.image.registry)/\(.global.catalogIndex.image.repository):\(.global.catalogIndex.image.tag)"' chart-values.yaml)"
+test "$(yq -r '.upstream.backstage.image.tag' chart-values.yaml)" = "$PORTAL_IMAGE_TAG"
+
+docker run --rm --entrypoint cat "$PORTAL_IMAGE" \
+  /opt/app-root/src/dynamic-plugins.veecode.yaml > dynamic-plugins.veecode.yaml
+yq -r '.plugins[].package | select(test("^oci://"))' \
+  dynamic-plugins.veecode.yaml > face-plugin-refs.txt
+test -s face-plugin-refs.txt
+
+curl -fsSLo mirror-plugins.sh \
+  https://raw.githubusercontent.com/redhat-developer/rhdh-operator/refs/heads/release-1.10/.rhdh/scripts/mirror-plugins.sh
+bash mirror-plugins.sh \
+  --plugin-index "$CATALOG_INDEX_REF" \
+  --plugin-list ./face-plugin-refs.txt \
+  --to-registry "$MIRROR_REGISTRY"
+```
+
+The image contains the `dynamic-plugins.veecode.yaml` product-face file. The commands extract its OCI references and give them to the RHDH script alongside the catalog index from the chart. The script reads the index's default plugin configuration, mirrors its referenced artifacts, and writes `rhdh-plugin-mirroring-summary.txt` with the source-to-mirror mappings. If your values override the image or `global.catalogIndex.image`, use those references instead of the chart defaults above.
+
+For a fully disconnected transfer, export the same inputs to a directory on the connected machine. Transfer both that directory and `mirror-plugins.sh` to a machine that can reach the target registry, then import them there:
+
+```bash
+bash mirror-plugins.sh \
+  --plugin-index "$CATALOG_INDEX_REF" \
+  --plugin-list ./face-plugin-refs.txt \
+  --to-dir "$PWD/plugin-mirror"
+
+bash mirror-plugins.sh \
+  --from-dir "$PWD/plugin-mirror" \
+  --to-registry "$MIRROR_REGISTRY"
+```
+
+Create a ConfigMap with the registry mapping. Set `MIRROR_REGISTRY` to a registry name that the cluster can resolve and reach.
+
+```bash
+cat > registries.conf <<EOF
+[[registry]]
+prefix = "quay.io/veecode"
+location = "$MIRROR_REGISTRY/veecode"
+EOF
+
+kubectl -n "$NAMESPACE" create configmap plugin-registry-mirror \
+  --from-file=rhdh-registries.conf=registries.conf \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
+
+Add the volume and mount below to the chart values you pass to Helm. Append the volume to `upstream.backstage.extraVolumes` and the mount to the `install-dynamic-plugins` entry under `upstream.backstage.initContainers`.
+
+```yaml
+upstream:
+  backstage:
+    extraVolumes:
+      - name: plugin-registry-mirror
+        configMap:
+          name: plugin-registry-mirror
+    initContainers:
+      - name: install-dynamic-plugins
+        volumeMounts:
+          - name: plugin-registry-mirror
+            mountPath: /etc/containers/registries.conf.d/rhdh-registries.conf
+            subPath: rhdh-registries.conf
+            readOnly: true
+```
+
+This snippet shows only the additions. Helm replaces list values, so preserve every existing volume, volume mount, and field of the `install-dynamic-plugins` entry for the chart version you use. The full defaults are in `helm show values veecode/devportal --version "$CHART_VERSION"`. RHDH describes the same list behavior and mount path in its [Helm mirror procedure](https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.10/html-single/installing_red_hat_developer_hub_in_an_air-gapped_environment/index).
+
+The chart already provides `global.catalogIndex.image`, `upstream.backstage.extraVolumes`, and `upstream.backstage.initContainers`. With the `registries.conf` mapping mounted, the installer can keep the chart's catalog-index reference and pull it and the face plugins from the mirror. Run the Helm install command in Step 6, then check the installer logs and wait for the portal to become ready:
+
+```bash
+kubectl -n "$NAMESPACE" logs deployment/devportal-developer-hub -c install-dynamic-plugins
+kubectl -n "$NAMESPACE" rollout status deployment/devportal-developer-hub
+```
+
 ## Version and lineage
 
-Each chart version pins its image by digest. Chart `0.1.26` installs image `3.0.0-beta.10`. Never point production at `:edge`.
+Step 1 sets the chart version and the image tag it installs. The chart pins that image by digest. Never point production at `:edge`.
 
 The chart source is [veecode-platform/devportal-chart](https://github.com/veecode-platform/devportal-chart). It is a renamed fork of [redhat-developer/rhdh-chart](https://github.com/redhat-developer/rhdh-chart) pinned at `backstage-7.0.1`.
 
 ## Attribution
 
-The OIDC configuration and the identity provider steps on this page are adapted from [Red Hat Developer Hub documentation](https://github.com/redhat-developer/red-hat-developers-documentation-rhdh), licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). VeeCode modified the text: it replaced Red Hat build of Keycloak with Keycloak, changed the configuration to the `devportal` chart, and added the steps for the Ingress, the certificate and the database.
+The OIDC and registry-mirroring instructions on this page are adapted from [Red Hat Developer Hub documentation](https://github.com/redhat-developer/red-hat-developers-documentation-rhdh), licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). VeeCode modified the text: it replaced Red Hat build of Keycloak with Keycloak, changed the configuration to the `devportal` chart, and added the steps for the Ingress, the certificate, the database, and registry mirroring.
