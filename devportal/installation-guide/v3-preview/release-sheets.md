@@ -6,7 +6,7 @@ title: Release sheets
 
 Every 3.x release has a release sheet. It says what changed, which versions of the image, chart, catalog index and plugins go together, what the vulnerability scan found, which findings are accepted for now and until when, and what is known not to work.
 
-The first one is the [DevPortal 3.0.0 release sheet](./release-sheet-3.0.0.md).
+The first one is the [DevPortal 3.0.0 release sheet](./release-sheet-3-0-0.md).
 
 This page is the template that every release sheet follows. A field with nothing to report says `None`, so a reader can tell an empty field from a forgotten one.
 
