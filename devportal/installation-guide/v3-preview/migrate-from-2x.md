@@ -276,7 +276,7 @@ The command must print `404`.
 
 ## Step 7: Install the marketplace plugins and locations again
 
-Enable again each plugin listed in `marketplace-installs-2x.yaml`: open the **Marketplace** in the portal, find the plugin, and choose **Enable**. Enable only the plugins listed in that file. Leave the entries that ship disabled with 3.x alone: the Red Hat dynamic Home page and the theme must stay disabled, and re-enabling the Home entry keeps the portal from starting. The 3.x chart installs plugins when the pod starts, so restart the deployment. Then check that the file 3.x regenerates from its database lists the plugins:
+Enable again each plugin listed in `marketplace-installs-2x.yaml`: open the **Marketplace** in the portal, find the plugin, and choose **Enable**. Leave the two entries that ship disabled with 3.x as they are, the Red Hat dynamic Home page and the theme: enabling the Home entry leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. The 3.x chart installs plugins when the pod starts, so restart the deployment. Then check that the file 3.x regenerates from its database lists the plugins:
 
 ```bash
 kubectl -n "$NAMESPACE" rollout restart "deploy/$V3_RELEASE-developer-hub"
