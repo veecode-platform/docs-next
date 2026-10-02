@@ -581,7 +581,6 @@ test -s face-plugin-refs.txt
 
 curl -fsSLo mirror-plugins.sh \
   https://raw.githubusercontent.com/redhat-developer/rhdh-operator/refs/heads/release-1.10/.rhdh/scripts/mirror-plugins.sh
-bash mirror-plugins.sh \
 export CATALOG_INDEX_SOURCE="${CATALOG_INDEX_REF#oci://}"
 export CATALOG_INDEX_MIRROR_REF="$MIRROR_REGISTRY/${CATALOG_INDEX_SOURCE#*/}"
 skopeo copy --all "docker://$CATALOG_INDEX_SOURCE" \
