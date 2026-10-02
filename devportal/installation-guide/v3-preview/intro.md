@@ -428,7 +428,7 @@ The sidebar item **Marketplace** opens the **Extensions** page. Its **Catalog** 
 
 1. In the **Catalog** tab, search for `Datadog` and select **Install** on its card. Confirm with **Install**: the dialog says the change takes effect after a restart. The card now shows **Pending install**.
 2. Restart the portal with the commands below. The restart installs the plugin before the portal starts, so it takes about as long as the first start.
-3. Sign in again. **Installed packages** has one more entry, and the Datadog card offers **Disable**.
+3. Sign in again. **Installed packages** has one more entry, and the Datadog card offers **Uninstall**.
 
 ```bash
 kubectl -n "$NAMESPACE" rollout restart deployment/devportal-developer-hub
