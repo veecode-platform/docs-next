@@ -575,7 +575,7 @@ test "$(yq -r '.upstream.backstage.image.tag' chart-values.yaml)" = "$PORTAL_IMA
 
 docker run --rm --entrypoint cat "$PORTAL_IMAGE" \
   /opt/app-root/src/dynamic-plugins.veecode.yaml > dynamic-plugins.veecode.yaml
-yq -r '.plugins[].package | select(test("^oci://"))' \
+yq -r '.plugins[].package | select(test("^oci://")) | sub("!.*$"; "")' \
   dynamic-plugins.veecode.yaml > face-plugin-refs.txt
 test -s face-plugin-refs.txt
 
@@ -592,7 +592,7 @@ bash mirror-plugins.sh \
   --to-registry "$MIRROR_REGISTRY"
 ```
 
-The image contains the `dynamic-plugins.veecode.yaml` product-face file. The commands extract its OCI references and give them to RHDH's script with `--plugin-list`. Copy the chart's catalog index separately with Skopeo; the RHDH script reads Red Hat's index format. The script writes `rhdh-plugin-mirroring-summary.txt` with the plugin source-to-mirror mappings. If your values override the image or `global.catalogIndex.image`, use those references instead of the chart defaults above.
+The image contains the `dynamic-plugins.veecode.yaml` product-face file. The commands extract its OCI references, remove the `!subpath` suffix, and give the image references to RHDH's script with `--plugin-list`. Copy the chart's catalog index separately with Skopeo; the RHDH script reads Red Hat's index format. The script writes `rhdh-plugin-mirroring-summary.txt` with the plugin source-to-mirror mappings. If your values override the image or `global.catalogIndex.image`, use those references instead of the chart defaults above.
 
 This procedure assumes the connected machine can reach both Quay and the mirror registry. For a fully disconnected transfer, use RHDH's documented `--to-dir` and `--from-dir` flow for the face plugin list, and copy the chart index separately with Skopeo.
 
