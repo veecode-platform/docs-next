@@ -12,7 +12,7 @@ The examples assume an installation created by the DevPortal 3.x installation gu
 
 The portal stores plugin data in separate PostgreSQL databases. Back up the database named by `PG_DATABASE` and every database that starts with `backend.database.prefix` (the default is `backstage_plugin_`). A backup of only `PG_DATABASE` can miss plugin data.
 
-Tested with chart `devportal` 0.1.25 and 0.1.26, which install images 3.0.0-beta.9 and 3.0.0-beta.10, respectively, and PostgreSQL 16.15.
+Tested with chart `devportal` 0.1.26 and 1.0.0, which install images 3.0.0-beta.10 and 3.0.0, respectively, and PostgreSQL 16.15.
 
 ## Before you start
 
@@ -20,7 +20,7 @@ Use a maintenance window. The procedure scales the portal down while it takes an
 
 Before you upgrade, note one registered catalog location and entity, one installed marketplace package, one Scaffolder task, and one user setting. Sign in after the upgrade and after the restore to check that the same data remains.
 
-Keep the backup directory private. The database archives can contain sensitive data. The examples use the `devportal` database, the default `backstage_plugin_` prefix, and chart version 0.1.26 as the target. If you changed `PG_DATABASE` or `backend.database.prefix`, set `DATABASE_NAME` and `DB_PREFIX` to those values.
+Keep the backup directory private. The database archives can contain sensitive data. The examples use the `devportal` database, the default `backstage_plugin_` prefix, and chart version 1.0.0 as the target. If you changed `PG_DATABASE` or `backend.database.prefix`, set `DATABASE_NAME` and `DB_PREFIX` to those values.
 
 ## Step 1: Prepare the release and backup directory
 
@@ -31,6 +31,8 @@ export NAMESPACE=devportal
 export RELEASE=devportal
 export DATABASE_NAME=devportal
 export DB_PREFIX=backstage_plugin_
+export CHART_FROM=0.1.26
+export CHART_TO=1.0.0
 BACKUP_DIR="$PWD/devportal-backup-$(date +%Y%m%d%H%M%S)"
 export BACKUP_DIR
 
@@ -56,7 +58,7 @@ helm get values "$RELEASE" --namespace "$NAMESPACE" --output yaml \
   > "$BACKUP_DIR/values.yaml"
 ```
 
-Confirm that `helm list` shows the release on chart 0.1.25 before you continue.
+Confirm that `helm list` shows the release on chart 0.1.26 before you continue.
 
 ## Step 2: Stop the portal and back up its databases
 
@@ -83,18 +85,18 @@ Keep `databases.txt`, every `.dump` file, `SHA256SUMS`, and `values.yaml` togeth
 
 ## Step 3: Upgrade the chart
 
-Upgrade the existing Helm release to chart version 0.1.26. The command applies the saved release values and uses the defaults from chart 0.1.26.
+Upgrade the existing Helm release to chart version 1.0.0. The command applies the saved release values and uses the defaults from chart 1.0.0.
 
 ```bash
 helm upgrade "$RELEASE" veecode/devportal \
-  --namespace "$NAMESPACE" --version 0.1.26 \
+  --namespace "$NAMESPACE" --version "$CHART_TO" \
   --values "$BACKUP_DIR/values.yaml" \
   --wait --timeout 20m
 ```
 
 ## Step 4: Verify the upgraded installation
 
-Wait for the portal deployment and confirm Helm reports chart version 0.1.26:
+Wait for the portal deployment and confirm Helm reports chart version 1.0.0:
 
 ```bash
 kubectl --namespace "$NAMESPACE" rollout status deployment/devportal-developer-hub --timeout=20m
@@ -104,13 +106,13 @@ kubectl --namespace "$NAMESPACE" get deployment/devportal-developer-hub \
 kubectl --namespace "$NAMESPACE" get pods
 ```
 
-Confirm that Helm reports chart 0.1.26. The deployment image should be `docker.io/veecode/devportal@sha256:28d1bafed0cfa3cdb3ceab1868ccc4a729410e0921b352457e167ab7cbfb3e5a`.
+Confirm that Helm reports chart 1.0.0. The deployment image should be `docker.io/veecode/devportal@sha256:585daa40009ca79988766a717257d592bce0f711b851fa06c200954aeafc6564` (image `3.0.0`).
 
 Check that the portal pods are ready. Sign in with the same account and confirm that the catalog location and entity, installed marketplace package, Scaffolder task, and user setting you noted before the upgrade are still present.
 
-## Step 5: Restore the backup and return to chart 0.1.25
+## Step 5: Restore the backup and return to chart 0.1.26
 
-If you need to return to the earlier chart with the pre-upgrade database state, stop the portal and restore every database from the backup before you install chart 0.1.25. The restore removes databases created under the configured portal prefix after the backup.
+If you need to return to the earlier chart with the pre-upgrade database state, stop the portal and restore every database from the backup before you install chart 0.1.26. The restore removes databases created under the configured portal prefix after the backup.
 
 ```bash
 kubectl --namespace "$NAMESPACE" scale deployment/devportal-developer-hub --replicas=0
@@ -133,14 +135,14 @@ while IFS= read -r database; do
 done < "$BACKUP_DIR/databases.txt"
 
 helm upgrade "$RELEASE" veecode/devportal \
-  --namespace "$NAMESPACE" --version 0.1.25 \
+  --namespace "$NAMESPACE" --version "$CHART_FROM" \
   --values "$BACKUP_DIR/values.yaml" \
   --wait --timeout 20m
 ```
 
 ## Step 6: Verify the restored installation
 
-Wait for the portal and confirm Helm reports chart version 0.1.25:
+Wait for the portal and confirm Helm reports chart version 0.1.26:
 
 ```bash
 kubectl --namespace "$NAMESPACE" rollout status deployment/devportal-developer-hub --timeout=20m
@@ -150,7 +152,7 @@ kubectl --namespace "$NAMESPACE" get deployment/devportal-developer-hub \
 kubectl --namespace "$NAMESPACE" get pods
 ```
 
-Confirm that Helm reports chart 0.1.25. The deployment image should be `docker.io/veecode/devportal@sha256:7a3d61de5e5e8f07c5f612e8235b2dc8d46e97418e4e4d1bf40ca2c500157347`.
+Confirm that Helm reports chart 0.1.26. The deployment image should be `docker.io/veecode/devportal@sha256:28d1bafed0cfa3cdb3ceab1868ccc4a729410e0921b352457e167ab7cbfb3e5a` (image `3.0.0-beta.10`).
 
 Check that the portal pods are ready. Sign in with the same account and confirm that the catalog location and entity, installed marketplace package, Scaffolder task, and user setting match the state you recorded before the upgrade.
 
