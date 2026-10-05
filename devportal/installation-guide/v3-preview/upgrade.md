@@ -20,6 +20,10 @@ Before you upgrade, note one registered catalog location and entity, one install
 
 Keep the backup directory private. The database archives can contain sensitive data. The examples use the `devportal` database, the default `backstage_plugin_` prefix, and the releases listed in Step 1. If you changed `PG_DATABASE` or `backend.database.prefix`, set `DATABASE_NAME` and `DB_PREFIX` to those values.
 
+The examples upgrade 3.0.0 (chart 1.0.0) to 3.0.1 (chart 1.0.1). To upgrade from another 3.x release, set `CHART_FROM`, `IMAGE_FROM_VERSION`, and `IMAGE_FROM` in Step 1 to that release. The recorded end-to-end run started with chart 0.1.26 and image 3.0.0-beta.10, upgraded to chart 1.0.0 and image 3.0.0, and used PostgreSQL 16.15. It does not cover the 3.0.0 to 3.0.1 path. Chart 1.0.1 changes only the image tag, digest, and version metadata against chart 1.0.0.
+
+If a 3.0.0 deployment outside this chart runs the image with SQLite, change its image reference to 3.0.1 (the digest is on the release sheet). The backup and restore steps in this guide do not apply to it.
+
 ## Step 1: Prepare the release and backup directory
 
 Run these commands in one Bash session. They save the values stored for this release. Each chart version supplies its own defaults.
@@ -29,12 +33,12 @@ export NAMESPACE=devportal
 export RELEASE=devportal
 export DATABASE_NAME=devportal
 export DB_PREFIX=backstage_plugin_
-export CHART_FROM=0.1.26
-export IMAGE_FROM_VERSION=3.0.0-beta.10
-export IMAGE_FROM=docker.io/veecode/devportal@sha256:28d1bafed0cfa3cdb3ceab1868ccc4a729410e0921b352457e167ab7cbfb3e5a
-export CHART_TO=1.0.0
-export IMAGE_TO_VERSION=3.0.0
-export IMAGE_TO=docker.io/veecode/devportal@sha256:585daa40009ca79988766a717257d592bce0f711b851fa06c200954aeafc6564
+export CHART_FROM=1.0.0
+export IMAGE_FROM_VERSION=3.0.0
+export IMAGE_FROM=docker.io/veecode/devportal@sha256:585daa40009ca79988766a717257d592bce0f711b851fa06c200954aeafc6564
+export CHART_TO=1.0.1
+export IMAGE_TO_VERSION=3.0.1
+export IMAGE_TO=docker.io/veecode/devportal@sha256:881f936ff4a38b31998d52cb6cd558d6b5e6fca9a3d99b08e80aba77913aaa38
 BACKUP_DIR="$PWD/devportal-backup-$(date +%Y%m%d%H%M%S)"
 export BACKUP_DIR
 
@@ -59,8 +63,6 @@ helm list --namespace "$NAMESPACE" --filter "^${RELEASE}$"
 helm get values "$RELEASE" --namespace "$NAMESPACE" --output yaml \
   > "$BACKUP_DIR/values.yaml"
 ```
-
-Tested with chart versions `$CHART_FROM` and `$CHART_TO`, images `$IMAGE_FROM_VERSION` and `$IMAGE_TO_VERSION`, and PostgreSQL 16.15.
 
 Confirm that `helm list` shows the starting release before you continue.
 
