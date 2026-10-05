@@ -22,7 +22,7 @@ This guide's procedure was followed end to end, command by command, with:
 - DevPortal 3.x: chart `devportal` 1.0.0-rc.1, which installs image 3.0.0-rc.2.
 - Kubernetes: a single-node k3s 1.31 cluster. The 3.x portal was reached through `kubectl port-forward`.
 
-The tested image has the same digest as released image 3.0.0. The chart templates are unchanged between chart tags 1.0.0-rc.1 and 1.0.0. The release chart changes the chart version, app version, default image tag, and generated README and schema metadata. The complete procedure has not been rerun with chart 1.0.0.
+The default image digest configured in chart 1.0.0 matches the digest used by the candidate run. The chart templates are unchanged between chart tags 1.0.0-rc.1 and 1.0.0. The release chart changes the chart version, app version, default image tag, and generated README and schema metadata. The complete procedure has not been rerun with chart 1.0.0.
 
 Two parts were not run:
 
