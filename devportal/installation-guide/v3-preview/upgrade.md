@@ -38,7 +38,7 @@ export IMAGE_FROM_VERSION=3.0.0
 export IMAGE_FROM=docker.io/veecode/devportal@sha256:585daa40009ca79988766a717257d592bce0f711b851fa06c200954aeafc6564
 export CHART_TO=1.0.1
 export IMAGE_TO_VERSION=3.0.1
-export IMAGE_TO=docker.io/veecode/devportal@@@IMAGE_DIGEST@@
+export IMAGE_TO=docker.io/veecode/devportal@sha256:881f936ff4a38b31998d52cb6cd558d6b5e6fca9a3d99b08e80aba77913aaa38
 BACKUP_DIR="$PWD/devportal-backup-$(date +%Y%m%d%H%M%S)"
 export BACKUP_DIR
 
