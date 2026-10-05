@@ -20,13 +20,9 @@ Before you upgrade, note one registered catalog location and entity, one install
 
 Keep the backup directory private. The database archives can contain sensitive data. The examples use the `devportal` database, the default `backstage_plugin_` prefix, and the releases listed in Step 1. If you changed `PG_DATABASE` or `backend.database.prefix`, set `DATABASE_NAME` and `DB_PREFIX` to those values.
 
-The recorded end-to-end run started with chart 0.1.26 and image 3.0.0-beta.10, upgraded to chart 1.0.0 and image 3.0.0, and used PostgreSQL 16.15. That record does not cover the chart 1.0.1 and image 3.0.1 target or the 3.0.0 to 3.0.1 path below.
+The examples upgrade 3.0.0 (chart 1.0.0) to 3.0.1 (chart 1.0.1). To upgrade from another 3.x release, set `CHART_FROM`, `IMAGE_FROM_VERSION`, and `IMAGE_FROM` in Step 1 to that release. The recorded end-to-end run started with chart 0.1.26 and image 3.0.0-beta.10, upgraded to chart 1.0.0 and image 3.0.0, and used PostgreSQL 16.15. It does not cover the 3.0.0 to 3.0.1 path. Chart 1.0.1 changes only the image tag, digest, and version metadata against chart 1.0.0.
 
-## Upgrade from 3.0.0 to 3.0.1
-
-This Helm upgrade path is for a PostgreSQL-backed 3.0.0 installation. Before running Step 1, edit `CHART_FROM`, `IMAGE_FROM_VERSION`, and `IMAGE_FROM` in its code block to the 3.0.0 source values listed there. Then follow Steps 1 through 4. The recorded test above does not cover this path.
-
-The 3.x chart connects to PostgreSQL. If your 3.0.0 deployment runs the image with SQLite, update its image reference to 3.0.1 in that deployment's configuration. The release sheet supplies the 3.0.1 image digest. This guide's PostgreSQL backup and restore steps do not apply to that deployment.
+If a 3.0.0 deployment outside this chart runs the image with SQLite, change its image reference to 3.0.1 (the digest is on the release sheet). The backup and restore steps in this guide do not apply to it.
 
 ## Step 1: Prepare the release and backup directory
 
@@ -37,12 +33,9 @@ export NAMESPACE=devportal
 export RELEASE=devportal
 export DATABASE_NAME=devportal
 export DB_PREFIX=backstage_plugin_
-export CHART_FROM=0.1.26
-export IMAGE_FROM_VERSION=3.0.0-beta.10
-export IMAGE_FROM=docker.io/veecode/devportal@sha256:28d1bafed0cfa3cdb3ceab1868ccc4a729410e0921b352457e167ab7cbfb3e5a
-export CHART_FROM_3_0_0=1.0.0
-export IMAGE_FROM_3_0_0_VERSION=3.0.0
-export IMAGE_FROM_3_0_0=docker.io/veecode/devportal@sha256:585daa40009ca79988766a717257d592bce0f711b851fa06c200954aeafc6564
+export CHART_FROM=1.0.0
+export IMAGE_FROM_VERSION=3.0.0
+export IMAGE_FROM=docker.io/veecode/devportal@sha256:585daa40009ca79988766a717257d592bce0f711b851fa06c200954aeafc6564
 export CHART_TO=1.0.1
 export IMAGE_TO_VERSION=3.0.1
 export IMAGE_TO=docker.io/veecode/devportal@@@IMAGE_DIGEST@@
