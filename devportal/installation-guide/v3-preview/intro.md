@@ -17,6 +17,7 @@ You need:
 - A Kubernetes cluster with an Ingress controller, and `kubectl` and Helm 3 pointed at it. The steps were followed on k3s 1.31 with its bundled Traefik controller (`className: traefik`) and Helm 3.20.
 - Two DNS names that resolve to the Ingress controller: one for the portal and one for the identity provider. The steps use `devportal.example.com` and `keycloak.example.com`. The portal backend calls the identity provider's public name when a user signs out, so the cluster must resolve and reach that name too ([Step 6](#step-6-install-devportal) covers a cluster that cannot).
 - `openssl` and `curl` on your machine, and a browser that allows pop-ups from the portal: the sign-in button opens the identity provider in a pop-up window.
+- If the cluster cannot reach a public Helm repository or registry, prepare a local chart archive and mirror before Step 1 by following [Install without internet access](#install-without-internet-access).
 
 The chart installs no database. The steps run a disposable PostgreSQL in the cluster. For production, use a PostgreSQL that you operate, and give the portal a user that can create databases, because the portal creates one database per plugin.
 
@@ -47,6 +48,8 @@ export BACKEND_SECRET="$(openssl rand -hex 16)"
 export AUTH_SESSION_SECRET="$(openssl rand -hex 16)"
 export KEYCLOAK_CLIENT_SECRET="$(openssl rand -hex 16)"
 export KEYCLOAK_USER_PASSWORD="$(openssl rand -hex 16)"
+export POSTGRES_IMAGE="${POSTGRES_IMAGE:-docker.io/library/postgres:16}"
+export KEYCLOAK_IMAGE="${KEYCLOAK_IMAGE:-quay.io/keycloak/keycloak:26.3.3@sha256:6a7217a100bd3e5de4063a27a538ef999a3c5a88c4b4ec0ffc0a642aee7b2597}"
 ```
 
 Use the bare hostname, without `https://` and without a port. The chart builds `https://` followed by `global.host` for the application and backend URLs.
@@ -74,7 +77,7 @@ kubectl -n "$NAMESPACE" create secret generic devportal-db \
   --from-literal=POSTGRES_PASSWORD="$DB_PASSWORD" \
   --from-literal=POSTGRES_DB=devportal
 
-kubectl -n "$NAMESPACE" apply -f - <<'EOF'
+kubectl -n "$NAMESPACE" apply -f - <<EOF
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -102,7 +105,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: postgres
-          image: postgres:16
+          image: $POSTGRES_IMAGE
           envFrom:
             - secretRef: {name: devportal-db}
           env:
@@ -199,7 +202,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: keycloak
-          image: quay.io/keycloak/keycloak:26.3.3@sha256:6a7217a100bd3e5de4063a27a538ef999a3c5a88c4b4ec0ffc0a642aee7b2597
+          image: "$KEYCLOAK_IMAGE"
           args: ["start-dev", "--import-realm"]
           envFrom:
             - secretRef: {name: keycloak-env}
@@ -275,15 +278,24 @@ With your own PostgreSQL and identity provider, put their values here. `KEYCLOAK
 
 ## Step 6: Install DevPortal
 
-Add the chart repository and list the versions:
+For an install with internet access, add the chart repository and list its versions:
 
 ```bash
-helm repo add veecode https://veecode-platform.github.io/next-charts
-helm repo update
-helm search repo veecode/devportal --versions
+if [[ -n "${OFFLINE_BUNDLE:-}" ]]; then
+  CHART_REF="$OFFLINE_BUNDLE/devportal-$CHART_VERSION.tgz"
+  test -f "$CHART_REF"
+  helm show chart "$CHART_REF"
+  CHART_VERSION_ARGS=()
+else
+  helm repo add veecode https://veecode-platform.github.io/next-charts
+  helm repo update
+  helm search repo veecode/devportal --versions
+  CHART_REF=veecode/devportal
+  CHART_VERSION_ARGS=(--version "$CHART_VERSION")
+fi
 ```
 
-This page uses the chart version set in Step 1. The chart pins its image by digest, so the install pulls exactly the image that chart version names. If you pick a newer version from the list, compare its values with the `values-trust.yaml` example below first. If the portal cannot reach Quay, complete [Install without internet access](#install-without-internet-access) before you install the chart.
+This page uses the chart version set in Step 1. The chart pins its image by digest, so the install pulls exactly the image that chart version names. If you pick a newer version from the list, compare its values with the `values-trust.yaml` example below first. In offline mode, `CHART_REF` points to the archive prepared by [Install without internet access](#install-without-internet-access), so Helm does not contact the public chart repository.
 
 Save this as `values.yaml`:
 
@@ -386,15 +398,24 @@ upstream:
 EOF
 ```
 
-The entries above match the chart version set in Step 1. When you change that version, compare them with the output of `helm show values veecode/devportal --version "$CHART_VERSION"` under `global.veecode.deployment` and `upstream.backstage`, and copy any entry that changed.
+The entries above match the chart version set in Step 1. When you change that version, compare them with the output of `helm show values "$CHART_REF" "${CHART_VERSION_ARGS[@]}"` under `global.veecode.deployment` and `upstream.backstage`, and copy any entry that changed.
 
 ### Install the chart
 
 The hostname is not in the files: `--set global.host` passes it.
 
 ```bash
-helm install devportal veecode/devportal --version "$CHART_VERSION" \
-  -n "$NAMESPACE" -f values.yaml -f values-trust.yaml \
+INSTALL_VALUES=(-f values.yaml)
+if [[ -f values-trust.yaml ]]; then
+  INSTALL_VALUES+=(-f values-trust.yaml)
+fi
+if [[ -n "${OFFLINE_BUNDLE:-}" ]]; then
+  test -f values-mirror.yaml
+  INSTALL_VALUES+=(-f values-mirror.yaml)
+fi
+
+helm install devportal "$CHART_REF" "${CHART_VERSION_ARGS[@]}" \
+  -n "$NAMESPACE" "${INSTALL_VALUES[@]}" \
   --set global.host="$DEVPORTAL_HOST" \
   --wait --timeout 20m
 ```
@@ -512,7 +533,27 @@ global:
         disabled: true
 ```
 
-Add the entries to the `plugins` list of your `values.yaml` and run `helm upgrade` with the same `-f` files.
+Save the entries to `values-tech-radar-disabled.yaml`. Append them to the existing plugin list so the Keycloak entry remains enabled, then upgrade the release:
+
+```bash
+cat > values-tech-radar-disabled.yaml <<'EOF'
+global:
+  dynamic:
+    plugins:
+      - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar@sha256:2a5e149c22bdc02f6cf0d1ba6db0113105b284bf05b3806678cca601387f3b63!backstage-community-plugin-tech-radar
+        disabled: true
+      - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar-backend@sha256:71f7f6c4816156120e693bf3c2ff29ee35c3725406c996c7de58607800df3a99!backstage-community-plugin-tech-radar-backend
+        disabled: true
+EOF
+yq -i '.global.dynamic.plugins += load("values-tech-radar-disabled.yaml").global.dynamic.plugins' values.yaml
+
+helm upgrade devportal "$CHART_REF" "${CHART_VERSION_ARGS[@]}" \
+  -n "$NAMESPACE" "${INSTALL_VALUES[@]}" \
+  --set global.host="$DEVPORTAL_HOST" \
+  --wait --timeout 25m
+```
+
+After the rollout, sign in again and confirm Tech Radar is absent from **Installed packages**.
 
 ## What ships by default
 
@@ -536,6 +577,8 @@ Set the mirror registry name, then read the image and catalog index references f
 ```bash
 export MIRROR_REGISTRY=registry.example.com
 
+helm repo add veecode https://veecode-platform.github.io/next-charts
+helm repo update
 helm show values veecode/devportal --version "$CHART_VERSION" > chart-values.yaml
 
 export PORTAL_IMAGE="$(yq -r '"\(.upstream.backstage.image.registry)/\(.upstream.backstage.image.repository)@\(.upstream.backstage.image.digest)"' chart-values.yaml)"
@@ -558,7 +601,46 @@ skopeo copy --all "docker://$CATALOG_INDEX_SOURCE" \
 bash mirror-plugins.sh \
   --plugin-list ./face-plugin-refs.txt \
   --to-registry "$MIRROR_REGISTRY"
+
+mkdir -p offline-bundle
+helm pull veecode/devportal --version "$CHART_VERSION" \
+  --destination offline-bundle
+export OFFLINE_BUNDLE="$PWD/offline-bundle"
+test -f "$OFFLINE_BUNDLE/devportal-$CHART_VERSION.tgz"
 ```
+
+The `helm pull` saves the chart archive so the disconnected install never contacts the public Helm repository. Step 6 installs from `$OFFLINE_BUNDLE/devportal-$CHART_VERSION.tgz` when `OFFLINE_BUNDLE` is set.
+
+Mirror the portal image, and the PostgreSQL and Keycloak images that Steps 3 and 4 run, so the cluster pulls no image from a public registry. The portal digest comes from the chart values, so the copy follows the chart version in Step 1.
+
+```bash
+export PORTAL_DIGEST="$(yq -r '.upstream.backstage.image.digest' chart-values.yaml)"
+test -n "$PORTAL_DIGEST" && test "$PORTAL_DIGEST" != "null"
+
+skopeo copy --all "docker://$PORTAL_IMAGE" \
+  "docker://$MIRROR_REGISTRY/veecode/devportal:$PORTAL_IMAGE_TAG"
+skopeo copy --all docker://docker.io/library/postgres:16 \
+  "docker://$MIRROR_REGISTRY/library/postgres:16"
+skopeo copy --all docker://quay.io/keycloak/keycloak:26.3.3@sha256:6a7217a100bd3e5de4063a27a538ef999a3c5a88c4b4ec0ffc0a642aee7b2597 \
+  "docker://$MIRROR_REGISTRY/keycloak/keycloak:26.3.3"
+
+cat > values-mirror.yaml <<EOF
+upstream:
+  backstage:
+    image:
+      registry: $MIRROR_REGISTRY
+      repository: veecode/devportal
+EOF
+```
+
+Point Steps 3 and 4 at the mirrored PostgreSQL and Keycloak images before you run them:
+
+```bash
+export POSTGRES_IMAGE="$MIRROR_REGISTRY/library/postgres:16"
+export KEYCLOAK_IMAGE="$MIRROR_REGISTRY/keycloak/keycloak:26.3.3"
+```
+
+Copy the `offline-bundle` directory, `values-mirror.yaml`, and `registries.conf` (created below) to the machine that reaches the cluster. There, set `OFFLINE_BUNDLE` to the bundle directory path, `MIRROR_REGISTRY` to the same registry name, and export the two image variables above before Step 1.
 
 The image contains the `dynamic-plugins.veecode.yaml` product-face file. The commands extract its OCI references, remove the `!subpath` suffix, and give the image references to RHDH's script with `--plugin-list`. Copy the chart's catalog index separately with Skopeo; the RHDH script reads Red Hat's index format. The script writes `rhdh-plugin-mirroring-summary.txt` with the plugin source-to-mirror mappings. If your values override the image or `global.catalogIndex.image`, use those references instead of the chart defaults above.
 
@@ -596,9 +678,9 @@ upstream:
             readOnly: true
 ```
 
-This snippet shows only the additions. Helm replaces list values, so preserve every existing volume, volume mount, and field of the `install-dynamic-plugins` entry for the chart version you use. The full defaults are in `helm show values veecode/devportal --version "$CHART_VERSION"`. RHDH describes the same list behavior and mount path in its [Helm mirror procedure](https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.10/html-single/installing_red_hat_developer_hub_in_an_air-gapped_environment/index).
+This snippet shows only the additions. Helm replaces list values, so preserve every existing volume, volume mount, and field of the `install-dynamic-plugins` entry for the chart version you use. The full defaults are in `helm show values "$CHART_REF" "${CHART_VERSION_ARGS[@]}"` once Step 6 sets those variables, or `helm show values veecode/devportal --version "$CHART_VERSION"` on a connected machine. RHDH describes the same list behavior and mount path in its [Helm mirror procedure](https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.10/html-single/installing_red_hat_developer_hub_in_an_air-gapped_environment/index).
 
-The chart already provides `global.catalogIndex.image`, `upstream.backstage.extraVolumes`, and `upstream.backstage.initContainers`. With the `registries.conf` mapping mounted, the installer can keep the chart's catalog-index reference and pull it and the face plugins from the mirror. Run the Helm install command in Step 6, then check the installer logs and wait for the portal to become ready:
+With `values-mirror.yaml` passed to Helm, the portal image comes from the mirror registry. With the `registries.conf` mapping mounted, the installer keeps the chart's catalog-index reference and pulls it and the face plugins from the mirror. The chart archive comes from the `offline-bundle` directory. Nothing is pulled from a public registry or repository. Run the Helm install command in Step 6, then check the installer logs and wait for the portal to become ready:
 
 ```bash
 kubectl -n "$NAMESPACE" logs deployment/devportal-developer-hub -c install-dynamic-plugins
