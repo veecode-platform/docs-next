@@ -16,7 +16,7 @@ Release date: @@RELEASE_DATE@@
 
 ### Breaking changes and upgrade notes
 
-- No other product behavior changes in this release.
+- None.
 
 ### Deprecated and removed features
 
@@ -29,7 +29,7 @@ Release date: @@RELEASE_DATE@@
 
 ### Fixed security issues
 
-- @@FIXED_SECURITY_ISSUES@@
+@@FIXED_SECURITY_ISSUES@@
 
 ## What goes together
 
@@ -37,7 +37,7 @@ Use these values together. Pin the image by its digest.
 
 | Part | Value |
 | --- | --- |
-| Image | `docker.io/veecode/devportal:3.0.1` |
+| Image | `docker.io/veecode/devportal:3.0.1@@@IMAGE_DIGEST@@` |
 | Image digest | `@@IMAGE_DIGEST@@` |
 | Chart | `devportal` 1.0.1 |
 | Chart checksum (SHA-256) | `@@CHART_SHA256@@` |
@@ -45,7 +45,7 @@ Use these values together. Pin the image by its digest.
 | Plugin tag line | `bs_1.52.0` |
 | Catalog index | `quay.io/veecode/plugin-catalog-index:bs_1.52.0`, qualified at `@@CATALOG_INDEX_DIGEST@@` |
 | Catalog index tag for pinning | `quay.io/veecode/plugin-catalog-index:@@CATALOG_INDEX_TIMESTAMPED_TAG@@` |
-| Qualified on | Kubernetes `@@QUALIFIED_KUBERNETES_VERSION@@`, PostgreSQL `@@QUALIFIED_POSTGRESQL_VERSION@@` |
+| Qualified on | Kubernetes @@QUALIFIED_KUBERNETES_VERSION@@, PostgreSQL @@QUALIFIED_POSTGRESQL_VERSION@@ |
 
 `bs_1.52.0` names the Backstage version the plugin artifacts target. The catalog index tag moves when the catalog is republished. During an incident, pin the timestamped tag above.
 
@@ -87,5 +87,5 @@ The table contains one row for each OCI artifact enabled by the product face, in
 The 3.0.0 release sheet also lists these limitations. The 3.0.1 changes do not address them.
 
 - The product face ships the Red Hat dynamic Home page entry disabled. Enabling it (for example from its Marketplace card) leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. Keep it disabled.
-- An offline install must mirror the catalog index as well as the OCI plugin artifacts. In beta.10 tests, the installer fetched the index before loading cached plugin artifacts and stopped when Quay was unreachable. The 3.0.1 changes do not address this limitation.
+- An offline install must mirror the catalog index as well as the OCI plugin artifacts. In beta.10 tests, the installer fetched the index before loading cached plugin artifacts and stopped when Quay was unreachable.
 - In beta.10 measurements, median readiness took 67.237 seconds with an empty plugin volume and 19.514 seconds with a populated volume. These are beta.10 measurements, not measurements of the final 3.0.1 candidate.

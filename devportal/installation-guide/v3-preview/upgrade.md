@@ -24,18 +24,9 @@ The recorded end-to-end run started with chart 0.1.26 and image 3.0.0-beta.10, u
 
 ## Upgrade from 3.0.0 to 3.0.1
 
-Before running Step 1, set `CHART_FROM`, `IMAGE_FROM_VERSION`, and `IMAGE_FROM` to `CHART_FROM_3_0_0`, `IMAGE_FROM_3_0_0_VERSION`, and `IMAGE_FROM_3_0_0` from that code block. For a PostgreSQL-backed installation, then follow Steps 1 through 4.
+This Helm upgrade path is for a PostgreSQL-backed 3.0.0 installation. Before running Step 1, edit `CHART_FROM`, `IMAGE_FROM_VERSION`, and `IMAGE_FROM` in its code block to the 3.0.0 source values listed there. Then follow Steps 1 through 4. The recorded test above does not cover this path.
 
-The backup and restore commands in Steps 2 and 5 use PostgreSQL. For a 3.0.0 installation that uses SQLite, back up its persistent database storage with your platform's storage procedure. Run Step 1 to save the release values, then upgrade the existing release:
-
-```bash
-helm upgrade "$RELEASE" veecode/devportal \
-  --namespace "$NAMESPACE" --version "$CHART_TO" \
-  --values "$BACKUP_DIR/values.yaml" \
-  --wait --timeout 20m
-```
-
-After the Helm upgrade, run Step 4 to check the running image. If your values explicitly override the portal image, update that override to the 3.0.1 digest from the release sheet.
+The 3.x chart connects to PostgreSQL. If your 3.0.0 deployment runs the image with SQLite, update its image reference to 3.0.1 in that deployment's configuration. The release sheet supplies the 3.0.1 image digest. This guide's PostgreSQL backup and restore steps do not apply to that deployment.
 
 ## Step 1: Prepare the release and backup directory
 

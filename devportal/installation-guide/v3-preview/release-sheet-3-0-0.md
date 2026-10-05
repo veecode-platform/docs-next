@@ -209,7 +209,7 @@ The table contains one row for each OCI artifact enabled by the product face, in
 
 ## Known limitations
 
-- DevPortal 3.0.0 crashes on startup when it uses an SQLite database under Node.js 24.19.0. Only SQLite-backed installations are affected; PostgreSQL-backed installations are not. Work around the crash by using PostgreSQL or upgrading to DevPortal 3.0.1 (image 3.0.1 and chart 1.0.1 for Helm installs), which fixes it. Changing to PostgreSQL does not move existing SQLite data.
+- DevPortal 3.0.0 crashes on startup when it uses an SQLite database under Node.js 24.19.0. Only SQLite-backed installations are affected; PostgreSQL-backed installations are not. Work around the crash by using PostgreSQL or upgrading the image to 3.0.1 (use chart 1.0.1 for Helm installs), which fixes it.
 
 - The product face ships the Red Hat dynamic Home page entry disabled. Enabling it (for example from its Marketplace card) leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. Keep it disabled.
 
