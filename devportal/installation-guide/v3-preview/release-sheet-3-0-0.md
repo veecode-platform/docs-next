@@ -6,7 +6,7 @@ title: DevPortal 3.0.0 release sheet
 
 # DevPortal 3.0.0 release sheet
 
-Release date: @@RELEASE_DATE@@
+Release date: 2026-10-02
 
 > Status: the new chart install values are merged in chart 0.1.27, now part of 1.0.0.
 
@@ -68,7 +68,7 @@ Use these values together. Pin the image by its digest.
 | Image | `docker.io/veecode/devportal:3.0.0` |
 | Image digest | `sha256:585daa40009ca79988766a717257d592bce0f711b851fa06c200954aeafc6564` |
 | Chart | `devportal` 1.0.0 |
-| Chart checksum (SHA-256) | `@@CHART_SHA256@@` |
+| Chart checksum (SHA-256) | `b8e8cf04e23b5667ae30f095cce2df67c683c73b95f81ea2ef94d914aaa1e9f0` |
 | Backstage version | 1.52.0 |
 | Plugin tag line | `bs_1.52.0` |
 | Catalog index | `quay.io/veecode/plugin-catalog-index:bs_1.52.0`, qualified at `sha256:af12436b9538d16cdd585a5cf89b69768deb5ac2dd78ead5b0ec749e476b5c35` |
@@ -81,7 +81,69 @@ Use these values together. Pin the image by its digest.
 
 | Package | Version |
 | --- | --- |
-@@BACKSTAGE_PACKAGE_ROWS@@
+| @backstage/backend-app-api | 1.7.1 |
+| @backstage/backend-defaults | 0.17.3 |
+| @backstage/backend-dev-utils | 0.1.7 |
+| @backstage/backend-dynamic-feature-service | 0.8.3 |
+| @backstage/backend-openapi-utils | 0.6.10 |
+| @backstage/backend-plugin-api | 1.9.2 |
+| @backstage/catalog-client | 1.16.0 |
+| @backstage/catalog-model | 1.9.0 |
+| @backstage/cli-common | 0.2.2 |
+| @backstage/cli-node | 0.3.3 |
+| @backstage/config | 1.3.8 |
+| @backstage/config-loader | 1.10.12 |
+| @backstage/connections | 0.1.0 |
+| @backstage/errors | 1.3.1 |
+| @backstage/filter-predicates | 0.1.3 |
+| @backstage/integration | 2.0.3 |
+| @backstage/integration-aws-node | 0.1.21 |
+| @backstage/plugin-app-backend | 0.5.15 |
+| @backstage/plugin-app-node | 0.1.46 |
+| @backstage/plugin-auth-backend | 0.29.1 |
+| @backstage/plugin-auth-backend-module-atlassian-provider | 0.4.16 |
+| @backstage/plugin-auth-backend-module-auth0-provider | 0.4.2 |
+| @backstage/plugin-auth-backend-module-azure-easyauth-provider | 0.2.21 |
+| @backstage/plugin-auth-backend-module-bitbucket-provider | 0.3.16 |
+| @backstage/plugin-auth-backend-module-bitbucket-server-provider | 0.2.16 |
+| @backstage/plugin-auth-backend-module-cloudflare-access-provider | 0.4.16 |
+| @backstage/plugin-auth-backend-module-gcp-iap-provider | 0.4.16 |
+| @backstage/plugin-auth-backend-module-github-provider | 0.5.4 |
+| @backstage/plugin-auth-backend-module-gitlab-provider | 0.4.4 |
+| @backstage/plugin-auth-backend-module-google-provider | 0.3.16 |
+| @backstage/plugin-auth-backend-module-guest-provider | 0.2.20 |
+| @backstage/plugin-auth-backend-module-microsoft-provider | 0.3.16 |
+| @backstage/plugin-auth-backend-module-oauth2-proxy-provider | 0.3.0 |
+| @backstage/plugin-auth-backend-module-oidc-provider | 0.4.17 |
+| @backstage/plugin-auth-backend-module-okta-provider | 0.2.16 |
+| @backstage/plugin-auth-backend-module-onelogin-provider | 0.3.16 |
+| @backstage/plugin-auth-node | 0.7.2 |
+| @backstage/plugin-catalog-backend | 3.8.0 |
+| @backstage/plugin-catalog-backend-module-logs | 0.1.23 |
+| @backstage/plugin-catalog-backend-module-openapi | 0.2.23 |
+| @backstage/plugin-catalog-backend-module-scaffolder-entity-model | 0.2.21 |
+| @backstage/plugin-catalog-common | 1.1.10 |
+| @backstage/plugin-catalog-node | 2.2.2 |
+| @backstage/plugin-events-backend | 0.6.3 |
+| @backstage/plugin-events-backend-module-gitlab | 0.3.13 |
+| @backstage/plugin-events-node | 0.4.23 |
+| @backstage/plugin-permission-backend | 0.7.13 |
+| @backstage/plugin-permission-common | 0.9.9 |
+| @backstage/plugin-permission-node | 0.11.1 |
+| @backstage/plugin-proxy-backend | 0.6.14 |
+| @backstage/plugin-proxy-node | 0.1.16 |
+| @backstage/plugin-scaffolder-backend | 4.0.1 |
+| @backstage/plugin-scaffolder-common | 2.2.1 |
+| @backstage/plugin-scaffolder-node | 0.13.4 |
+| @backstage/plugin-search-backend | 2.1.3 |
+| @backstage/plugin-search-backend-module-catalog | 0.3.16 |
+| @backstage/plugin-search-backend-module-pg | 0.5.56 |
+| @backstage/plugin-search-backend-node | 1.4.5 |
+| @backstage/plugin-search-common | 1.2.24 |
+| @backstage/plugin-signals-node | 0.2.2 |
+| @backstage/plugin-user-settings-backend | 0.4.4 |
+| @backstage/plugin-user-settings-common | 0.1.0 |
+| @backstage/types | 1.2.2 |
 
 ## Vulnerability report
 
@@ -91,7 +153,11 @@ Use these values together. Pin the image by its digest.
 
 | Severity | Reported | With a fix | Accepted as an exception |
 | --- | ---: | ---: | ---: |
-@@IMAGE_SCAN_ROWS@@
+| CRITICAL | 0 | 0 | 0 |
+| HIGH | 56 | 13 | 15 |
+| MEDIUM | 460 | 129 | 0 |
+| LOW | 145 | 16 | 0 |
+| UNKNOWN | 0 | 0 | 0 |
 
 A release does not ship with a critical vulnerability that has a fix and no live exception.
 
@@ -120,9 +186,26 @@ An exception expires on the date shown. After that date, the finding counts agai
 
 The table contains one row for each OCI artifact enabled by the product face, including the Marketplace card. These artifact scans are reports and do not block the image release.
 
-| Artifact | Critical | High | Medium | Low |
-| --- | ---: | ---: | ---: | ---: |
-@@PLUGIN_SCAN_ROWS@@
+| Artifact | Digest | Packages | Critical | High | Medium | Low | Unknown | Critical with a fix | Result |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| `quay.io/veecode/backstage-community-plugin-rbac` | `36e9f606223d` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
+| `quay.io/veecode/backstage-community-plugin-tech-radar-backend` | `71f7f6c48161` | 78 | 0 | 1 | 2 | 2 | 0 | 0 | scanned |
+| `quay.io/veecode/backstage-community-plugin-tech-radar` | `2a5e149c22bd` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
+| `quay.io/veecode/backstage-plugin-notifications-backend` | `b089cdda6380` | 109 | 0 | 0 | 2 | 1 | 0 | 0 | scanned |
+| `quay.io/veecode/backstage-plugin-notifications` | `bb3c3f0739f8` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
+| `quay.io/veecode/backstage-plugin-signals-backend` | `3767a18cdb45` | 83 | 0 | 1 | 2 | 1 | 0 | 0 | scanned |
+| `quay.io/veecode/backstage-plugin-signals` | `8764b50b78b6` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
+| `quay.io/veecode/backstage-plugin-techdocs-backend` | `a52ab2f01ccf` | 427 | 0 | 25 | 28 | 2 | 0 | 0 | scanned |
+| `quay.io/veecode/backstage-plugin-techdocs-module-addons-contrib` | `9feeac06c77e` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
+| `quay.io/veecode/backstage-plugin-techdocs` | `d8222a85e6a4` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
+| `quay.io/veecode/devportal-marketplace-backend` | `153527c7d510` | 78 | 0 | 0 | 3 | 1 | 0 | 0 | scanned |
+| `quay.io/veecode/devportal-marketplace-frontend-dynamic` | `311de8798d0d` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
+| `quay.io/veecode/devportal-pending-changes-dynamic` | `18d75d59e287` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
+| `quay.io/veecode/red-hat-developer-hub-backstage-plugin-catalog-backend-module-extensions` | `9fad03e713fe` | 15 | 0 | 11 | 3 | 1 | 0 | 0 | scanned |
+| `quay.io/veecode/red-hat-developer-hub-backstage-plugin-global-header` | `2a622b6a8c30` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
+| `quay.io/veecode/veecode-platform-backstage-plugin-about-backend` | `99ca46df8ebd` | 10 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
+| `quay.io/veecode/veecode-platform-backstage-plugin-about` | `5746126ea012` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
+| `quay.io/veecode/veecode-platform-plugin-veecode-homepage` | `897d9ae74de4` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
 
 ## Known limitations
 
