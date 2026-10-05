@@ -73,7 +73,7 @@ Use these values together. Pin the image by its digest.
 | Plugin tag line | `bs_1.52.0` |
 | Catalog index | `quay.io/veecode/plugin-catalog-index:bs_1.52.0`, qualified at `sha256:af12436b9538d16cdd585a5cf89b69768deb5ac2dd78ead5b0ec749e476b5c35` |
 | Catalog index tag for pinning | `quay.io/veecode/plugin-catalog-index:bs_1.52.0_20261002T135533` |
-| Qualified on | Kubernetes `1.35.0`, PostgreSQL `@@QUALIFIED_POSTGRESQL_VERSION@@` |
+| Qualified on | Kubernetes `1.35.0`, PostgreSQL `16` (image `postgres:16`) |
 
 `bs_1.52.0` names the Backstage version the plugin artifacts target. The catalog index tag moves when the catalog is republished. During an incident, pin the timestamped tag above.
 
