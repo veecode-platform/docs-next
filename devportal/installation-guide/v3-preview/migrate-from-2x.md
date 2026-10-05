@@ -16,15 +16,17 @@ The migration goes to a **fresh database**. Nothing is converted in place:
 
 ## Tested with
 
-This guide was followed end to end, command by command, with:
+This guide's procedure was followed end to end, command by command, with:
 
 - DevPortal 2.x: chart `veecode-devportal-platform` 0.5.2 (DevPortal 2.2.3), external PostgreSQL 16, the `recommended` and `keycloak` presets, Keycloak 26, one Ingress.
-- DevPortal 3.x: chart `devportal` 1.0.0, which installs image 3.0.0.
+- DevPortal 3.x: chart `devportal` 1.0.0-rc.1, which installs image 3.0.0-rc.2.
 - Kubernetes: a single-node k3s 1.31 cluster. The 3.x portal was reached through `kubectl port-forward`.
+
+The tested image has the same digest as released image 3.0.0. The chart templates are unchanged between chart tags 1.0.0-rc.1 and 1.0.0. The release chart changes the chart version, app version, default image tag, and generated README and schema metadata. The complete procedure has not been rerun with chart 1.0.0.
 
 Two parts were not run:
 
-- **SQLite.** The test used external PostgreSQL only. A 2.x install on SQLite differs in two ways that come from reading the charts, not from a run. The 2.x data lives on a volume that the chart creates, and `helm uninstall` of that release deletes the volume, so never uninstall such a release while you still need it. The 3.x chart always connects to PostgreSQL, so you need a PostgreSQL server before step 3, and the data of the SQLite install does not move to it.
+- **SQLite.** The test used external PostgreSQL only. A 2.x install on SQLite differs in two ways that come from reading the charts, not from a run. The 2.x data lives on a volume that the chart creates, and `helm uninstall` of that release deletes the volume, so never uninstall such a release while you still need it. The 3.x chart always connects to PostgreSQL, so prepare that server before step 2. The data of the SQLite install does not move to it.
 - **An Ingress for 3.x.** Step 6 reaches the portal through a port-forward. Exposing 3.x through an Ingress follows the 3.x install guide.
 
 ## What comes back and what does not
@@ -51,7 +53,7 @@ The 3.x chart turns guest sign-in on and maps every guest to the `admin` user. A
 You need:
 
 - `kubectl`, `helm` 3 and `jq`, with access to the namespace of the 2.x release;
-- the PostgreSQL server of the 2.x install and its user. The 3.x portal creates its own databases, so the user needs the privilege to create databases (`CREATEDB`), as in 2.x;
+- a PostgreSQL server and a user with the privilege to create databases (`CREATEDB`). For a PostgreSQL-backed 2.x install, use its server and user. For SQLite, prepare PostgreSQL for 3.x;
 - a real identity provider for the 3.x portal. The examples use Keycloak, which is what the 2.x `keycloak` preset configured;
 - the 3.x install guide ("Install DevPortal 3.x"), which covers everything about installing 3.x that this page does not repeat.
 
@@ -66,7 +68,7 @@ export PG_IMAGE=postgres:16
 ```
 
 - `NAMESPACE` and `V2_RELEASE` come from `helm list --all-namespaces`.
-- `V2_SECRET` is the Secret named by `existingSecret` in your 2.x values (`helm get values "$V2_RELEASE" -n "$NAMESPACE"`).
+- `V2_SECRET` is the Secret named by `existingSecret` in your 2.x values (`helm get values "$V2_RELEASE" -n "$NAMESPACE"`). For a PostgreSQL-backed install, it already has the database keys. For SQLite, keep this Secret so it retains any identity-provider keys, then add the new PostgreSQL keys using the [PostgreSQL credentials section of the install guide](../production-setup/setup.md#postgresql-credentials-production). Point those keys at the new 3.x PostgreSQL server. This does not copy SQLite data.
 - `V3_RELEASE` is the name of the new release. It must differ from `V2_RELEASE`.
 - `PG_IMAGE` is a PostgreSQL client image. Use the major version of your server or a newer one, because `pg_dump` refuses a server newer than itself.
 
@@ -101,7 +103,7 @@ helm upgrade "$V2_RELEASE" veecode-devportal-platform --repo https://veecode-pla
 kubectl -n "$NAMESPACE" wait --for=delete pod -l app.kubernetes.io/instance="$V2_RELEASE" --timeout=180s
 ```
 
-Then fingerprint the 2.x databases. Start a PostgreSQL client pod that reads the connection settings from the 2.x Secret, and record a checksum of a dump of every 2.x plugin database. Step 6 and the way back compare against this file to show that 3.x never wrote to them. The `grep` removes the random `\restrict` lines that recent `pg_dump` releases add to every dump, because they would give each dump a different checksum:
+For a PostgreSQL-backed 2.x install, fingerprint its databases. Start a PostgreSQL client pod that reads the connection settings from `V2_SECRET`, and record a checksum of a dump of every 2.x plugin database. Step 6 and the way back compare against this file to show that 3.x never wrote to them. The `grep` removes the random `\restrict` lines that recent `pg_dump` releases add to every dump, because they would give each dump a different checksum. For SQLite, still create and wait for the client pod for the later 3.x steps, but skip the `fingerprint.sh` creation and execution. The PostgreSQL server in `V2_SECRET` is the new 3.x server, not a source of 2.x data.
 
 ```bash
 kubectl -n "$NAMESPACE" apply -f - <<EOF
@@ -236,11 +238,40 @@ helm repo update
 helm install "$V3_RELEASE" veecode/devportal --version 1.0.0 -n "$NAMESPACE" -f values-v3.yaml --wait --timeout 20m
 ```
 
-If the command times out and the pod stays at `0/1`, read the backend log with `kubectl -n "$NAMESPACE" logs "deploy/$V3_RELEASE-developer-hub" -c backstage-backend`. On a busy node the first start can fail while it creates the database tables. With an earlier pre-release, two of three first starts on a loaded host ended with `Plugin 'catalog' startup failed; caused by MigrationLocked`; one of them had been stopped by the startup probe, and the other one's log does not show what interrupted the migration. The 3.x databases hold nothing yet, so release the lock of the database of the plugin named in the log line (`catalog` in that test) and restart the pod:
+If the command times out and the pod stays at `0/1`, read the backend log with `kubectl -n "$NAMESPACE" logs "deploy/$V3_RELEASE-developer-hub" -c backstage-backend`. On a busy node the first start can fail while it creates the database tables. In an earlier pre-release test, two of three first starts ended with `Plugin 'catalog' startup failed; caused by MigrationLocked`. One pod had been stopped by the startup probe. The other had no restarts, and its log did not establish whether another migrator still held the lock. Do not clear the lock until you have stopped every backend replica and confirmed that no migration is active. The commands below use the catalog database from that test. If the log names another plugin, replace `catalog` in both database commands with that plugin's name. Run the recovery commands in the same terminal so `V3_REPLICAS` remains set.
+
+```bash
+V3_REPLICAS=$(kubectl -n "$NAMESPACE" get "deploy/$V3_RELEASE-developer-hub" -o jsonpath='{.spec.replicas}')
+if [ -z "$V3_REPLICAS" ] || [ "$V3_REPLICAS" -lt 1 ]; then
+  echo "Could not read a positive replica count; stop here." >&2
+  exit 1
+fi
+kubectl -n "$NAMESPACE" scale "deploy/$V3_RELEASE-developer-hub" --replicas=0
+kubectl -n "$NAMESPACE" wait --for=delete pod -l app.kubernetes.io/instance="$V3_RELEASE" --timeout=180s
+PODS=$(kubectl -n "$NAMESPACE" get pods -l app.kubernetes.io/instance="$V3_RELEASE" -o name)
+if [ -n "$PODS" ]; then
+  printf 'Backend pods remain; do not clear the lock:\n%s\n' "$PODS" >&2
+  exit 1
+fi
+echo "No backend pods remain."
+```
+
+Check the database named in the error log for active or open transactions:
+
+```bash
+kubectl -n "$NAMESPACE" exec pg-client -- psql -d devportal3_plugin_catalog -c "select pid, usename, application_name, state, query_start from pg_stat_activity where datname = current_database() and pid <> pg_backend_pid() and state <> 'idle'"
+```
+
+If this query returns a session, or you cannot establish that no migration is running, leave the Deployment scaled to zero and do not clear the lock. After you confirm that no migration remains active, clear the lock and start one backend replica. Wait for it to become ready before restoring the previous replica count:
 
 ```bash
 kubectl -n "$NAMESPACE" exec pg-client -- psql -d devportal3_plugin_catalog -c "update knex_migrations_lock set is_locked = 0"
-kubectl -n "$NAMESPACE" rollout restart "deploy/$V3_RELEASE-developer-hub"
+kubectl -n "$NAMESPACE" scale "deploy/$V3_RELEASE-developer-hub" --replicas=1
+kubectl -n "$NAMESPACE" rollout status "deploy/$V3_RELEASE-developer-hub" --timeout=20m
+if [ "$V3_REPLICAS" -gt 1 ]; then
+  kubectl -n "$NAMESPACE" scale "deploy/$V3_RELEASE-developer-hub" --replicas="$V3_REPLICAS"
+  kubectl -n "$NAMESPACE" rollout status "deploy/$V3_RELEASE-developer-hub" --timeout=20m
+fi
 ```
 
 ## Step 6: Check the result
@@ -253,12 +284,14 @@ kubectl -n "$NAMESPACE" port-forward "svc/$V3_RELEASE-developer-hub" 7007:7007
 
 Then run these checks.
 
-**Own databases.** The 3.x release created its own set of databases, and the 2.x set has the same fingerprint as in step 2:
+**Own databases.** The 3.x release created its own set of databases. For a PostgreSQL-backed 2.x install, the old set has the same fingerprint as in step 2:
 
 ```bash
 kubectl -n "$NAMESPACE" exec pg-client -- psql -At -c "select datname from pg_database where datname like 'devportal3\_plugin\_%' order by 1"
 kubectl -n "$NAMESPACE" exec -i pg-client -- sh -s < fingerprint.sh | diff v2-fingerprint.txt - && echo "2.x databases unchanged"
 ```
+
+For a SQLite 2.x install, skip the fingerprint comparison. There are no PostgreSQL 2.x databases to compare, and the SQLite data was not copied.
 
 **Sign-in.** Open `http://localhost:7007`, choose **Sign In** on the OIDC card, and sign in through Keycloak as a user who signed in before. Repeat with a second user. If the sign-in fails right after the first start, wait a minute and try again. In the test the first attempt failed and the next one, about 40 seconds later, worked, because the catalog needs a short time to import the users from Keycloak.
 
@@ -300,11 +333,21 @@ If your 2.x install relies on these rules, decide how 3.x enforces them before y
 
 ## Going back to 2.x
 
-The 2.x databases were not touched, so going back is a rollback of the 2.x release. Remove 3.x first and compare the fingerprint while no portal is running, because a running 2.x portal writes to its databases as soon as it starts:
+The 2.x data store was not touched, so going back is a rollback of the 2.x release. Remove 3.x first. For a PostgreSQL-backed 2.x install, compare the fingerprint while no portal is running, because a running 2.x portal writes to its databases as soon as it starts. Skip that comparison for SQLite, which has no PostgreSQL source databases:
 
 ```bash
 helm uninstall "$V3_RELEASE" -n "$NAMESPACE"
+```
+
+For PostgreSQL-backed 2.x installs, run this comparison:
+
+```bash
 kubectl -n "$NAMESPACE" exec -i pg-client -- sh -s < fingerprint.sh | diff v2-fingerprint.txt - && echo "2.x databases unchanged"
+```
+
+Then restore the 2.x release:
+
+```bash
 helm rollback "$V2_RELEASE" "$V2_REVISION" -n "$NAMESPACE" --wait --timeout 10m
 ```
 
