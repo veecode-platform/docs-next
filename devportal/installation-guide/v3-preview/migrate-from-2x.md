@@ -244,16 +244,16 @@ If the command times out and the pod stays at `0/1`, read the backend log with `
 V3_REPLICAS=$(kubectl -n "$NAMESPACE" get "deploy/$V3_RELEASE-developer-hub" -o jsonpath='{.spec.replicas}')
 if [ -z "$V3_REPLICAS" ] || [ "$V3_REPLICAS" -lt 1 ]; then
   echo "Could not read a positive replica count; stop here." >&2
-  exit 1
+else
+  kubectl -n "$NAMESPACE" scale "deploy/$V3_RELEASE-developer-hub" --replicas=0
+  kubectl -n "$NAMESPACE" wait --for=delete pod -l app.kubernetes.io/instance="$V3_RELEASE" --timeout=180s
+  PODS=$(kubectl -n "$NAMESPACE" get pods -l app.kubernetes.io/instance="$V3_RELEASE" -o name)
+  if [ -n "$PODS" ]; then
+    printf 'Backend pods remain; do not clear the lock:\n%s\n' "$PODS" >&2
+  else
+    echo "No backend pods remain."
+  fi
 fi
-kubectl -n "$NAMESPACE" scale "deploy/$V3_RELEASE-developer-hub" --replicas=0
-kubectl -n "$NAMESPACE" wait --for=delete pod -l app.kubernetes.io/instance="$V3_RELEASE" --timeout=180s
-PODS=$(kubectl -n "$NAMESPACE" get pods -l app.kubernetes.io/instance="$V3_RELEASE" -o name)
-if [ -n "$PODS" ]; then
-  printf 'Backend pods remain; do not clear the lock:\n%s\n' "$PODS" >&2
-  exit 1
-fi
-echo "No backend pods remain."
 ```
 
 Check the database named in the error log for active or open transactions:
