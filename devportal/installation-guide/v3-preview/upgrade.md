@@ -20,6 +20,23 @@ Before you upgrade, note one registered catalog location and entity, one install
 
 Keep the backup directory private. The database archives can contain sensitive data. The examples use the `devportal` database, the default `backstage_plugin_` prefix, and the releases listed in Step 1. If you changed `PG_DATABASE` or `backend.database.prefix`, set `DATABASE_NAME` and `DB_PREFIX` to those values.
 
+The recorded end-to-end run started with chart 0.1.26 and image 3.0.0-beta.10, upgraded to chart 1.0.0 and image 3.0.0, and used PostgreSQL 16.15. That record does not cover the chart 1.0.1 and image 3.0.1 target or the 3.0.0 to 3.0.1 path below.
+
+## Upgrade from 3.0.0 to 3.0.1
+
+Before running Step 1, set `CHART_FROM`, `IMAGE_FROM_VERSION`, and `IMAGE_FROM` to `CHART_FROM_3_0_0`, `IMAGE_FROM_3_0_0_VERSION`, and `IMAGE_FROM_3_0_0` from that code block. For a PostgreSQL-backed installation, then follow Steps 1 through 4.
+
+The backup and restore commands in Steps 2 and 5 use PostgreSQL. For a 3.0.0 installation that uses SQLite, back up its persistent database storage with your platform's storage procedure. Run Step 1 to save the release values, then upgrade the existing release:
+
+```bash
+helm upgrade "$RELEASE" veecode/devportal \
+  --namespace "$NAMESPACE" --version "$CHART_TO" \
+  --values "$BACKUP_DIR/values.yaml" \
+  --wait --timeout 20m
+```
+
+After the Helm upgrade, run Step 4 to check the running image. If your values explicitly override the portal image, update that override to the 3.0.1 digest from the release sheet.
+
 ## Step 1: Prepare the release and backup directory
 
 Run these commands in one Bash session. They save the values stored for this release. Each chart version supplies its own defaults.
@@ -32,9 +49,12 @@ export DB_PREFIX=backstage_plugin_
 export CHART_FROM=0.1.26
 export IMAGE_FROM_VERSION=3.0.0-beta.10
 export IMAGE_FROM=docker.io/veecode/devportal@sha256:28d1bafed0cfa3cdb3ceab1868ccc4a729410e0921b352457e167ab7cbfb3e5a
-export CHART_TO=1.0.0
-export IMAGE_TO_VERSION=3.0.0
-export IMAGE_TO=docker.io/veecode/devportal@sha256:585daa40009ca79988766a717257d592bce0f711b851fa06c200954aeafc6564
+export CHART_FROM_3_0_0=1.0.0
+export IMAGE_FROM_3_0_0_VERSION=3.0.0
+export IMAGE_FROM_3_0_0=docker.io/veecode/devportal@sha256:585daa40009ca79988766a717257d592bce0f711b851fa06c200954aeafc6564
+export CHART_TO=1.0.1
+export IMAGE_TO_VERSION=3.0.1
+export IMAGE_TO=docker.io/veecode/devportal@@@IMAGE_DIGEST@@
 BACKUP_DIR="$PWD/devportal-backup-$(date +%Y%m%d%H%M%S)"
 export BACKUP_DIR
 
@@ -59,8 +79,6 @@ helm list --namespace "$NAMESPACE" --filter "^${RELEASE}$"
 helm get values "$RELEASE" --namespace "$NAMESPACE" --output yaml \
   > "$BACKUP_DIR/values.yaml"
 ```
-
-Tested with chart versions `$CHART_FROM` and `$CHART_TO`, images `$IMAGE_FROM_VERSION` and `$IMAGE_TO_VERSION`, and PostgreSQL 16.15.
 
 Confirm that `helm list` shows the starting release before you continue.
 

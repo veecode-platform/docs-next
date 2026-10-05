@@ -14,7 +14,7 @@ The chart ships guest sign-in **enabled** and maps the guest identity to the `AD
 
 You need:
 
-- A Kubernetes cluster with an Ingress controller, and `kubectl` and Helm 3 pointed at it. The steps were followed on k3s 1.31 with its bundled Traefik controller (`className: traefik`) and Helm 3.20.
+- A Kubernetes cluster with an Ingress controller, and `kubectl` and Helm 3 pointed at it. The documented walkthrough used k3s 1.31 with its bundled Traefik controller (`className: traefik`) and Helm 3.20. Its test record does not name the chart or image version; the values in Step 1 are the 3.0.1 release target.
 - Two DNS names that resolve to the Ingress controller: one for the portal and one for the identity provider. The steps use `devportal.example.com` and `keycloak.example.com`. The portal backend calls the identity provider's public name when a user signs out, so the cluster must resolve and reach that name too ([Step 6](#step-6-install-devportal) covers a cluster that cannot).
 - `openssl` and `curl` on your machine, and a browser that allows pop-ups from the portal: the sign-in button opens the identity provider in a pop-up window.
 - If the cluster cannot reach a public Helm repository or registry, prepare a local chart archive and mirror before Step 1 by following [Install without internet access](#install-without-internet-access).
@@ -40,8 +40,8 @@ Run every command in one terminal session. Later steps use the shell variables t
 export NAMESPACE=devportal
 export DEVPORTAL_HOST=devportal.example.com
 export KEYCLOAK_HOST=keycloak.example.com
-export CHART_VERSION=1.0.0
-export PORTAL_IMAGE_TAG=3.0.0
+export CHART_VERSION=1.0.1
+export PORTAL_IMAGE_TAG=3.0.1
 
 export DB_PASSWORD="$(openssl rand -hex 16)"
 export BACKEND_SECRET="$(openssl rand -hex 16)"
@@ -398,7 +398,7 @@ upstream:
 EOF
 ```
 
-The entries above match the chart version set in Step 1. When you change that version, compare them with the output of `helm show values "$CHART_REF" "${CHART_VERSION_ARGS[@]}"` under `global.veecode.deployment` and `upstream.backstage`, and copy any entry that changed.
+The sample values were written for chart 1.0.0. Step 1 targets chart 1.0.1. When that chart is published, compare these entries with the output of `helm show values "$CHART_REF" "${CHART_VERSION_ARGS[@]}"` under `global.veecode.deployment` and `upstream.backstage`, and copy any entry that changed.
 
 ### Install the chart
 

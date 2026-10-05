@@ -24,6 +24,8 @@ This guide's procedure was followed end to end, command by command, with:
 
 The default image digest configured in chart 1.0.0 matches the digest used by the candidate run. The chart templates are unchanged between chart tags 1.0.0-rc.1 and 1.0.0. The release chart changes the chart version, app version, default image tag, and generated README and schema metadata. The complete procedure has not been rerun with chart 1.0.0.
 
+Step 5 targets chart 1.0.1 and image 3.0.1. The tested-with record above does not cover that release target.
+
 Two parts were not run:
 
 - **SQLite.** The test used external PostgreSQL only. A 2.x install on SQLite differs in two ways that come from reading the charts, not from a run. The 2.x data lives on a volume that the chart creates, and `helm uninstall` of that release deletes the volume, so never uninstall such a release while you still need it. The 3.x chart always connects to PostgreSQL, so prepare that server before step 2. The data of the SQLite install does not move to it.
@@ -235,7 +237,7 @@ Add the chart repository and install the release. The first start pulls the imag
 ```bash
 helm repo add veecode https://veecode-platform.github.io/next-charts
 helm repo update
-helm install "$V3_RELEASE" veecode/devportal --version 1.0.0 -n "$NAMESPACE" -f values-v3.yaml --wait --timeout 20m
+helm install "$V3_RELEASE" veecode/devportal --version 1.0.1 -n "$NAMESPACE" -f values-v3.yaml --wait --timeout 20m
 ```
 
 If the command times out and the pod stays at `0/1`, read the backend log with `kubectl -n "$NAMESPACE" logs "deploy/$V3_RELEASE-developer-hub" -c backstage-backend`. On a busy node the first start can fail while it creates the database tables. In an earlier pre-release test, two of three first starts ended with `Plugin 'catalog' startup failed; caused by MigrationLocked`. One pod had been stopped by the startup probe. The other had no restarts, and its log did not establish whether another migrator still held the lock. Do not clear the lock until you have stopped every backend replica and confirmed that no migration is active. The commands below use the catalog database from that test. If the log names another plugin, replace `catalog` in both database commands with that plugin's name. Run the recovery commands in the same terminal so `V3_REPLICAS` remains set.

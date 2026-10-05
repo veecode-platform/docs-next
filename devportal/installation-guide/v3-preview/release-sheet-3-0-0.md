@@ -65,7 +65,7 @@ Use these values together. Pin the image by its digest.
 
 | Part | Value |
 | --- | --- |
-| Image | `docker.io/veecode/devportal:3.0.0` |
+| Image | `docker.io/veecode/devportal:3.0.0@sha256:585daa40009ca79988766a717257d592bce0f711b851fa06c200954aeafc6564` |
 | Image digest | `sha256:585daa40009ca79988766a717257d592bce0f711b851fa06c200954aeafc6564` |
 | Chart | `devportal` 1.0.0 |
 | Chart checksum (SHA-256) | `b8e8cf04e23b5667ae30f095cce2df67c683c73b95f81ea2ef94d914aaa1e9f0` |
@@ -208,6 +208,8 @@ The table contains one row for each OCI artifact enabled by the product face, in
 | `quay.io/veecode/veecode-platform-plugin-veecode-homepage` | `897d9ae74de4` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
 
 ## Known limitations
+
+- DevPortal 3.0.0 crashes on startup when it uses an SQLite database under Node.js 24.19.0. Only SQLite-backed installations are affected; PostgreSQL-backed installations are not. Work around the crash by using PostgreSQL or upgrading to DevPortal 3.0.1 (image 3.0.1 and chart 1.0.1 for Helm installs), which fixes it. Changing to PostgreSQL does not move existing SQLite data.
 
 - The product face ships the Red Hat dynamic Home page entry disabled. Enabling it (for example from its Marketplace card) leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. Keep it disabled.
 
