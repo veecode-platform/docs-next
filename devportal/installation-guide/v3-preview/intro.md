@@ -621,7 +621,7 @@ skopeo copy --all "docker://$PORTAL_IMAGE" \
   "docker://$MIRROR_REGISTRY/veecode/devportal:$PORTAL_IMAGE_TAG"
 skopeo copy --all docker://docker.io/library/postgres:16 \
   "docker://$MIRROR_REGISTRY/library/postgres:16"
-skopeo copy --all docker://quay.io/keycloak/keycloak:26.3.3@sha256:6a7217a100bd3e5de4063a27a538ef999a3c5a88c4b4ec0ffc0a642aee7b2597 \
+skopeo copy --all docker://quay.io/keycloak/keycloak@sha256:6a7217a100bd3e5de4063a27a538ef999a3c5a88c4b4ec0ffc0a642aee7b2597 \
   "docker://$MIRROR_REGISTRY/keycloak/keycloak:26.3.3"
 
 cat > values-mirror.yaml <<EOF
