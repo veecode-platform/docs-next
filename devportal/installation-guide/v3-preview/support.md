@@ -25,7 +25,7 @@ Only the latest 3.x release receives fixes. A fix ships as a new 3.x release, so
 The DevPortal image and the Helm chart have separate version numbers.
 
 - **Image.** `veecode/devportal:MAJOR.MINOR.PATCH`, for example `2.2.3`. The first number names the line: 2.x or 3.x. `veecode/devportal:edge` follows development and is not for production.
-- **Pre-releases.** A version with a suffix, such as `3.0.0-rc.2` (a release candidate) or `3.0.0-beta.10`, is published for testing before the release it announces. It is not the version to install: the current stable release is `3.0.1`. Do not run a pre-release in production.
+- **Pre-releases.** A version with a suffix, such as `3.0.0-rc.2` (a release candidate) or `3.0.0-beta.10`, is published for testing before the release it announces. It is not the version to install: the current stable release is `3.0.2`. Do not run a pre-release in production.
 - **Chart.** The `devportal` chart has its own version. Each chart version pins one image by digest, and the release sheet lists the pair.
 - **Backstage.** The release sheet states the Backstage version the release is built on.
 

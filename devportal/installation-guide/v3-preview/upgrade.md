@@ -20,9 +20,9 @@ Before you upgrade, note one registered catalog location and entity, one install
 
 Keep the backup directory private. The database archives can contain sensitive data. The examples use the `devportal` database, the default `backstage_plugin_` prefix, and the releases listed in Step 1. If you changed `PG_DATABASE` or `backend.database.prefix`, set `DATABASE_NAME` and `DB_PREFIX` to those values.
 
-The examples upgrade 3.0.0 (chart 1.0.0) to 3.0.1 (chart 1.0.1). To upgrade from another 3.x release, set `CHART_FROM`, `IMAGE_FROM_VERSION`, and `IMAGE_FROM` in Step 1 to that release. The recorded end-to-end run started with chart 0.1.26 and image 3.0.0-beta.10, upgraded to chart 1.0.0 and image 3.0.0, and used PostgreSQL 16.15. It does not cover the 3.0.0 to 3.0.1 path. Chart 1.0.1 changes only the image tag, digest, and version metadata against chart 1.0.0.
+The examples upgrade 3.0.1 (chart 1.0.1) to 3.0.2 (chart 1.0.2). To upgrade from another 3.x release, set `CHART_FROM`, `IMAGE_FROM_VERSION`, and `IMAGE_FROM` in Step 1 to that release. The recorded end-to-end run started with chart 0.1.26 and image 3.0.0-beta.10, upgraded to chart 1.0.0 and image 3.0.0, and used PostgreSQL 16.15. It does not cover the 3.0.0 to 3.0.1 or 3.0.1 to 3.0.2 paths. Charts 1.0.1 and 1.0.2 change only the image tag, digest, and version metadata against the chart before them.
 
-If a 3.0.0 deployment outside this chart runs the image with SQLite, change its image reference to 3.0.1 (the digest is on the release sheet). The backup and restore steps in this guide do not apply to it.
+If a 3.0.0 deployment outside this chart runs the image with SQLite, change its image reference to 3.0.2 (the digest is on the release sheet). The backup and restore steps in this guide do not apply to it.
 
 ## Step 1: Prepare the release and backup directory
 
@@ -33,12 +33,12 @@ export NAMESPACE=devportal
 export RELEASE=devportal
 export DATABASE_NAME=devportal
 export DB_PREFIX=backstage_plugin_
-export CHART_FROM=1.0.0
-export IMAGE_FROM_VERSION=3.0.0
-export IMAGE_FROM=docker.io/veecode/devportal@sha256:585daa40009ca79988766a717257d592bce0f711b851fa06c200954aeafc6564
-export CHART_TO=1.0.1
-export IMAGE_TO_VERSION=3.0.1
-export IMAGE_TO=docker.io/veecode/devportal@sha256:881f936ff4a38b31998d52cb6cd558d6b5e6fca9a3d99b08e80aba77913aaa38
+export CHART_FROM=1.0.1
+export IMAGE_FROM_VERSION=3.0.1
+export IMAGE_FROM=docker.io/veecode/devportal@sha256:881f936ff4a38b31998d52cb6cd558d6b5e6fca9a3d99b08e80aba77913aaa38
+export CHART_TO=1.0.2
+export IMAGE_TO_VERSION=3.0.2
+export IMAGE_TO=docker.io/veecode/devportal@sha256:48f95e221844db13887b71dd7379a867b338ec1f9601a7ce3882e376aad36706
 BACKUP_DIR="$PWD/devportal-backup-$(date +%Y%m%d%H%M%S)"
 export BACKUP_DIR
 
