@@ -50,7 +50,7 @@ The `devportal` instance is versioned (the others are not). Current posture:
 
 **Freeze rule:** `versioned_docs/version-v1/` and `versioned_docs/version-v2/` are **correctness-only**: no new content, only factual fixes and the image-tag updates of their own line. All new work lands in the `devportal/` (3.x) current tree.
 
-**Same topic, same doc id:** a 3.x page that covers the same topic as a 2.x page keeps the 2.x doc id (its path under the docs folder), so the version selector moves between the two pages. A topic that moves or is gone in 3.x needs an entry in the version parity map instead.
+**Same topic, same doc id:** a 3.x page that covers the same topic as a 2.x page keeps the 2.x doc id (its path under the docs folder), so the version selector moves between the two pages. A topic that moves or is gone in 3.x needs an entry under `parity` in `scripts/v3-docs-check.json` instead. `node scripts/check-v3-docs.mjs` (run in CI on every PR) enforces this, and also fails on a 2.x-only marker in a 3.x page unless the file is listed under `allow` with a reason; the pending entries there shrink as pages are rewritten.
 
 **Links:** inside a version, use **relative** `.md` links. In the 3.x tree, a bare `/devportal/...` resolves to 3.x; in the V2 tree, link to `/devportal/v2/...`; V1 self-links use `/devportal/v1/...`. Cross-instance links (`platform/`, `admin-ui/`) into DevPortal use `/devportal/...`.
 
