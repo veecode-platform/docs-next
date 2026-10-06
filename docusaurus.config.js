@@ -49,12 +49,13 @@ const config = {
           routeBasePath: "devportal",
           sidebarPath: require.resolve("./sidebars.js"),
           showLastUpdateTime: true,
-          // V2 (the unified devportal-platform image, driven by presets) is the
-          // default, served at the root (/devportal/). V1 is the prior
-          // split-image line, kept at /devportal/v1/ for installs still on it.
+          // 3.x (the current tree) is the default, served at the root
+          // (/devportal/). 2.x is frozen at /devportal/v2/ and still supported;
+          // V1, the split-image line, is kept at /devportal/v1/.
           lastVersion: "current",
           versions: {
-            current: { label: "v2", path: "", banner: "none" },
+            current: { label: "v3", path: "", banner: "none" },
+            "v2": { label: "v2", path: "v2", banner: "none" },
             "v1": { label: "v1", path: "v1", banner: "unmaintained" },
           },
         },
@@ -164,19 +165,6 @@ const config = {
             to: '/devportal/v3/release-sheets/release-sheet-3-0-3'
           },
         ],
-        // V2 is now served at the root (/devportal/). Preserve the preview-era
-        // links that circulated under /devportal/v2/… by redirecting each V2
-        // page from its old /devportal/v2/ path. V1 pages (/devportal/v1/…) and
-        // the other doc instances are left untouched.
-        createRedirects(existingPath) {
-          if (
-            existingPath.startsWith("/devportal/") &&
-            !existingPath.startsWith("/devportal/v1/")
-          ) {
-            return [existingPath.replace("/devportal/", "/devportal/v2/")];
-          }
-          return undefined;
-        },
       },
     ],
     'docusaurus-plugin-image-zoom',
@@ -246,8 +234,6 @@ const config = {
             type: "docsVersionDropdown",
             docsPluginId: "default",
             position: "right",
-            // The 3.x docs live inside the current (v2) tree, under /devportal/v3/.
-            dropdownItemsBefore: [{ to: "/devportal/v3/intro", label: "v3" }],
           },
           {
             href: "https://github.com/veecode-platform/support",
