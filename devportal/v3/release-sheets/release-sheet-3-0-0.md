@@ -1,6 +1,6 @@
 ---
-sidebar_position: 5
-sidebar_label: Release sheet
+sidebar_position: 1
+sidebar_label: DevPortal 3.0.0
 title: DevPortal 3.0.0 release sheet
 ---
 

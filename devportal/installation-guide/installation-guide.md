@@ -15,6 +15,10 @@ import DocCard from '@site/src/components/DocCard';
 
 <div className={style.wrapper}>
 
+<DocCard title="DevPortal 3.x (Kubernetes)" link="/devportal/v3/intro" style={style}>Install DevPortal 3.x on a Kubernetes cluster with the <code>devportal</code> Helm chart.</DocCard>
+
+<DocCard title="Migrating from 2.x to 3.x" link="/devportal/migrating-from-2x" style={style}>Move a DevPortal 2.x install made with the <code>veecode-devportal-platform</code> chart to 3.x.</DocCard>
+
 <DocCard title="Docker Run (Quickstart)" link="/devportal/installation-guide/docker-local/intro" style={style}>Quickly run DevPortal locally using Docker. Ideal for testing and exploration without Kubernetes.</DocCard>
 
 <DocCard title="VKDR (Local Kubernetes)" link="/devportal/installation-guide/vkdr-local/vkdr-setup" style={style}>Install DevPortal V2 locally on a lightweight Kubernetes cluster using <code>vkdr devportal-platform install</code>. Best for reproducing production scenarios.</DocCard>

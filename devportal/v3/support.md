@@ -14,7 +14,7 @@ This page says which DevPortal versions receive fixes, how versions are numbered
 | Earlier 3.x releases | None. Update to the latest 3.x release. | |
 | 2.x | Critical fixes only | The 2.x end date will be announced |
 
-Only the latest 3.x release receives fixes. A fix ships as a new 3.x release, so you get it by updating to that release. The [release sheet](./release-sheets.md) of each release says what changed in it.
+Only the latest 3.x release receives fixes. A fix ships as a new 3.x release, so you get it by updating to that release. The [release sheet](./release-sheets/release-sheets.md) of each release says what changed in it.
 
 2.x receives critical fixes only. Other fixes are made in 3.x.
 
@@ -42,6 +42,6 @@ The release sheet states the versions a release was qualified on. Other versions
 
 ## Report a problem
 
-To report a bug or ask for help, see [Troubleshooting](../../troubleshooting.md).
+To report a bug or ask for help, see [Troubleshooting](../troubleshooting.md).
 
 The layout of this page follows the life cycle page of Red Hat Developer Hub. No text is copied.
