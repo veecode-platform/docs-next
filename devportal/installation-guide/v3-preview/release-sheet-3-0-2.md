@@ -42,7 +42,7 @@ Use these values together. Pin the image by its digest.
 | Image | `docker.io/veecode/devportal:3.0.2@sha256:48f95e221844db13887b71dd7379a867b338ec1f9601a7ce3882e376aad36706` |
 | Image digest | `sha256:48f95e221844db13887b71dd7379a867b338ec1f9601a7ce3882e376aad36706` |
 | Chart | `devportal` 1.0.2 |
-| Chart checksum (SHA-256) | `@@CHART_SHA256@@` |
+| Chart checksum (SHA-256) | `80ff7c4d6975970ce6972561305374fdfb22db297bce408a09d165ad2b902bc2` |
 | Backstage version | 1.52.0 |
 | Plugin tag line | `bs_1.52.0` |
 | Catalog index | `quay.io/veecode/plugin-catalog-index:bs_1.52.0`, qualified at `sha256:9952cad12b45c9487aba789b93a094080a0001bfa71b6b0d77ec588d955417ee` |
