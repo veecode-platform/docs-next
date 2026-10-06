@@ -1,12 +1,12 @@
 ---
-sidebar_position: 8
-sidebar_label: DevPortal 3.0.3
-title: DevPortal 3.0.3 release sheet
+sidebar_position: 2
+sidebar_label: DevPortal 3.0.1
+title: DevPortal 3.0.1 release sheet
 ---
 
-# DevPortal 3.0.3 release sheet
+# DevPortal 3.0.1 release sheet
 
-Release date: 2026-10-06
+Release date: 2026-10-05
 
 ## What changed
 
@@ -24,11 +24,12 @@ Release date: 2026-10-06
 
 ### Fixed issues
 
-- None.
+- The backend moves `better-sqlite3` from 12.11.1 to 13.0.3. This fixes a startup crash when DevPortal uses SQLite under Node.js 24.19.0. PostgreSQL-backed installations were not affected.
+- Marketplace 0.3.1 fixes two regressions in the Marketplace card. After you confirm an install or removal, the card shows the matching pending status. The confirm click no longer opens the details drawer.
 
 ### Fixed security issues
 
-3.0.3 changes only the plugin artifacts the product face pins. Five backend plugins enabled by default move from builds with `proxy-addr` 2.0.7 to builds with `proxy-addr` 2.0.8, which fixes `CVE-2026-90711` (critical): `techdocs-backend`, `notifications-backend`, `signals-backend`, `tech-radar-backend` and `devportal-marketplace-backend`. Their plugin versions are unchanged. The 3.0.2 image already had no critical finding; with 3.0.3 the default plugins have none either.
+- None.
 
 ## What goes together
 
@@ -36,14 +37,14 @@ Use these values together. Pin the image by its digest.
 
 | Part | Value |
 | --- | --- |
-| Image | `docker.io/veecode/devportal:3.0.3@sha256:e5c84f744994b30b329e23ff8480857bd4b0be46d63e027b5e87d0428c1df7f5` |
-| Image digest | `sha256:e5c84f744994b30b329e23ff8480857bd4b0be46d63e027b5e87d0428c1df7f5` |
-| Chart | `devportal` 1.0.3 |
-| Chart checksum (SHA-256) | `b8c7afafc8bb5eabf61d04c216abcc070c688da773473e527355226355ec16cf` |
+| Image | `docker.io/veecode/devportal:3.0.1@sha256:881f936ff4a38b31998d52cb6cd558d6b5e6fca9a3d99b08e80aba77913aaa38` |
+| Image digest | `sha256:881f936ff4a38b31998d52cb6cd558d6b5e6fca9a3d99b08e80aba77913aaa38` |
+| Chart | `devportal` 1.0.1 |
+| Chart checksum (SHA-256) | `ad896aaf2361a74069e3bf90e55ffc22e275f4a2f9864a38e3e8dd316149c52c` |
 | Backstage version | 1.52.0 |
 | Plugin tag line | `bs_1.52.0` |
-| Catalog index | `quay.io/veecode/plugin-catalog-index:bs_1.52.0`, qualified at `sha256:f47be1ceaa3aa08271c0ec092a3551d686b3b888d94ef3a5661d9c4f2025798a` |
-| Catalog index tag for pinning | `quay.io/veecode/plugin-catalog-index:bs_1.52.0_20261006T182731` |
+| Catalog index | `quay.io/veecode/plugin-catalog-index:bs_1.52.0`, qualified at `sha256:9952cad12b45c9487aba789b93a094080a0001bfa71b6b0d77ec588d955417ee` |
+| Catalog index tag for pinning | `quay.io/veecode/plugin-catalog-index:bs_1.52.0_20261005T164038` |
 | Qualified on | Kubernetes `1.35.0`, PostgreSQL `16` (image `postgres:16`) |
 
 `bs_1.52.0` names the Backstage version the plugin artifacts target. The catalog index tag moves when the catalog is republished. During an incident, pin the timestamped tag above.
@@ -118,17 +119,17 @@ Use these values together. Pin the image by its digest.
 
 ## Vulnerability report
 
-- Image scanned: `docker.io/veecode/devportal@sha256:e5c84f744994b30b329e23ff8480857bd4b0be46d63e027b5e87d0428c1df7f5`
-- Scanner: Trivy `0.74.0`, database dated `2026-10-06`.
+- Image scanned: `docker.io/veecode/devportal@sha256:881f936ff4a38b31998d52cb6cd558d6b5e6fca9a3d99b08e80aba77913aaa38`
+- Scanner: Trivy `0.74.0`, database dated `2026-10-05`.
 - Critical vulnerabilities with a fix and no live exception: `0`.
-- Qualification run: `https://github.com/veecode-platform/devportal-chart/actions/runs/37515190379`.
+- Qualification run: `https://github.com/veecode-platform/devportal-chart/actions/runs/37378674819`.
 
 | Severity | Reported | With a fix | Accepted as an exception |
 | --- | ---: | ---: | ---: |
 | CRITICAL | 0 | 0 | 0 |
-| HIGH | 69 | 17 | 15 |
-| MEDIUM | 472 | 138 | 0 |
-| LOW | 146 | 16 | 0 |
+| HIGH | 62 | 14 | 15 |
+| MEDIUM | 460 | 129 | 0 |
+| LOW | 145 | 16 | 0 |
 | UNKNOWN | 0 | 0 | 0 |
 
 A release does not ship with a critical vulnerability that has a fix and no live exception.
@@ -161,16 +162,16 @@ The table contains one row for each OCI artifact enabled by the product face, in
 | Artifact | Digest | Packages | Critical | High | Medium | Low | Unknown | Critical with a fix | Result |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 | `quay.io/veecode/backstage-community-plugin-rbac` | `36e9f606223d` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
-| `quay.io/veecode/backstage-community-plugin-tech-radar-backend` | `214058752d8e` | 78 | 0 | 1 | 2 | 2 | 0 | 0 | scanned |
+| `quay.io/veecode/backstage-community-plugin-tech-radar-backend` | `71f7f6c48161` | 78 | 0 | 1 | 2 | 2 | 0 | 0 | scanned |
 | `quay.io/veecode/backstage-community-plugin-tech-radar` | `2a5e149c22bd` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
-| `quay.io/veecode/backstage-plugin-notifications-backend` | `56583b006dab` | 109 | 0 | 0 | 2 | 1 | 0 | 0 | scanned |
+| `quay.io/veecode/backstage-plugin-notifications-backend` | `b089cdda6380` | 109 | 0 | 0 | 2 | 1 | 0 | 0 | scanned |
 | `quay.io/veecode/backstage-plugin-notifications` | `bb3c3f0739f8` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
-| `quay.io/veecode/backstage-plugin-signals-backend` | `ea4c2a6c4a62` | 83 | 0 | 1 | 2 | 1 | 0 | 0 | scanned |
+| `quay.io/veecode/backstage-plugin-signals-backend` | `3767a18cdb45` | 83 | 0 | 1 | 2 | 1 | 0 | 0 | scanned |
 | `quay.io/veecode/backstage-plugin-signals` | `8764b50b78b6` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
-| `quay.io/veecode/backstage-plugin-techdocs-backend` | `e43b9fb4aabb` | 427 | 0 | 25 | 28 | 2 | 0 | 0 | scanned |
+| `quay.io/veecode/backstage-plugin-techdocs-backend` | `a52ab2f01ccf` | 427 | 0 | 25 | 28 | 2 | 0 | 0 | scanned |
 | `quay.io/veecode/backstage-plugin-techdocs-module-addons-contrib` | `9feeac06c77e` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
 | `quay.io/veecode/backstage-plugin-techdocs` | `d8222a85e6a4` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
-| `quay.io/veecode/devportal-marketplace-backend` | `53c0c06ab767` | 78 | 0 | 0 | 3 | 1 | 0 | 0 | scanned |
+| `quay.io/veecode/devportal-marketplace-backend` | `153527c7d510` | 78 | 0 | 0 | 3 | 1 | 0 | 0 | scanned |
 | `quay.io/veecode/devportal-marketplace-frontend-dynamic` | `2d3ffc77eac7` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
 | `quay.io/veecode/devportal-pending-changes-dynamic` | `18d75d59e287` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
 | `quay.io/veecode/red-hat-developer-hub-backstage-plugin-catalog-backend-module-extensions` | `9fad03e713fe` | 15 | 0 | 11 | 3 | 1 | 0 | 0 | scanned |
@@ -181,8 +182,10 @@ The table contains one row for each OCI artifact enabled by the product face, in
 
 ## Known limitations
 
-The 3.0.0 release sheet also lists the following limitations. The 3.0.1, 3.0.2 and 3.0.3 changes do not address them.
+- A vulnerability database update on 2026-10-06 reports 14 critical findings with a fix in the 3.0.1 image, in `proxy-addr` 2.0.7 and `vm2` 3.11.7. Upgrade to 3.0.2 (use chart 1.0.2 for Helm installs), which fixes them.
+
+The 3.0.0 release sheet also lists the following limitations. The 3.0.1 changes do not address them.
 
 - The product face ships the Red Hat dynamic Home page entry disabled. Enabling it (for example from its Marketplace card) leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. Keep it disabled.
 - An offline install must mirror the catalog index as well as the OCI plugin artifacts. In beta.10 tests, the installer fetched the index before loading cached plugin artifacts and stopped when Quay was unreachable.
-- In beta.10 measurements, median readiness took 67.237 seconds with an empty plugin volume and 19.514 seconds with a populated volume. These are beta.10 measurements, not measurements of the final 3.0.3 candidate.
+- In beta.10 measurements, median readiness took 67.237 seconds with an empty plugin volume and 19.514 seconds with a populated volume. These are beta.10 measurements, not measurements of the final 3.0.1 candidate.

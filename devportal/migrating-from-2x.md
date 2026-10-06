@@ -1,6 +1,6 @@
 ---
-sidebar_label: Migrate from 2.x
-sidebar_position: 3
+sidebar_label: Migrating from 2.x to 3.x
+sidebar_position: 2.6
 title: Migrate from DevPortal 2.x to 3.x
 ---
 
@@ -70,7 +70,7 @@ export PG_IMAGE=postgres:16
 ```
 
 - `NAMESPACE` and `V2_RELEASE` come from `helm list --all-namespaces`.
-- `V2_SECRET` is the Secret named by `existingSecret` in your 2.x values (`helm get values "$V2_RELEASE" -n "$NAMESPACE"`). For a PostgreSQL-backed install, it already has the database keys. For SQLite, keep this Secret so it retains any identity-provider keys, then add the new PostgreSQL keys using the [PostgreSQL credentials section of the install guide](../production-setup/setup.md#postgresql-credentials-production). Point those keys at the new 3.x PostgreSQL server. This does not copy SQLite data.
+- `V2_SECRET` is the Secret named by `existingSecret` in your 2.x values (`helm get values "$V2_RELEASE" -n "$NAMESPACE"`). For a PostgreSQL-backed install, it already has the database keys. For SQLite, keep this Secret so it retains any identity-provider keys, then add the new PostgreSQL keys using the [PostgreSQL credentials section of the install guide](./installation-guide/production-setup/setup.md#postgresql-credentials-production). Point those keys at the new 3.x PostgreSQL server. This does not copy SQLite data.
 - `V3_RELEASE` is the name of the new release. It must differ from `V2_RELEASE`.
 - `PG_IMAGE` is a PostgreSQL client image. Use the major version of your server or a newer one, because `pg_dump` refuses a server newer than itself.
 

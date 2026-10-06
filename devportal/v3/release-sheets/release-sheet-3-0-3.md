@@ -1,10 +1,10 @@
 ---
-sidebar_position: 7
-sidebar_label: DevPortal 3.0.2
-title: DevPortal 3.0.2 release sheet
+sidebar_position: 4
+sidebar_label: DevPortal 3.0.3
+title: DevPortal 3.0.3 release sheet
 ---
 
-# DevPortal 3.0.2 release sheet
+# DevPortal 3.0.3 release sheet
 
 Release date: 2026-10-06
 
@@ -28,10 +28,7 @@ Release date: 2026-10-06
 
 ### Fixed security issues
 
-3.0.2 changes only these two dependency versions against 3.0.1. Together they clear the 14 critical findings the image scan reported for 3.0.1 on 2026-10-06.
-
-- `proxy-addr` moves from 2.0.7 to 2.0.8 in the backend and in the dynamic plugins built into the image. This fixes `CVE-2026-90711`.
-- `vm2` moves from 3.11.7 to 3.12.2. This fixes `CVE-2026-92934` and `CVE-2026-92955` (sandbox escape), `CVE-2026-92953` (prototype pollution), `CVE-2026-92954` (denial of service), and `CVE-2026-100721` (path boundary bypass in NodeVM custom resolution). Version 3.11.8 fixes the first four but not `CVE-2026-100721`.
+3.0.3 changes only the plugin artifacts the product face pins. Five backend plugins enabled by default move from builds with `proxy-addr` 2.0.7 to builds with `proxy-addr` 2.0.8, which fixes `CVE-2026-90711` (critical): `techdocs-backend`, `notifications-backend`, `signals-backend`, `tech-radar-backend` and `devportal-marketplace-backend`. Their plugin versions are unchanged. The 3.0.2 image already had no critical finding; with 3.0.3 the default plugins have none either.
 
 ## What goes together
 
@@ -39,14 +36,14 @@ Use these values together. Pin the image by its digest.
 
 | Part | Value |
 | --- | --- |
-| Image | `docker.io/veecode/devportal:3.0.2@sha256:48f95e221844db13887b71dd7379a867b338ec1f9601a7ce3882e376aad36706` |
-| Image digest | `sha256:48f95e221844db13887b71dd7379a867b338ec1f9601a7ce3882e376aad36706` |
-| Chart | `devportal` 1.0.2 |
-| Chart checksum (SHA-256) | `80ff7c4d6975970ce6972561305374fdfb22db297bce408a09d165ad2b902bc2` |
+| Image | `docker.io/veecode/devportal:3.0.3@sha256:e5c84f744994b30b329e23ff8480857bd4b0be46d63e027b5e87d0428c1df7f5` |
+| Image digest | `sha256:e5c84f744994b30b329e23ff8480857bd4b0be46d63e027b5e87d0428c1df7f5` |
+| Chart | `devportal` 1.0.3 |
+| Chart checksum (SHA-256) | `b8c7afafc8bb5eabf61d04c216abcc070c688da773473e527355226355ec16cf` |
 | Backstage version | 1.52.0 |
 | Plugin tag line | `bs_1.52.0` |
-| Catalog index | `quay.io/veecode/plugin-catalog-index:bs_1.52.0`, qualified at `sha256:9952cad12b45c9487aba789b93a094080a0001bfa71b6b0d77ec588d955417ee` |
-| Catalog index tag for pinning | `quay.io/veecode/plugin-catalog-index:bs_1.52.0_20261005T164038` |
+| Catalog index | `quay.io/veecode/plugin-catalog-index:bs_1.52.0`, qualified at `sha256:f47be1ceaa3aa08271c0ec092a3551d686b3b888d94ef3a5661d9c4f2025798a` |
+| Catalog index tag for pinning | `quay.io/veecode/plugin-catalog-index:bs_1.52.0_20261006T182731` |
 | Qualified on | Kubernetes `1.35.0`, PostgreSQL `16` (image `postgres:16`) |
 
 `bs_1.52.0` names the Backstage version the plugin artifacts target. The catalog index tag moves when the catalog is republished. During an incident, pin the timestamped tag above.
@@ -121,10 +118,10 @@ Use these values together. Pin the image by its digest.
 
 ## Vulnerability report
 
-- Image scanned: `docker.io/veecode/devportal@sha256:48f95e221844db13887b71dd7379a867b338ec1f9601a7ce3882e376aad36706`
+- Image scanned: `docker.io/veecode/devportal@sha256:e5c84f744994b30b329e23ff8480857bd4b0be46d63e027b5e87d0428c1df7f5`
 - Scanner: Trivy `0.74.0`, database dated `2026-10-06`.
 - Critical vulnerabilities with a fix and no live exception: `0`.
-- Qualification run: `https://github.com/veecode-platform/devportal-chart/actions/runs/37482668823`.
+- Qualification run: `https://github.com/veecode-platform/devportal-chart/actions/runs/37515190379`.
 
 | Severity | Reported | With a fix | Accepted as an exception |
 | --- | ---: | ---: | ---: |
@@ -164,16 +161,16 @@ The table contains one row for each OCI artifact enabled by the product face, in
 | Artifact | Digest | Packages | Critical | High | Medium | Low | Unknown | Critical with a fix | Result |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 | `quay.io/veecode/backstage-community-plugin-rbac` | `36e9f606223d` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
-| `quay.io/veecode/backstage-community-plugin-tech-radar-backend` | `71f7f6c48161` | 78 | 1 | 1 | 2 | 2 | 0 | 1 | scanned |
+| `quay.io/veecode/backstage-community-plugin-tech-radar-backend` | `214058752d8e` | 78 | 0 | 1 | 2 | 2 | 0 | 0 | scanned |
 | `quay.io/veecode/backstage-community-plugin-tech-radar` | `2a5e149c22bd` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
-| `quay.io/veecode/backstage-plugin-notifications-backend` | `b089cdda6380` | 109 | 1 | 0 | 2 | 1 | 0 | 1 | scanned |
+| `quay.io/veecode/backstage-plugin-notifications-backend` | `56583b006dab` | 109 | 0 | 0 | 2 | 1 | 0 | 0 | scanned |
 | `quay.io/veecode/backstage-plugin-notifications` | `bb3c3f0739f8` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
-| `quay.io/veecode/backstage-plugin-signals-backend` | `3767a18cdb45` | 83 | 1 | 1 | 2 | 1 | 0 | 1 | scanned |
+| `quay.io/veecode/backstage-plugin-signals-backend` | `ea4c2a6c4a62` | 83 | 0 | 1 | 2 | 1 | 0 | 0 | scanned |
 | `quay.io/veecode/backstage-plugin-signals` | `8764b50b78b6` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
-| `quay.io/veecode/backstage-plugin-techdocs-backend` | `a52ab2f01ccf` | 427 | 1 | 25 | 28 | 2 | 0 | 1 | scanned |
+| `quay.io/veecode/backstage-plugin-techdocs-backend` | `e43b9fb4aabb` | 427 | 0 | 25 | 28 | 2 | 0 | 0 | scanned |
 | `quay.io/veecode/backstage-plugin-techdocs-module-addons-contrib` | `9feeac06c77e` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
 | `quay.io/veecode/backstage-plugin-techdocs` | `d8222a85e6a4` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
-| `quay.io/veecode/devportal-marketplace-backend` | `153527c7d510` | 78 | 1 | 0 | 3 | 1 | 0 | 1 | scanned |
+| `quay.io/veecode/devportal-marketplace-backend` | `53c0c06ab767` | 78 | 0 | 0 | 3 | 1 | 0 | 0 | scanned |
 | `quay.io/veecode/devportal-marketplace-frontend-dynamic` | `2d3ffc77eac7` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
 | `quay.io/veecode/devportal-pending-changes-dynamic` | `18d75d59e287` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | scanned |
 | `quay.io/veecode/red-hat-developer-hub-backstage-plugin-catalog-backend-module-extensions` | `9fad03e713fe` | 15 | 0 | 11 | 3 | 1 | 0 | 0 | scanned |
@@ -184,10 +181,8 @@ The table contains one row for each OCI artifact enabled by the product face, in
 
 ## Known limitations
 
-- Five plugins enabled by default are OCI artifacts that 3.0.2 does not rebuild: `tech-radar-backend`, `notifications-backend`, `signals-backend`, `techdocs-backend`, and `devportal-marketplace-backend`. Each still contains `proxy-addr` 2.0.7, which has the critical `CVE-2026-90711`, so each reports one critical finding with a fix in the table above. The image itself has none. These artifact scans are reports and do not block the image release. 3.0.3 (chart 1.0.3) pins rebuilds of the five plugins with `proxy-addr` 2.0.8.
-
-The 3.0.0 release sheet also lists the following limitations. The 3.0.1 and 3.0.2 changes do not address them.
+The 3.0.0 release sheet also lists the following limitations. The 3.0.1, 3.0.2 and 3.0.3 changes do not address them.
 
 - The product face ships the Red Hat dynamic Home page entry disabled. Enabling it (for example from its Marketplace card) leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. Keep it disabled.
 - An offline install must mirror the catalog index as well as the OCI plugin artifacts. In beta.10 tests, the installer fetched the index before loading cached plugin artifacts and stopped when Quay was unreachable.
-- In beta.10 measurements, median readiness took 67.237 seconds with an empty plugin volume and 19.514 seconds with a populated volume. These are beta.10 measurements, not measurements of the final 3.0.2 candidate.
+- In beta.10 measurements, median readiness took 67.237 seconds with an empty plugin volume and 19.514 seconds with a populated volume. These are beta.10 measurements, not measurements of the final 3.0.3 candidate.
