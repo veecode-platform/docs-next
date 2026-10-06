@@ -8,6 +8,7 @@ Every 3.x release has a release sheet. It says what changed, which versions of t
 
 The release sheets are:
 
+- [DevPortal 3.0.3 release sheet](./release-sheet-3-0-3.md)
 - [DevPortal 3.0.2 release sheet](./release-sheet-3-0-2.md)
 - [DevPortal 3.0.1 release sheet](./release-sheet-3-0-1.md)
 - [DevPortal 3.0.0 release sheet](./release-sheet-3-0-0.md)
