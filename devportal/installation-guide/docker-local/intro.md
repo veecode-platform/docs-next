@@ -16,7 +16,7 @@ cd devportal-local
 docker compose up
 ```
 
-Open [http://localhost:7007](http://localhost:7007). On a fresh database, the first start takes about two minutes. To change the published UI port or PostgreSQL password, copy `.env.example` to `.env` before starting. Set `DEVPORTAL_PORT` or `POSTGRES_PASSWORD` in that file. The portal's base URLs follow `DEVPORTAL_PORT`.
+Open [http://localhost:7007](http://localhost:7007). On a fresh database, the first start takes two to three minutes. To change the published UI port or PostgreSQL password, copy `.env.example` to `.env` before starting. Set `DEVPORTAL_PORT` or `POSTGRES_PASSWORD` in that file. The portal's base URLs follow `DEVPORTAL_PORT`.
 
 To publish the portal on a different host port, set `DEVPORTAL_PORT` when you start the stack:
 
@@ -28,7 +28,7 @@ DEVPORTAL_PORT=8080 docker compose up
 
 The local stack provides the same portal and Marketplace as the Kubernetes install described in [production-setup/setup.md](../production-setup/setup.md), backed by PostgreSQL:
 
-- The VeeCode sidebar includes Home, Catalog, APIs, Docs, Self-service, Notifications, Tech Radar, and Marketplace.
+- The VeeCode sidebar includes Home, Catalog, APIs, Docs, Self-service, Notifications, Tech Radar, and Marketplace, with Settings at the bottom.
 - TechDocs, Notifications/Signals, and Tech Radar are wired up.
 - VeeCode branding includes light and dark themes.
 - Marketplace selections persist in PostgreSQL when you stop and start the stack without removing its volumes.
