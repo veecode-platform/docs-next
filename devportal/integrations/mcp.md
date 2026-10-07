@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 7
 sidebar_label: MCP Actions
 title: Expose DevPortal tools to AI clients
 ---

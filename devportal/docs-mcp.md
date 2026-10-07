@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 6
 sidebar_label: Docs MCP Server
 title: Documentation MCP Server
 ---

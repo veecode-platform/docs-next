@@ -6,7 +6,7 @@ title: Marketplace Plugin
 
 # Marketplace Plugin
 
-The Marketplace plugin is the in-portal interface for discovering, installing, and uninstalling dynamic plugins without editing YAML files. It is accessible at `/marketplace` in the sidebar.
+The Marketplace plugin is the in-portal interface for discovering, installing, and uninstalling dynamic plugins without editing YAML files. The sidebar item **Marketplace** opens it as the **Extensions** page at `/marketplace`.
 
 **Status:** Default plugin, enabled by default. No chart values entry is required.
 

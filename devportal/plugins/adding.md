@@ -27,7 +27,7 @@ After the restart the install service logs show `Installing OCI plugin ...` for 
 
 ## On Kubernetes: chart values
 
-Add the plugin under `global.dynamic.plugins` in your values file, using a full digest-pinned OCI reference. Entries there only add to the image-baked default plugins; they never replace them.
+Add the plugin under `global.dynamic.plugins` in your values file, using a full digest-pinned OCI reference. An entry for a new plugin adds it; an entry that matches a default plugin by registry, repository, and plugin path overrides that default plugin. To disable a default plugin, see [Disable a default plugin](../installation-guide/production-setup/setup.md#disable-a-default-plugin).
 
 ```yaml
 global:
@@ -53,7 +53,7 @@ Then upgrade the release. The production setup guide shows the full flow in [Dis
 
 ## Enable a plugin bundled in the image
 
-DevPortal 3.0.3 bundles 41 plugins under `/opt/app-root/src/dynamic-plugins/dist`. List their directories on the local stack with:
+DevPortal 3.0.3 bundles 41 plugins under `/opt/app-root/src/dynamic-plugins/dist`. These bundled plugins are separate from the 20 default plugins. A `./dynamic-plugins/dist/...` entry enables a bundled plugin and does not override a default plugin; to disable or reconfigure a default plugin, use the OCI `{{inherit}}` form described in [Disable a default plugin](../installation-guide/production-setup/setup.md#disable-a-default-plugin). List their directories on the local stack with:
 
 ```bash
 docker compose exec devportal ls /opt/app-root/src/dynamic-plugins/dist

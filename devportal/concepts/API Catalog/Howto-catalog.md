@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-sidebar_label: API Catalog
+sidebar_label: Use the API Catalog
 title: How to Use the API Catalog
 ---
 
