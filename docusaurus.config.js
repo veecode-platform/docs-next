@@ -144,6 +144,10 @@ const config = {
             to: '/devportal/v2/migrating-from-v1'
           },
           {
+            from: '/devportal/plugins/vault',
+            to: '/devportal/v2/plugins/vault'
+          },
+          {
             from: '/devportal/concepts/iac-template',
             to: '/devportal/v2/concepts/iac-template'
           },
