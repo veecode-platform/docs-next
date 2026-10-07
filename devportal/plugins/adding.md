@@ -81,7 +81,7 @@ The [production setup guide's Keycloak catalog module example](../installation-g
 
 The GitHub scaffolder module loads at startup without extra configuration and adds actions such as `publish:github` and `publish:github:pull-request`. Configure a GitHub integration token before you run those actions.
 
-The Marketplace offers the same upstream module in the `github-scaffolder-actions` collection as a digest-pinned OCI artifact. A bundled path does not require pulling that artifact from a registry, which helps when a cluster cannot reach the registry. The default plugin index lists none of the `./dynamic-plugins/dist` paths, so those paths do not appear there as installable entries.
+The Marketplace offers the same upstream module in the `github-scaffolder-actions` collection as a digest-pinned OCI artifact. A bundled path does not require pulling that artifact from a registry, which helps when a cluster cannot reach the registry. The default plugin index lists none of the `./dynamic-plugins/dist` paths, so those paths do not appear there as installable entries. To change which catalog index the portal reads, see [Configure the plugin catalog index](../installation-guide/production-setup/catalog-index.md).
 
 ## On the local stack: the operator plugin file
 

@@ -131,6 +131,8 @@ EOF
 kubectl -n "$NAMESPACE" rollout status deployment/devportal-db --timeout=10m
 ```
 
+For a PostgreSQL server outside the cluster, see [Use an external PostgreSQL database](./external-database.md).
+
 ## Step 4: Start Keycloak
 
 Skip this step if you already run an identity provider. The portal needs an OIDC client with these settings:
@@ -648,7 +650,7 @@ Copy the `offline-bundle` directory, `values-mirror.yaml`, and `registries.conf`
 
 The image contains the default plugin file (`dynamic-plugins.veecode.yaml`). The commands extract its OCI references, remove the `!subpath` suffix, and give the image references to RHDH's script with `--plugin-list`. Copy the chart's catalog index separately with Skopeo; the RHDH script reads Red Hat's index format. The script writes `rhdh-plugin-mirroring-summary.txt` with the plugin source-to-mirror mappings. If your values override the image or `global.catalogIndex.image`, use those references instead of the chart defaults above.
 
-This procedure assumes the connected machine can reach both Quay and the mirror registry. For a fully disconnected transfer, use RHDH's documented `--to-dir` and `--from-dir` flow for the default plugin list, and copy the chart index separately with Skopeo.
+This procedure assumes the connected machine can reach both Quay and the mirror registry. For a fully disconnected transfer, use RHDH's documented `--to-dir` and `--from-dir` flow for the default plugin list, and copy the chart index separately with Skopeo. To point the chart at a mirrored catalog index, see [Configure the plugin catalog index](./catalog-index.md).
 
 Create a ConfigMap with the registry mapping. Set `MIRROR_REGISTRY` to a registry name that the cluster can resolve and reach.
 
