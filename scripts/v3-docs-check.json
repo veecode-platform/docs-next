@@ -71,7 +71,6 @@
     "devportal/integrations/integrations.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/integrations/mcp.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/migrating-from-2x.md": "The 2.x to 3.x migration guide names 2.x settings on purpose.",
-    "devportal/plugins/bundled/rbac.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/plugins/development/wiring.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/plugins/kubernetes.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/which-version.md": "Compares the DevPortal lines, so it names 2.x and V1 markers on purpose.",
