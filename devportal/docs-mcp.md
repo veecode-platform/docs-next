@@ -13,9 +13,10 @@ documentation for
 all four products (DevPortal, Platform, Admin-UI, VKDR-CLI). Instead of
 pasting doc snippets into a prompt, the agent queries the docs directly.
 
-It runs locally over stdio, needs no API key, and is distributed on npm — so
-you never install a specific version by hand: `npx` always resolves the latest
-published release.
+It runs locally over stdio, needs no API key, and is distributed on npm, so
+you never install a specific version by hand: `npx` downloads the package on
+first call and caches it afterwards. For a guaranteed fresh copy, install
+globally with `npm install -g @veecode-platform/docs-mcp`.
 
 :::note This is not the in-portal MCP
 There are two different MCP servers in the VeeCode ecosystem, and they solve
@@ -150,8 +151,8 @@ Once the server is registered, ask your agent naturally — it picks the right
 tool. For example:
 
 - "Search the VeeCode docs for how to enable RBAC in DevPortal."
-- "Using the veecode-docs MCP, show me the preset for GitLab integration."
-- "What VEECODE_PRESETS do I need to migrate from the V1 gitlab profile?"
+- "Using the veecode-docs MCP, how do I turn off guest sign-in on the 3.x chart?"
+- "Which values enable Keycloak sign-in in 3.x?"
 
 ## Environment variables
 
@@ -177,6 +178,6 @@ loaded snapshot until it ends.
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Server doesn't appear in the client | The MCP entry wasn't picked up | Restart the client after editing `~/.mcp.json` / running `claude mcp add`; confirm the entry with `claude mcp list` |
-| Results look out of date | Cached snapshot from a previous launch | The refresh applies on the *next* launch — restart the server once; to force a clean pull, delete `~/.cache/veecode-docs-mcp/` |
+| Results look out of date | Cached snapshot from a previous launch | The refresh applies on the *next* launch — restart the server once; to force a clean pull, delete `~/.cache/veecode-docs-mcp/` (this removes the cached snapshots of all three versions) or only that version's subdirectory, for example `~/.cache/veecode-docs-mcp/v3` |
 | Wrong docs version in results | Instance bound to the other version | Check `get_snapshot_info` (`docs_version`); register a separate instance with the correct `--version` |
 | `npx` fails at launch behind a proxy/offline | No registry access to resolve the package | Install globally (`npm i -g @veecode-platform/docs-mcp`) and point the client at `veecode-docs-mcp`; set `VEECODE_DOCS_MCP_OFFLINE=1` to skip the refresh check |

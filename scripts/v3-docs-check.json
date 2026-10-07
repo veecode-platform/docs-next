@@ -46,6 +46,16 @@
       "name": "SQLite",
       "pattern": "\\bSQLite\\b",
       "flags": "i"
+    },
+    {
+      "name": "Internal jargon",
+      "pattern": "\\bproduct[- ]face\\b|\\b(image|the) face\\b|\\bface (file|plugins?|entr(y|ies))\\b",
+      "flags": "i"
+    },
+    {
+      "name": "Program evidence paths",
+      "pattern": "evidence/runner|lane-context|lane-evidence|runner-3\\.0\\.3|\\bcatalog D[0-9]+\\b",
+      "flags": "i"
     }
   ],
   "allow": {

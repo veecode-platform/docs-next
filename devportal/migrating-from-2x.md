@@ -57,7 +57,7 @@ You need:
 - `kubectl`, `helm` 3 and `jq`, with access to the namespace of the 2.x release;
 - a PostgreSQL server and a user with the privilege to create databases (`CREATEDB`). For a PostgreSQL-backed 2.x install, use its server and user. For SQLite, prepare PostgreSQL for 3.x;
 - a real identity provider for the 3.x portal. The examples use Keycloak, which is what the 2.x `keycloak` preset configured;
-- the 3.x install guide ("Install DevPortal 3.x"), which covers everything about installing 3.x that this page does not repeat.
+- the 3.x [install guide](./installation-guide/production-setup/setup.md), which covers everything about installing 3.x that this page does not repeat.
 
 Set these variables once. Every command below uses them:
 

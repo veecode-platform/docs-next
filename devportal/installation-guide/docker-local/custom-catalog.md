@@ -37,6 +37,8 @@ catalog:
 
 Keep the `catalog-info.yaml` location and add every other location under the same `catalog.locations` key.
 
+Entities from a new file location can take several minutes to appear; search the portal's Catalog page for a component such as `local-quickstart` to check whether it loaded.
+
 ## Mount the catalog file
 
 Create `docker-compose.custom-catalog.yaml` in the `devportal-local` directory:
@@ -172,6 +174,8 @@ catalog:
     - type: url
       target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/components/artist-lookup-component.yaml
 ```
+
+For provider-based discovery across many repositories, see the [integrations guides](../../integrations/integrations.md).
 
 ## Continue customizing the local stack
 

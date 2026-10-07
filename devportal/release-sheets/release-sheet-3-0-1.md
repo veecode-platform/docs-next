@@ -24,7 +24,7 @@ Release date: 2026-10-05
 
 ### Fixed issues
 
-- The backend moves `better-sqlite3` from 12.11.1 to 13.0.3. This fixes a startup crash when DevPortal uses SQLite under Node.js 24.19.0. PostgreSQL-backed installations were not affected.
+- The backend moves `better-sqlite3` from 12.11.1 to 13.0.3. This fixes a startup crash when the image runs outside this chart with SQLite under Node.js 24.19.0. Chart installs use PostgreSQL and are not affected.
 - Marketplace 0.3.1 fixes two regressions in the Marketplace card. After you confirm an install or removal, the card shows the matching pending status. The confirm click no longer opens the details drawer.
 
 ### Fixed security issues
@@ -157,7 +157,7 @@ An exception expires on the date shown. After that date, the finding counts agai
 
 ### Plugins enabled by default
 
-The table contains one row for each OCI artifact enabled by the product face, including the Marketplace card. These artifact scans are reports and do not block the image release.
+The table contains one row for each OCI artifact enabled by default, including the Marketplace card. These artifact scans are reports and do not block the image release.
 
 | Artifact | Digest | Packages | Critical | High | Medium | Low | Unknown | Critical with a fix | Result |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
@@ -186,6 +186,6 @@ The table contains one row for each OCI artifact enabled by the product face, in
 
 The 3.0.0 release sheet also lists the following limitations. The 3.0.1 changes do not address them.
 
-- The product face ships the Red Hat dynamic Home page entry disabled. Enabling it (for example from its Marketplace card) leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. Keep it disabled.
+- The default plugins ship the Red Hat dynamic Home page entry disabled. Enabling it (for example from its Marketplace card) leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. Keep it disabled.
 - An offline install must mirror the catalog index as well as the OCI plugin artifacts. In beta.10 tests, the installer fetched the index before loading cached plugin artifacts and stopped when Quay was unreachable.
 - In beta.10 measurements, median readiness took 67.237 seconds with an empty plugin volume and 19.514 seconds with a populated volume. These are beta.10 measurements, not measurements of the final 3.0.1 candidate.

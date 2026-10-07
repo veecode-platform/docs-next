@@ -28,7 +28,7 @@ Release date: 2026-10-06
 
 ### Fixed security issues
 
-3.0.3 changes only the plugin artifacts the product face pins. Five backend plugins enabled by default move from builds with `proxy-addr` 2.0.7 to builds with `proxy-addr` 2.0.8, which fixes `CVE-2026-90711` (critical): `techdocs-backend`, `notifications-backend`, `signals-backend`, `tech-radar-backend` and `devportal-marketplace-backend`. Their plugin versions are unchanged. The 3.0.2 image already had no critical finding; with 3.0.3 the default plugins have none either.
+3.0.3 changes only the plugin artifacts the default plugin file pins. Five backend plugins enabled by default move from builds with `proxy-addr` 2.0.7 to builds with `proxy-addr` 2.0.8, which fixes `CVE-2026-90711` (critical): `techdocs-backend`, `notifications-backend`, `signals-backend`, `tech-radar-backend` and `devportal-marketplace-backend`. Their plugin versions are unchanged. The 3.0.2 image already had no critical finding; with 3.0.3 the default plugins have none either.
 
 ## What goes together
 
@@ -156,7 +156,7 @@ An exception expires on the date shown. After that date, the finding counts agai
 
 ### Plugins enabled by default
 
-The table contains one row for each OCI artifact enabled by the product face, including the Marketplace card. These artifact scans are reports and do not block the image release.
+The table contains one row for each OCI artifact enabled by default, including the Marketplace card. These artifact scans are reports and do not block the image release.
 
 | Artifact | Digest | Packages | Critical | High | Medium | Low | Unknown | Critical with a fix | Result |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
@@ -183,6 +183,6 @@ The table contains one row for each OCI artifact enabled by the product face, in
 
 The 3.0.0 release sheet also lists the following limitations. The 3.0.1, 3.0.2 and 3.0.3 changes do not address them.
 
-- The product face ships the Red Hat dynamic Home page entry disabled. Enabling it (for example from its Marketplace card) leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. Keep it disabled.
+- The default plugins ship the Red Hat dynamic Home page entry disabled. Enabling it (for example from its Marketplace card) leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. Keep it disabled.
 - An offline install must mirror the catalog index as well as the OCI plugin artifacts. In beta.10 tests, the installer fetched the index before loading cached plugin artifacts and stopped when Quay was unreachable.
 - In beta.10 measurements, median readiness took 67.237 seconds with an empty plugin volume and 19.514 seconds with a populated volume. These are beta.10 measurements, not measurements of the final 3.0.3 candidate.

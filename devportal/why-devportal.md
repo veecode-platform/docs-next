@@ -16,7 +16,7 @@ For 3.x, the default plugins ship in the image. Use chart values to add or overr
 
 - **Faster time-to-value:** start with a working portal on day one. The catalog, the API catalog, TechDocs, notifications, Tech Radar, the plugin Marketplace, and the self-service area for your own templates are already wired in the image.
 
-- **Hardened, supported baseline:** vetted plugins, sensible configuration, and guidance for scale and multi-tenant realities.
+- **Hardened, supported baseline:** vetted plugins, sensible configuration, and guidance for scale and multi-tenant realities. Permission checks are off by default in 3.x; see [the RBAC note](./installation-guide/production-setup/plan.md#rbac).
 
 - **Upgrades made safe:** regular, non-breaking releases, security patches, and migration notes, without you chasing every upstream change.
 
