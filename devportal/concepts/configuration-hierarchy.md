@@ -16,7 +16,7 @@ takes effect — or why it doesn't.
 
 **Quick answer — where do I put my override?**
 - Operator customizations (branding, catalog locations, integration credentials): `app-config.local.yaml` (layer 5).
-- Auth provider and SCM integration (set once per environment): selected via `VEECODE_PRESETS`, which generates the preset layer (layer 4). See [Presets](./presets.md).
+- Auth provider and SCM integration (set once per environment): selected via `VEECODE_PRESETS`, which generates the preset layer (layer 4). See [Presets](/devportal/v2/concepts/presets).
 - Plugin-specific backend config (Kubernetes cluster URLs, SonarQube base URL, etc.): also goes in `app-config.local.yaml`, or is injected via `pluginConfig` in `dynamic-plugins.yaml` (layer 6). See [Composing a Portal](./portal-composition.md) for the relationship between plugin loading and backend config.
 
 ---
@@ -45,7 +45,7 @@ The source of truth is the `EXTRA_ARGS` construction in `entrypoint.sh`.
 :::note This is not the V1 seven-layer profile chain
 V2 has no `app-config.<profile>.yaml` layer. The profile slot (old layer 3) is
 replaced by **one file per selected preset** (layer 4 above), assembled in
-`VEECODE_PRESETS` order. See [Presets](./presets.md).
+`VEECODE_PRESETS` order. See [Presets](/devportal/v2/concepts/presets).
 :::
 
 ---
@@ -106,7 +106,7 @@ Backstage resolves these from the process environment at startup, **after** all
 If a preset declares a variable as `required: true`, the entrypoint validates it
 **before** Backstage starts. A missing required var exits with code **78**, so
 substitution never runs on an incomplete environment. See
-[Presets](./presets.md) for the full validation flow.
+[Presets](/devportal/v2/concepts/presets) for the full validation flow.
 
 Substitution applies equally to all files in the chain. The chain position only
 controls which file's *containing key* wins, not the substitution outcome.
@@ -143,7 +143,7 @@ either by reading the boot logs (many keys emit a `Found N config(s)` or
 
 ## Related
 
-- [Presets](./presets.md) — the preset model and how preset configs (layer 4)
+- [Presets](/devportal/v2/concepts/presets) — the preset model and how preset configs (layer 4)
   are generated.
 - [Dynamic Plugins](./dynamic-plugins.md) — how
   `app-config.dynamic-plugins.yaml` (layer 6) is built.
