@@ -59,10 +59,6 @@
     }
   ],
   "allow": {
-    "devportal/concepts/configuration-hierarchy.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
-    "devportal/concepts/dynamic-plugins.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
-    "devportal/concepts/portal-composition.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
-    "devportal/concepts/software-template.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/docs-mcp.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/integrations/Azure/azure.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/integrations/GitHub/github-auth.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
@@ -79,8 +75,6 @@
     "devportal/plugins/development/wiring.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/plugins/kubernetes.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/which-version.md": "Compares the DevPortal lines, so it names 2.x and V1 markers on purpose.",
-    "devportal/concepts/catalog.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
-    "devportal/concepts/writing-templates.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/installation-guide/FAQs.md": {
       "reason": "The FAQ answers that DevPortal 3.x has no presets.",
       "markers": [
@@ -160,6 +154,14 @@
     "customization/theme-hack": {
       "removed": "DevPortal 3.x does not read the THEME_* environment variables; the theme is set through app configuration.",
       "statedIn": "customization/custom-theme"
+    },
+    "concepts/iac-template": {
+      "removed": "DevPortal 3.x ships no templates, so the 2.x infrastructure-as-code templates are not part of 3.x.",
+      "statedIn": "concepts/software-template"
+    },
+    "concepts/environment-cluster-journey-veecode-platform": {
+      "removed": "The 2.x environment and cluster journey relied on VeeCode plugins that 3.x does not ship.",
+      "statedIn": "concepts/portal-composition"
     }
   }
 }

@@ -143,6 +143,14 @@ const config = {
             from: '/devportal/migrating-from-v1',
             to: '/devportal/v2/migrating-from-v1'
           },
+          {
+            from: '/devportal/concepts/iac-template',
+            to: '/devportal/v2/concepts/iac-template'
+          },
+          {
+            from: '/devportal/concepts/environment-cluster-journey-veecode-platform',
+            to: '/devportal/v2/concepts/environment-cluster-journey-veecode-platform'
+          },
           ...['access-and-testing', 'deployment', 'github', 'infra', 'requirements', 'vkdr-install', 'vkdr-setup'].map((page) => ({
             from: `/devportal/installation-guide/vkdr-local/${page}`,
             to: `/devportal/v2/installation-guide/vkdr-local/${page}`,
