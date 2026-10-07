@@ -49,7 +49,7 @@ The installer matches an override entry to a default plugin by registry, reposit
 
 Each plugin page in this section explains what the plugin adds, how to install or disable it, the configuration it needs, and the catalog annotations it reads. Pages for Azure DevOps, GitHub Actions, and Jenkins describe Marketplace plugins; the remaining bundled pages describe default plugins.
 
-To write your own plugin, see plugin development. To install a plugin on a Kubernetes install or on the local stack, see [Adding Plugins](./adding.md).
+To write your own plugin, see [Plugin development](./development/development.md). To install a plugin on a Kubernetes install or on the local stack, see [Adding Plugins](./adding.md).
 
 ## Plugins that are not available in 3.x
 
