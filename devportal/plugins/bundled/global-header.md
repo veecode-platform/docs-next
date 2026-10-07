@@ -24,7 +24,7 @@ This is the Red Hat Developer Hub global header package. The 3.x default plugin 
 
 - Renders the top header bar on every portal page
 - Defines the Administration sidebar group used by the About, RBAC, and other admin pages
-- Sets the sidebar order: Home, Catalog, APIs, Docs, self-service, Notifications, Tech Radar, Marketplace
+- Sets the sidebar order: Home, Catalog, APIs, Docs, self-service, Notifications, Tech Radar, Marketplace; Settings stays at the bottom.
 - Hides the upstream Learning Paths menu item, which VeeCode DevPortal does not ship
 
 ---
