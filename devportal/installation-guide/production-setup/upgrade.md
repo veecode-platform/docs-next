@@ -74,8 +74,8 @@ Stop the portal so it cannot write to the databases while you take the backup. T
 (
   set -euo pipefail
 
-  kubectl --namespace "$NAMESPACE" scale deployment/devportal-developer-hub --replicas=0
-  kubectl --namespace "$NAMESPACE" rollout status deployment/devportal-developer-hub --timeout=10m
+  kubectl --namespace "$NAMESPACE" scale "deployment/$RELEASE-developer-hub" --replicas=0
+  kubectl --namespace "$NAMESPACE" rollout status "deployment/$RELEASE-developer-hub" --timeout=10m
   kubectl --namespace "$NAMESPACE" wait --for=delete pod \
     -l app.kubernetes.io/name=developer-hub --timeout=10m
 
@@ -111,16 +111,16 @@ helm upgrade "$RELEASE" veecode/devportal \
 Wait for the portal deployment and confirm Helm reports `$CHART_TO`:
 
 ```bash
-kubectl --namespace "$NAMESPACE" rollout status deployment/devportal-developer-hub --timeout=20m
+kubectl --namespace "$NAMESPACE" rollout status "deployment/$RELEASE-developer-hub" --timeout=20m
 helm list --namespace "$NAMESPACE" --filter "^${RELEASE}$"
-image=$(kubectl --namespace "$NAMESPACE" get deployment/devportal-developer-hub \
+image=$(kubectl --namespace "$NAMESPACE" get "deployment/$RELEASE-developer-hub" \
   -o jsonpath='{.spec.template.spec.containers[?(@.name=="backstage-backend")].image}')
 printf '%s\n' "$image"
 test "$image" = "$IMAGE_TO"
 kubectl --namespace "$NAMESPACE" get pods
 ```
 
-Confirm that Helm reports `$CHART_TO` and the image check passes.
+Confirm that Helm reports `$CHART_TO` and the image check passes. The `RESTARTS` column can show 1 or 2 for the portal pod. During its first start after the chart change, the backend can fail its health checks and be restarted before it becomes ready.
 
 Check that the portal pods are ready. Sign in with the same account and confirm that the catalog location and entity, installed marketplace package, Scaffolder task, and user setting you noted before the upgrade are still present.
 
@@ -132,8 +132,8 @@ If you need to return to the earlier chart with the pre-upgrade database state, 
 (
   set -euo pipefail
 
-  kubectl --namespace "$NAMESPACE" scale deployment/devportal-developer-hub --replicas=0
-  kubectl --namespace "$NAMESPACE" rollout status deployment/devportal-developer-hub --timeout=10m
+  kubectl --namespace "$NAMESPACE" scale "deployment/$RELEASE-developer-hub" --replicas=0
+  kubectl --namespace "$NAMESPACE" rollout status "deployment/$RELEASE-developer-hub" --timeout=10m
   kubectl --namespace "$NAMESPACE" wait --for=delete pod \
     -l app.kubernetes.io/name=developer-hub --timeout=10m
   sha256sum --check "$BACKUP_DIR/SHA256SUMS"
@@ -166,16 +166,16 @@ If you need to return to the earlier chart with the pre-upgrade database state, 
 Wait for the portal and confirm Helm reports `$CHART_FROM`:
 
 ```bash
-kubectl --namespace "$NAMESPACE" rollout status deployment/devportal-developer-hub --timeout=20m
+kubectl --namespace "$NAMESPACE" rollout status "deployment/$RELEASE-developer-hub" --timeout=20m
 helm list --namespace "$NAMESPACE" --filter "^${RELEASE}$"
-image=$(kubectl --namespace "$NAMESPACE" get deployment/devportal-developer-hub \
+image=$(kubectl --namespace "$NAMESPACE" get "deployment/$RELEASE-developer-hub" \
   -o jsonpath='{.spec.template.spec.containers[?(@.name=="backstage-backend")].image}')
 printf '%s\n' "$image"
 test "$image" = "$IMAGE_FROM"
 kubectl --namespace "$NAMESPACE" get pods
 ```
 
-Confirm that Helm reports `$CHART_FROM` and the image check passes.
+Confirm that Helm reports `$CHART_FROM` and the image check passes. The `RESTARTS` column can show 1 or 2 for the portal pod. During its first start after the chart change, the backend can fail its health checks and be restarted before it becomes ready.
 
 Check that the portal pods are ready. Sign in with the same account and confirm that the catalog location and entity, installed marketplace package, Scaffolder task, and user setting match the state you recorded before the upgrade.
 
