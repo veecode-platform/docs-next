@@ -33,7 +33,7 @@ See [Support](../support.md) for the release support policy and troubleshooting 
 
 ### Why does the Marketplace look empty?
 
-The Marketplace fills after the catalog finishes loading. On a fresh local database, the first start takes about two minutes; see the [local quickstart](./docker-local/intro.md). The Marketplace lists the plugins from a catalog index image that the plugin install step pulls. If it stays empty, read that step's output, shown in the next answer. A cluster without internet access must mirror that image; see [Install without internet access](./production-setup/setup.md#install-without-internet-access).
+The Marketplace fills after the catalog finishes loading. On a fresh local database, the first start takes two to three minutes; see the [local quickstart](./docker-local/intro.md). The Marketplace lists the plugins from a catalog index image that the plugin install step pulls. If it stays empty, read that step's output, shown in the next answer. A cluster without internet access must mirror that image; see [Install without internet access](./production-setup/setup.md#install-without-internet-access).
 
 ### Why does the portal not start locally?
 
