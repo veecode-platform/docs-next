@@ -43,4 +43,4 @@ Jaeger handles distributed tracing. Trace links can be added as URL annotations 
 - Catalog annotation conventions for pointing entities to the correct Grafana dashboards, alert labels, and external trace/log URLs.
 - A unified experience: developers can access observability data from the same entity page where they view source code, CI/CD status, and docs.
 
-For plugin setup and required annotations, see [Observability Dashboard](./dashboard.md).
+For plugin setup and required annotations, see [Observability Dashboard](./dashboard.md). To scrape the portal's own Prometheus metrics, see [Portal metrics](./portal-metrics.md).
