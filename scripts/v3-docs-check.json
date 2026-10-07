@@ -29,16 +29,7 @@
     "devportal/concepts/software-template.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/customization/theme-hack.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/docs-mcp.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
-    "devportal/installation-guide/FAQs.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/installation-guide/docker-local/presets.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
-    "devportal/installation-guide/installation-guide.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
-    "devportal/installation-guide/production-setup/plan.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
-    "devportal/installation-guide/production-setup/production-setup.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
-    "devportal/installation-guide/production-setup/setup.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
-    "devportal/installation-guide/vkdr-local/access-and-testing.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
-    "devportal/installation-guide/vkdr-local/deployment.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
-    "devportal/installation-guide/vkdr-local/github.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
-    "devportal/installation-guide/vkdr-local/vkdr-setup.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/integrations/Azure/azure.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/integrations/GitHub/github-auth.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/integrations/GitHub/github-integrations.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
@@ -49,9 +40,7 @@
     "devportal/integrations/LDAP/ldap.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/integrations/integrations.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/integrations/mcp.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
-    "devportal/intro.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/migrating-from-2x.md": "The 2.x to 3.x migration guide names 2.x settings on purpose.",
-    "devportal/migrating-from-v1.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/plugins/adding.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/plugins/bundled/github-actions.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/plugins/bundled/index.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
@@ -61,5 +50,38 @@
     "devportal/plugins/kubernetes.md": "Pending its 3.x rewrite in the docs-v3 program; remove this entry when the page is rewritten.",
     "devportal/which-version.md": "Compares the DevPortal lines, so it names 2.x and V1 markers on purpose."
   },
-  "parity": {}
+  "parity": {
+    "installation-guide/vkdr-local/access-and-testing": {
+      "removed": "VKDR installs DevPortal 2.x only; its guide stays in the 2.x docs.",
+      "statedIn": "installation-guide/installation-guide"
+    },
+    "installation-guide/vkdr-local/deployment": {
+      "removed": "VKDR installs DevPortal 2.x only; its guide stays in the 2.x docs.",
+      "statedIn": "installation-guide/installation-guide"
+    },
+    "installation-guide/vkdr-local/github": {
+      "removed": "VKDR installs DevPortal 2.x only; its guide stays in the 2.x docs.",
+      "statedIn": "installation-guide/installation-guide"
+    },
+    "installation-guide/vkdr-local/infra": {
+      "removed": "VKDR installs DevPortal 2.x only; its guide stays in the 2.x docs.",
+      "statedIn": "installation-guide/installation-guide"
+    },
+    "installation-guide/vkdr-local/requirements": {
+      "removed": "VKDR installs DevPortal 2.x only; its guide stays in the 2.x docs.",
+      "statedIn": "installation-guide/installation-guide"
+    },
+    "installation-guide/vkdr-local/vkdr-install": {
+      "removed": "VKDR installs DevPortal 2.x only; its guide stays in the 2.x docs.",
+      "statedIn": "installation-guide/installation-guide"
+    },
+    "installation-guide/vkdr-local/vkdr-setup": {
+      "removed": "VKDR installs DevPortal 2.x only; its guide stays in the 2.x docs.",
+      "statedIn": "installation-guide/installation-guide"
+    },
+    "migrating-from-v1": {
+      "removed": "V1 installs move to 2.x first; that guide stays in the 2.x docs.",
+      "statedIn": "which-version"
+    }
+  }
 }
