@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 2.7
 sidebar_label: Support
 title: Support and versions
 ---
@@ -42,6 +42,6 @@ The release sheet states the versions a release was qualified on. Other versions
 
 ## Report a problem
 
-To report a bug or ask for help, see [Troubleshooting](../troubleshooting.md).
+To report a bug or ask for help, see [Troubleshooting](./troubleshooting.md).
 
 The layout of this page follows the life cycle page of Red Hat Developer Hub. No text is copied.

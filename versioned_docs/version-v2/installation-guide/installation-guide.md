@@ -15,7 +15,7 @@ import DocCard from '@site/src/components/DocCard';
 
 <div className={style.wrapper}>
 
-<DocCard title="DevPortal 3.x (Kubernetes)" link="/devportal/v3/intro" style={style}>Install DevPortal 3.x on a Kubernetes cluster with the <code>devportal</code> Helm chart.</DocCard>
+<DocCard title="DevPortal 3.x (Kubernetes)" link="/devportal/installation-guide/production-setup/setup" style={style}>Install DevPortal 3.x on a Kubernetes cluster with the <code>devportal</code> Helm chart.</DocCard>
 
 <DocCard title="Migrating from 2.x to 3.x" link="/devportal/migrating-from-2x" style={style}>Move a DevPortal 2.x install made with the <code>veecode-devportal-platform</code> chart to 3.x.</DocCard>
 

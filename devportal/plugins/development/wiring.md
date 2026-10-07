@@ -36,7 +36,7 @@ plugins:
 The `vkdr devportal install --merge` flow below uses VKDR's Helm values format (`global.dynamic.plugins`), which is **not** the V2 install/override format. It still works as a local sandbox for exercising frontend wiring, but the V2 way to test a plugin locally is to mount your `dynamic-plugins.yaml` (a flat top-level `plugins:` list) into the [Docker](../../installation-guide/docker-local/custom-plugins.md) or Kubernetes deployment and restart — see [Adding Plugins](../adding.md).
 :::
 
-Our [local DevPortal setup](../../installation-guide/vkdr-local/vkdr-setup.md) using `vkdr` can be used to validate locally the wiring of a dynamic frontend plugin.
+Our [local DevPortal setup](/devportal/v2/installation-guide/vkdr-local/vkdr-setup) using `vkdr` can be used to validate locally the wiring of a dynamic frontend plugin.
 
 ### Steps
 
@@ -45,7 +45,7 @@ What you need:
 - A local npm registry (run [Verdaccio](https://verdaccio.org/) at local port 4873)
 - Publish the frontend plugin to Verdaccio (as described [here](/devportal/plugins/development/packaging#publish-a-dynamic-plugin))
 - Obtain the SHA integrity signature of the published plugin
-- A local `vkdr` cluster with DevPortal properly installed - check the [local DevPortal setup](../../installation-guide/vkdr-local/vkdr-setup.md) guide for more info.
+- A local `vkdr` cluster with DevPortal properly installed - check the [local DevPortal setup](/devportal/v2/installation-guide/vkdr-local/vkdr-setup) guide for more info.
 
 ### Verdaccio
 
@@ -115,7 +115,7 @@ vkdr devportal install --github-token $GITHUB_TOKEN \
 :::note
 This command installs DevPortal with the extra plugin wiring. It also installs a few sample apps and configures DevPortal to rely on Verdaccio as an external npm registry.
 
-This is the **V1** `vkdr devportal install` command (Helm-values `--merge` format), used here only as a quick local sandbox to exercise frontend wiring. To install DevPortal V2, use `vkdr devportal-platform install --github-pat ...` — see [Deployment](../../installation-guide/vkdr-local/deployment.md).
+This is the **V1** `vkdr devportal install` command (Helm-values `--merge` format), used here only as a quick local sandbox to exercise frontend wiring. To install DevPortal V2, use `vkdr devportal-platform install --github-pat ...` — see [Deployment](/devportal/v2/installation-guide/vkdr-local/deployment).
 :::
 
 ### Open DevPortal (VKDR)

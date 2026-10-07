@@ -52,6 +52,8 @@ The `devportal` instance is versioned (the others are not). Current posture:
 
 **Same topic, same doc id:** a 3.x page that covers the same topic as a 2.x page keeps the 2.x doc id (its path under the docs folder), so the version selector moves between the two pages. A topic that moves or is gone in 3.x needs an entry under `parity` in `scripts/v3-docs-check.json` instead. `node scripts/check-v3-docs.mjs` (run in CI on every PR) enforces this, and also fails on a 2.x-only marker in a 3.x page unless the file is listed under `allow` with a reason; the pending entries there shrink as pages are rewritten.
 
+Release sheets live in `devportal/release-sheets/`, one `release-sheet-X-Y-Z.md` per release, with `sidebar_position` values in ascending order. The upgrade and support pages live at `installation-guide/production-setup/upgrade.md` and `support.md`.
+
 **Links:** inside a version, use **relative** `.md` links. In the 3.x tree, a bare `/devportal/...` resolves to 3.x; in the V2 tree, link to `/devportal/v2/...`; V1 self-links use `/devportal/v1/...`. Cross-instance links (`platform/`, `admin-ui/`) into DevPortal use `/devportal/...`.
 
 **Image tag:** prose references to the image stay version-agnostic (`veecode/devportal`, no tag). Concrete `veecode/devportal:X.Y.Z` tags belong only in copy-paste install commands, where `.github/workflows/update-image-tag.yml` keeps each major line on its latest stable Docker Hub release.

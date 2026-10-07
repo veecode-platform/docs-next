@@ -6,6 +6,8 @@ title: Troubleshooting
 
 This document provides a brief guide on how to report issues or bugs that you may encounter while using our products or the underlying technology stacks.
 
+For the 3.x support lifecycle and release policy, see [Support](./support.md).
+
 > **Note**: The options below are aimed at providing general solutions without a guaranteed response time (SLA). If you need customized support for your technical requirements, learn more about our [**Expert Support**](https://platform.vee.codes/support/).
 
 ## How to Report a Bug
