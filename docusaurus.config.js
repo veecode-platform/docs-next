@@ -136,6 +136,10 @@ const config = {
             to: '/devportal/v2/installation-guide/docker-local/presets'
           },
           {
+            from: '/devportal/customization/theme-hack',
+            to: '/devportal/v2/customization/theme-hack'
+          },
+          {
             from: '/devportal/migrating-from-v1',
             to: '/devportal/v2/migrating-from-v1'
           },
