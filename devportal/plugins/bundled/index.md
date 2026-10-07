@@ -24,9 +24,9 @@ DevPortal 3.x ships 20 digest-pinned OCI plugins baked into the portal image. Th
 | TechDocs frontend | Enabled | [TechDocs](../techdocs.md) |
 | TechDocs backend | Enabled | [TechDocs](../techdocs.md) |
 | TechDocs add-ons | Enabled | [TechDocs](../techdocs.md) |
-| Notifications frontend | Enabled | No page |
+| [Notifications frontend](./notifications.md) | Enabled | [Notifications](./notifications.md) |
 | Signals frontend (notifications transport) | Enabled | No page |
-| Notifications backend | Enabled | No page |
+| Notifications backend | Enabled | [Notifications](./notifications.md) |
 | Signals backend | Enabled | No page |
 | [Tech Radar frontend](./tech-radar.md) | Enabled | [Tech Radar](./tech-radar.md) |
 | Tech Radar backend | Enabled | [Tech Radar](./tech-radar.md) |

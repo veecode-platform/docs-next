@@ -6,9 +6,9 @@ title: RBAC Plugin
 
 # RBAC Plugin
 
-The RBAC plugin provides a UI for managing role-based access control policies in DevPortal. It adds a `/rbac` route under the **Admin** menu section.
+The RBAC plugin provides a page for managing role-based access control policies in DevPortal. It adds a `/rbac` route under the **Administration** menu section.
 
-**Status:** Disabled by default. Enabled via `VEECODE_PRESETS=recommended` (or by an explicit `dynamic-plugins.yaml` entry).
+**Status:** The RBAC screens ship enabled among the default plugins listed in the default plugin file (`dynamic-plugins.veecode.yaml`). The enforcing backend is built in and turns on through configuration. No plugin entry is needed.
 
 ---
 
@@ -20,44 +20,67 @@ The RBAC plugin provides a UI for managing role-based access control policies in
 
 ## What it does
 
-- Displays all roles (`role:default/admin`, `role:default/developer`, `role:default/viewer`) and their members
-- Shows permission policies per role
-- Allows admins to create, edit, and delete roles and policies through the UI
-- Reads and writes the RBAC policy CSV file at runtime
+The RBAC page shows the role table with columns **Name**, **Users and groups**, **Accessible plugins** and **Actions**, with **Create**, **Filter** and **Export CSV** controls. **Create** opens a wizard with three steps: "Enter name, description, and owner of role", "Add users and groups", and "Add permission policies". You can also manage roles through the permission REST API or a CSV policy file.
+
+An admin creates a role with `POST /api/permission/roles` and adds policies with `POST /api/permission/policies`, where the body must be a JSON array. Roles and policies created this way persist across restarts. See [How to Create a Role](../../rbac/creating-role.md) for the full steps.
 
 ---
 
 ## Access
 
-The RBAC UI is accessible at `/rbac` and appears in the sidebar under **Admin** for users with the `role:default/admin` role.
+The RBAC page is available at `/rbac` and sits under **Administration** in the sidebar. Users and groups listed in `superUsers` can open it.
 
 ---
 
-## Default roles
+## Roles
 
-| Role | Purpose |
-|---|---|
-| `role:default/admin` | Full administrative access, including RBAC management |
-| `role:default/developer` | Standard developer access |
-| `role:default/viewer` | Read-only access |
-
-The distro adds `extensions.plugin.configuration.read` and `extensions.plugin.configuration.write` permissions for the admin role via `rbac-policy-extensions.csv`.
+DevPortal 3.x ships no roles. Users and groups in `superUsers` get full access, including role and policy management. The policy list shows their admin policies under `role:default/rbac_admin`, and that role does not appear in the role list. Every other role is your own. Do not treat example `viewer` or `developer` roles from local samples as product defaults.
 
 ---
 
 ## App configuration
 
-RBAC is configured in `app-config.yaml` under `permission.rbac`:
+RBAC is configured in app configuration under `permission.rbac`. The CSV settings are optional and point at a file mounted into the container:
 
 ```yaml
 permission:
   enabled: true
   rbac:
-    policies-csv-file: /app/rbac-policy.csv
-    pluginsWithPermission:
-      - catalog
-      - scaffolder
-      - kubernetes
+    admin:
+      superUsers:
+        - name: group:default/backstage-admins
+    defaultPermissions:
+      defaultRole: role:default/viewer
+      basicPermissions:
+        - permission: catalog.entity.read
+          action: read
+        - permission: catalog-entity
+          action: read
+    policies-csv-file: /opt/app-root/src/rbac/rbac-policy.csv
+    policyFileReload: true
 ```
 
-See [Permissions and RBAC](../../rbac/permissions) for full configuration details.
+On Kubernetes, place the permission settings under `upstream.backstage.appConfig` in the chart values:
+
+```yaml
+upstream:
+  backstage:
+    appConfig:
+      permission:
+        enabled: true
+        rbac:
+          admin:
+            superUsers:
+              - name: group:default/backstage-admins
+          defaultPermissions:
+            defaultRole: role:default/viewer
+            basicPermissions:
+              - permission: catalog.entity.read
+                action: read
+              - permission: catalog-entity
+                action: read
+```
+
+The chart ships with `permission.enabled: false`. With checks off, the permission API returns 404 and no request is checked against roles. For example, a location registration that a reader's role denies with 403 when checks are on passes the permission check when they are off.
+
+See [RBAC Permissions](../../rbac/permissions.md) for the permission names.
