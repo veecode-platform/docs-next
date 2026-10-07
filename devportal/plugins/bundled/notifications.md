@@ -89,7 +89,7 @@ docker compose -f docker-compose.yml -f docker-compose.notifications.yaml up -d
 
 ### Kubernetes
 
-Add the same block under `upstream.backstage.appConfig` in your values, with the token read from the runtime Secret:
+Add the same block under `upstream.backstage.appConfig` in your values, with the token read from the runtime Secret. Helm replaces the chart's `externalAccess` list with yours instead of merging them, so repeat the chart's own `legacy` entry next to the static one. Without it, the chart's `legacy` access with `BACKEND_SECRET` is no longer configured:
 
 ```yaml
 upstream:
@@ -100,6 +100,10 @@ upstream:
       backend:
         auth:
           externalAccess:
+            - type: legacy
+              options:
+                subject: legacy-default-config
+                secret: ${BACKEND_SECRET}
             - type: static
               options:
                 token: ${NOTIFICATIONS_STATIC_TOKEN}
