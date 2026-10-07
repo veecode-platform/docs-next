@@ -147,7 +147,7 @@ kubectl -n "$NAMESPACE" get secret "$V2_SECRET" -o json \
 
 ## Step 4: Write the 3.x values
 
-The 3.x chart has no presets. What the `recommended` preset enabled in 2.x ships with the 3.x image, and the settings that the `keycloak` preset applied become plain configuration. The file below translates a 2.x install with the `recommended` and `keycloak` presets, external PostgreSQL and one catalog location. Save it as `values-v3.yaml` and replace the example addresses with your own:
+The 3.x chart has no presets. What the `recommended` preset enabled in 2.x ships with the 3.x image, and the settings that the `keycloak` preset applied become plain configuration. For the removed 2.x pages, see [Presets](/devportal/v2/concepts/presets) and [Docker local presets](/devportal/v2/installation-guide/docker-local/presets). The file below translates a 2.x install with the `recommended` and `keycloak` presets, external PostgreSQL and one catalog location. Save it as `values-v3.yaml` and replace the example addresses with your own:
 
 ```yaml title="values-v3.yaml"
 global:

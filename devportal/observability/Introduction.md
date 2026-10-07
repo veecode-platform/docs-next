@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
-sidebar_label: Introduction
-title: Introduction
+sidebar_label: Observability overview
+title: Observability overview
 ---
 
 DevPortal's observability integration allows you to surface metrics, dashboards, and alert status from your existing observability stack **directly on catalog entity pages**. DevPortal does not provision or manage Prometheus or Grafana — these tools must be deployed and operated separately. DevPortal connects to them through the Grafana plugin and catalog entity annotations.

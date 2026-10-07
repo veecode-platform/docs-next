@@ -4,6 +4,8 @@ sidebar_label: Software Templates
 title: Software Templates
 ---
 
+# Software Templates
+
 ## How to Create Components Using Templates in the Developer Portal
 
 This guide explains how to run scaffolder templates in the Developer Portal to create components or projects with a predefined structure.
