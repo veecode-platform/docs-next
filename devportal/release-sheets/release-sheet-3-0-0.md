@@ -8,25 +8,23 @@ title: DevPortal 3.0.0 release sheet
 
 Release date: 2026-10-02
 
-> Status: the new chart install values are merged in chart 0.1.27, now part of 1.0.0.
-
 ## What changed
 
 ### New features and enhancements
 
-- The product face keeps 20 entries, with 18 enabled by default; the stock Home page and legacy theme are disabled. It replaces 13 local plugin paths with digest-pinned OCI packages: TechDocs, TechDocs backend, TechDocs module addons, Notifications, Notifications backend, Signals, Signals backend, Catalog Extensions, Dynamic Home Page, RBAC, Tech Radar, Tech Radar backend, and Global Header.
+- The default plugins include 20 entries, with 18 enabled by default; the stock Home page and legacy theme are disabled. It replaces 13 local plugin paths with digest-pinned OCI packages: TechDocs, TechDocs backend, TechDocs module addons, Notifications, Notifications backend, Signals, Signals backend, Catalog Extensions, Dynamic Home Page, RBAC, Tech Radar, Tech Radar backend, and Global Header.
 
 - Marketplace 0.3.0 updates installation storage to keep one row per plugin. The Marketplace card is the `devportal-marketplace-frontend-dynamic` artifact.
 
 - The 1.52.0 catalog adds Packages for Azure Scaffolder Actions, Bitbucket Cloud Catalog Integration, Bitbucket Cloud Scaffolder Actions, Bitbucket Server Catalog Integration, and Bitbucket Server Scaffolder Actions.
 
-- Deploy configuration takes precedence over Marketplace rows, and Marketplace rows take precedence over product-face defaults.
+- Deploy configuration takes precedence over Marketplace rows, and Marketplace rows take precedence over the default plugin entries.
 
 ### Breaking changes and upgrade notes
 
 - Moving from 2.x to 3.0.0 requires a fresh database. Keep the 2.x database untouched so you can return to 2.x on it.
 
-- Overrides that name product-face plugins by their former `./dynamic-plugins/dist/...` local paths no longer match, so the face default remains enabled. Use the current full OCI reference under `global.dynamic.plugins` to disable or reconfigure the plugin. A tag or digest pins that artifact version; update or remove the override when the face changes.
+- Overrides that name default plugins by their former `./dynamic-plugins/dist/...` local paths no longer match, so the default remains enabled. Use the current full OCI reference under `global.dynamic.plugins` to disable or reconfigure the plugin. A tag or digest pins that artifact version; update or remove the override when the default plugins change.
 
 ### Deprecated and removed features
 
@@ -184,7 +182,7 @@ An exception expires on the date shown. After that date, the finding counts agai
 
 ### Plugins enabled by default
 
-The table contains one row for each OCI artifact enabled by the product face, including the Marketplace card. These artifact scans are reports and do not block the image release.
+The table contains one row for each OCI artifact enabled by default, including the Marketplace card. These artifact scans are reports and do not block the image release.
 
 | Artifact | Digest | Packages | Critical | High | Medium | Low | Unknown | Critical with a fix | Result |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
@@ -211,7 +209,7 @@ The table contains one row for each OCI artifact enabled by the product face, in
 
 - DevPortal 3.0.0 crashes on startup when it uses an SQLite database under Node.js 24.19.0. Only SQLite-backed installations are affected; PostgreSQL-backed installations are not. Work around the crash by using PostgreSQL or upgrading the image to 3.0.1 (use chart 1.0.1 for Helm installs), which fixes it.
 
-- The product face ships the Red Hat dynamic Home page entry disabled. Enabling it (for example from its Marketplace card) leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. Keep it disabled.
+- The default plugins ship the Red Hat dynamic Home page entry disabled. Enabling it (for example from its Marketplace card) leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. Keep it disabled.
 
 - An offline install must mirror the catalog index as well as the OCI plugin artifacts. In beta.10 tests, the installer fetched the index before loading cached plugin artifacts and stopped when Quay was unreachable.
 

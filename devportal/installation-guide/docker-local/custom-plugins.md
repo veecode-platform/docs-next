@@ -4,13 +4,13 @@ sidebar_label: Dynamic Plugins
 title: Configure dynamic plugins for the local stack
 ---
 
-The image contains a default plugin index and a product plugin file. The local stack mounts an operator plugin file into the install service, which merges its entries with Marketplace selections before installing plugins.
+The image contains a default plugin index and the default plugin file (`dynamic-plugins.veecode.yaml`). The local stack mounts an operator plugin file into the `install-dynamic-plugins` service, which merges its entries with Marketplace selections before installing plugins.
 
 The root `dynamic-plugins.yaml` is derived from the pinned chart. Do not edit it. Create a separate operator file for local additions.
 
 ## Add an operator plugin file
 
-Create `dynamic-plugins.local.yaml` in the `devportal-local` directory. Include the default plugin index and product plugin file:
+Create `dynamic-plugins.local.yaml` in the `devportal-local` directory. Include the default plugin index and the default plugin file:
 
 ```yaml
 includes:
@@ -19,7 +19,9 @@ includes:
 plugins: []
 ```
 
-Replace `plugins: []` with the entries you need. Use a full digest-pinned OCI package reference to enable a plugin. To disable a default plugin, use its exact reference.
+Replace `plugins: []` with the entries you need. Use a full digest-pinned OCI package reference to enable a plugin that is not a default plugin. To override a default plugin, use `oci://<registry>/<repository>:{{inherit}}!<plugin path>` with the full `!<plugin path>` suffix.
+
+The installer matches an override by registry, repository, and plugin path, not by tag or digest. A tag or digest in an override sets the plugin version, so a stale digest can pin an older artifact. An override's `pluginConfig` replaces the default plugin's entire `pluginConfig`. Include every setting you want to keep.
 
 ### Enable or disable plugins from the index
 
@@ -29,11 +31,11 @@ This example enables the regex scaffolder module and disables the Tech Radar fro
 plugins:
   - package: oci://quay.io/veecode/backstage-community-plugin-scaffolder-backend-module-regex@sha256:e0f3e1f69cb6c1bccd538f8ed80e6b16b85f2540b8866c636225903bb76a0e35
     disabled: false
-  - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar@sha256:2a5e149c22bdc02f6cf0d1ba6db0113105b284bf05b3806678cca601387f3b63!backstage-community-plugin-tech-radar
+  - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar:{{inherit}}!backstage-community-plugin-tech-radar
     disabled: true
 ```
 
-The regex module adds the `regex:replace` action. Use the full reference from `dynamic-plugins.veecode.yaml` when disabling a default plugin.
+The regex module adds the `regex:replace` action.
 
 ## Find plugin references
 

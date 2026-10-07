@@ -43,6 +43,15 @@ The `devportal` service waits for the `install-dynamic-plugins` service to finis
 docker compose logs install-dynamic-plugins
 ```
 
+### The portal does not become ready on Kubernetes
+
+Check the plugin installer log and rollout status with these commands:
+
+```sh
+kubectl -n "$NAMESPACE" logs deployment/devportal-developer-hub -c install-dynamic-plugins
+kubectl -n "$NAMESPACE" rollout status deployment/devportal-developer-hub
+```
+
 ### Why does a local configuration key have no effect?
 
 Compose loads the product configuration fragment last by default. Add your fragment after it when you need to override a product value. Configuration arrays replace earlier arrays, so include the full array in your override. See [Add configuration to the local stack](./docker-local/custom-config.md).
@@ -51,7 +60,7 @@ Compose loads the product configuration fragment last by default. Add your fragm
 
 ### Why can a user not sign in after Keycloak accepts their credentials?
 
-DevPortal signs a user in only after it imports that user from Keycloak. The first import runs 15 seconds after startup, then runs every five minutes. If the user is not in the catalog yet, wait for the next import and try again. See [Step 7: Sign in and check](./production-setup/setup.md#step-7-sign-in-and-check).
+DevPortal signs a user in only after it imports that user from Keycloak. With the values in the setup guide, the first import runs 15 seconds after startup, then runs every five minutes. If the user is not in the catalog yet, wait for the next import and try again. See [Step 7: Sign in and check](./production-setup/setup.md#step-7-sign-in-and-check).
 
 ## Presets
 
@@ -67,4 +76,4 @@ Open Marketplace after the catalog finishes loading and select a plugin to insta
 
 ### Do I need to copy the image's default plugins into chart values?
 
-No. The image ships its default plugins. Use chart values for additions or overrides. To override a default plugin, provide its exact package reference as described in [Disable a default plugin](./production-setup/setup.md#disable-a-default-plugin).
+No. The image ships its default plugins. Use chart values for additions or overrides. See [Disable a default plugin](./production-setup/setup.md#disable-a-default-plugin) for the override form.

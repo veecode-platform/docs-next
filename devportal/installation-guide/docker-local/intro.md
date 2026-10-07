@@ -26,7 +26,7 @@ DEVPORTAL_PORT=8080 docker compose up
 
 ## What you get
 
-The local stack provides the same DevPortal interface as a Kubernetes installation:
+The local stack provides the same portal and Marketplace as the Kubernetes install described in [production-setup/setup.md](../production-setup/setup.md), backed by PostgreSQL:
 
 - The VeeCode sidebar includes Home, Catalog, APIs, Docs, Self-service, Notifications, Tech Radar, and Marketplace.
 - TechDocs, Notifications/Signals, and Tech Radar are wired up.

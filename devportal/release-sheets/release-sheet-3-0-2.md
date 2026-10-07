@@ -159,7 +159,7 @@ An exception expires on the date shown. After that date, the finding counts agai
 
 ### Plugins enabled by default
 
-The table contains one row for each OCI artifact enabled by the product face, including the Marketplace card. These artifact scans are reports and do not block the image release.
+The table contains one row for each OCI artifact enabled by default, including the Marketplace card. These artifact scans are reports and do not block the image release.
 
 | Artifact | Digest | Packages | Critical | High | Medium | Low | Unknown | Critical with a fix | Result |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
@@ -188,6 +188,6 @@ The table contains one row for each OCI artifact enabled by the product face, in
 
 The 3.0.0 release sheet also lists the following limitations. The 3.0.1 and 3.0.2 changes do not address them.
 
-- The product face ships the Red Hat dynamic Home page entry disabled. Enabling it (for example from its Marketplace card) leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. Keep it disabled.
+- The default plugins ship the Red Hat dynamic Home page entry disabled. Enabling it (for example from its Marketplace card) leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. Keep it disabled.
 - An offline install must mirror the catalog index as well as the OCI plugin artifacts. In beta.10 tests, the installer fetched the index before loading cached plugin artifacts and stopped when Quay was unreachable.
 - In beta.10 measurements, median readiness took 67.237 seconds with an empty plugin volume and 19.514 seconds with a populated volume. These are beta.10 measurements, not measurements of the final 3.0.2 candidate.

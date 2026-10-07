@@ -67,7 +67,7 @@ openssl req -x509 -newkey rsa:2048 -nodes -days 365 \
 kubectl -n "$NAMESPACE" create secret tls devportal-tls --cert=tls.crt --key=tls.key
 ```
 
-The certificate is self-signed, so browsers warn about it. With a certificate from your CA, create the same `devportal-tls` Secret from the certificate and key files you received. The certificate must cover both hostnames, or you must create a second Secret for the identity provider's Ingress. Keep `tls.key` private.
+The certificate is self-signed, so browsers warn about it. With a certificate from your CA, create the same `devportal-tls` Secret from the certificate and key files you received. The certificate must cover both hostnames. Keep `tls.key` private.
 
 ## Step 3: Start PostgreSQL
 
@@ -462,7 +462,7 @@ The portal stores the installation in its PostgreSQL database, in the `marketpla
 
 ## Evaluate without Ingress or an identity provider
 
-For a quick look on a laptop you can skip Ingress, TLS and the identity provider and keep guest sign-in. This is for evaluation only: guest sign-in signs everyone in as `ADMIN` (`user:default/admin`). Use a cluster that does not hold the installation above. The chart creates a ClusterRole named after the release, so a second release called `devportal` in another namespace fails (set `kubernetesPlugin.rbac.namespaceQualifiedName: true` when releases with the same name must share a cluster).
+For a quick look on a laptop you can skip Ingress, TLS and the identity provider and keep guest sign-in. This is for evaluation only: guest sign-in signs everyone in as `ADMIN` (`user:default/admin`). Use a cluster that does not hold the installation above. The chart creates a cluster-scoped ClusterRole named `<release>-developer-hub-kubernetes-plugin`, for example `devportal-developer-hub-kubernetes-plugin`. The name does not include the namespace, so set `kubernetesPlugin.rbac.namespaceQualifiedName: true` when releases with the same name must share a cluster.
 
 Set the variables and create the namespace:
 
@@ -521,15 +521,19 @@ The sign-in page offers **Guest** and a GitHub sign-in that needs an OAuth app t
 
 ## Disable a default plugin
 
-The default plugins ship in the DevPortal image's face file `dynamic-plugins.veecode.yaml`, not in the chart's `values.yaml`. When the same plugin is configured in several places, deploy configuration (chart values or operator-supplied app-config) wins over a marketplace row, which wins over the face. An entry with a new package reference adds a plugin; an entry with the exact package reference of a face plugin overrides just that entry. To disable a default plugin, add an entry with its exact (OCI, digest-pinned) package reference and `disabled: true`. The chart's [product face guide](https://github.com/veecode-platform/devportal-chart/blob/main/docs/product-face-overrides.md) lists every reference. This example disables Tech Radar:
+The default plugins ship in the DevPortal image's default plugin file (`dynamic-plugins.veecode.yaml`), not in the chart's `values.yaml`. When the same plugin is configured in several places, deploy configuration (chart values or operator-supplied app-config) wins over a Marketplace row, which wins over the default.
+
+The installer matches an override by registry, repository, and plugin path, not by tag or digest. Include the full `!<plugin path>` suffix. A tag or digest in an override sets the plugin version, so a stale digest can pin an older artifact. An override's `pluginConfig` replaces the default plugin's entire `pluginConfig`. Include every setting you want to keep.
+
+This example disables Tech Radar:
 
 ```yaml
 global:
   dynamic:
     plugins:
-      - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar@sha256:2a5e149c22bdc02f6cf0d1ba6db0113105b284bf05b3806678cca601387f3b63!backstage-community-plugin-tech-radar
+      - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar:{{ "{{inherit}}" }}!backstage-community-plugin-tech-radar
         disabled: true
-      - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar-backend@sha256:71f7f6c4816156120e693bf3c2ff29ee35c3725406c996c7de58607800df3a99!backstage-community-plugin-tech-radar-backend
+      - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar-backend:{{ "{{inherit}}" }}!backstage-community-plugin-tech-radar-backend
         disabled: true
 ```
 
@@ -540,9 +544,9 @@ cat > values-tech-radar-disabled.yaml <<'EOF'
 global:
   dynamic:
     plugins:
-      - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar@sha256:2a5e149c22bdc02f6cf0d1ba6db0113105b284bf05b3806678cca601387f3b63!backstage-community-plugin-tech-radar
+      - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar:{{ "{{inherit}}" }}!backstage-community-plugin-tech-radar
         disabled: true
-      - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar-backend@sha256:71f7f6c4816156120e693bf3c2ff29ee35c3725406c996c7de58607800df3a99!backstage-community-plugin-tech-radar-backend
+      - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar-backend:{{ "{{inherit}}" }}!backstage-community-plugin-tech-radar-backend
         disabled: true
 EOF
 yq -i '.global.dynamic.plugins += load("values-tech-radar-disabled.yaml").global.dynamic.plugins' values.yaml
@@ -557,12 +561,12 @@ After the rollout, sign in again and confirm Tech Radar is absent from **Install
 
 ## What ships by default
 
-The image's face file `dynamic-plugins.veecode.yaml` runs 20 digest-pinned OCI plugins without an entry in your values: 18 enabled by default and 2 shipped disabled (the Red Hat dynamic Home page and the theme). The **Installed packages** tab lists them, together with the Keycloak module that `values.yaml` adds, and any marketplace rows you install:
+The image's default plugin file (`dynamic-plugins.veecode.yaml`) runs 20 digest-pinned OCI plugins without an entry in your values: 18 enabled by default and 2 shipped disabled (the Red Hat dynamic Home page and the theme). The **Installed packages** tab lists them, together with the Keycloak module that `values.yaml` adds, and any marketplace rows you install:
 
 - The VeeCode home page, the global header and an About page.
 - The Marketplace, which is the **Extensions** page.
 - TechDocs, Notifications, Signals and Tech Radar.
-- The RBAC screens, without the RBAC backend. Permission checks are off: the portal reads `permission.enabled` from the `PERMISSION_ENABLED` variable and the chart does not set it. Every signed-in user can install plugins from the Marketplace.
+- The RBAC screens. The RBAC backend is part of the image, but permission checks are off because the chart sets `permission.enabled: false`. Every signed-in user can install plugins from the Marketplace.
 
 The chart also creates a read-only ClusterRole and binding for the Kubernetes plugin (`kubernetesPlugin.rbac.enabled`, on by default). The image does not load the Kubernetes plugin by default. When releases with the same name share a cluster across namespaces, set `kubernetesPlugin.rbac.namespaceQualifiedName: true` so the cluster-scoped names include the release namespace.
 
@@ -588,8 +592,8 @@ test "$(yq -r '.upstream.backstage.image.tag' chart-values.yaml)" = "$PORTAL_IMA
 docker run --rm --entrypoint cat "$PORTAL_IMAGE" \
   /opt/app-root/src/dynamic-plugins.veecode.yaml > dynamic-plugins.veecode.yaml
 yq -r '.plugins[].package | select(test("^oci://")) | sub("!.*$"; "")' \
-  dynamic-plugins.veecode.yaml > face-plugin-refs.txt
-test -s face-plugin-refs.txt
+  dynamic-plugins.veecode.yaml > default-plugin-refs.txt
+test -s default-plugin-refs.txt
 
 curl -fsSLo mirror-plugins.sh \
   https://raw.githubusercontent.com/redhat-developer/rhdh-operator/refs/heads/release-1.10/.rhdh/scripts/mirror-plugins.sh
@@ -599,7 +603,7 @@ skopeo copy --all "docker://$CATALOG_INDEX_SOURCE" \
   "docker://$CATALOG_INDEX_MIRROR_REF"
 
 bash mirror-plugins.sh \
-  --plugin-list ./face-plugin-refs.txt \
+  --plugin-list ./default-plugin-refs.txt \
   --to-registry "$MIRROR_REGISTRY"
 
 mkdir -p offline-bundle
@@ -642,9 +646,9 @@ export KEYCLOAK_IMAGE="$MIRROR_REGISTRY/keycloak/keycloak:26.3.3"
 
 Copy the `offline-bundle` directory, `values-mirror.yaml`, and `registries.conf` (created below) to the machine that reaches the cluster. There, set `OFFLINE_BUNDLE` to the bundle directory path, `MIRROR_REGISTRY` to the same registry name, and export the two image variables above before Step 1.
 
-The image contains the `dynamic-plugins.veecode.yaml` product-face file. The commands extract its OCI references, remove the `!subpath` suffix, and give the image references to RHDH's script with `--plugin-list`. Copy the chart's catalog index separately with Skopeo; the RHDH script reads Red Hat's index format. The script writes `rhdh-plugin-mirroring-summary.txt` with the plugin source-to-mirror mappings. If your values override the image or `global.catalogIndex.image`, use those references instead of the chart defaults above.
+The image contains the default plugin file (`dynamic-plugins.veecode.yaml`). The commands extract its OCI references, remove the `!subpath` suffix, and give the image references to RHDH's script with `--plugin-list`. Copy the chart's catalog index separately with Skopeo; the RHDH script reads Red Hat's index format. The script writes `rhdh-plugin-mirroring-summary.txt` with the plugin source-to-mirror mappings. If your values override the image or `global.catalogIndex.image`, use those references instead of the chart defaults above.
 
-This procedure assumes the connected machine can reach both Quay and the mirror registry. For a fully disconnected transfer, use RHDH's documented `--to-dir` and `--from-dir` flow for the face plugin list, and copy the chart index separately with Skopeo.
+This procedure assumes the connected machine can reach both Quay and the mirror registry. For a fully disconnected transfer, use RHDH's documented `--to-dir` and `--from-dir` flow for the default plugin list, and copy the chart index separately with Skopeo.
 
 Create a ConfigMap with the registry mapping. Set `MIRROR_REGISTRY` to a registry name that the cluster can resolve and reach.
 
@@ -680,7 +684,7 @@ upstream:
 
 This snippet shows only the additions. Helm replaces list values, so preserve every existing volume, volume mount, and field of the `install-dynamic-plugins` entry for the chart version you use. The full defaults are in `helm show values "$CHART_REF" "${CHART_VERSION_ARGS[@]}"` once Step 6 sets those variables, or `helm show values veecode/devportal --version "$CHART_VERSION"` on a connected machine. RHDH describes the same list behavior and mount path in its [Helm mirror procedure](https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.10/html-single/installing_red_hat_developer_hub_in_an_air-gapped_environment/index).
 
-With `values-mirror.yaml` passed to Helm, the portal image comes from the mirror registry. With the `registries.conf` mapping mounted, the installer keeps the chart's catalog-index reference and pulls it and the face plugins from the mirror. The chart archive comes from the `offline-bundle` directory. Nothing is pulled from a public registry or repository. Run the Helm install command in Step 6, then check the installer logs and wait for the portal to become ready:
+With `values-mirror.yaml` passed to Helm, the portal image comes from the mirror registry. With the `registries.conf` mapping mounted, the installer keeps the chart's catalog-index reference and pulls it and the default plugins from the mirror. The chart archive comes from the `offline-bundle` directory. Nothing is pulled from a public registry or repository. Run the Helm install command in Step 6, then check the installer logs and wait for the portal to become ready:
 
 ```bash
 kubectl -n "$NAMESPACE" logs deployment/devportal-developer-hub -c install-dynamic-plugins

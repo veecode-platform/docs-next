@@ -1,6 +1,6 @@
 ---
 sidebar_position: 9
-sidebar-label: Troubleshooting
+sidebar_label: Troubleshooting
 title: Troubleshooting 
 ---
 
