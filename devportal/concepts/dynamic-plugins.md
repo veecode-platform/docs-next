@@ -72,7 +72,7 @@ A plugin is enabled if **any** selection surface includes it. There are three:
 Presets enable the plugins they declare. Each preset entry is self-contained — it
 carries `package:`, `disabled: false`, and the full `pluginConfig:` (mount
 points, dynamic routes, RBAC scopes, menu items) inline. No merge with
-`dynamic-plugins.default.yaml` is needed at runtime. See [Presets](./presets.md).
+`dynamic-plugins.default.yaml` is needed at runtime. See [Presets](/devportal/v2/concepts/presets).
 
 ### 2. Operator override — mounted `dynamic-plugins.yaml`
 
@@ -216,7 +216,7 @@ Three modes are supported by design:
 
 ## Related
 
-- [Presets](./presets.md) — the recommended way to enable plugins.
+- [Presets](/devportal/v2/concepts/presets) — the recommended way to enable plugins.
 - [Configuration Hierarchy](./configuration-hierarchy.md) — how
   `app-config.dynamic-plugins.yaml` fits the config merge order.
 - [Adding Plugins](/devportal/plugins/adding) — the selection surfaces in

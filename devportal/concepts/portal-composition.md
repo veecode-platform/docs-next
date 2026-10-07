@@ -20,7 +20,7 @@ Every plugin activates across three layers. All three must be in place before a 
 
 This controls which plugins are present at all. In V2 there are two ways to load a plugin, and a plugin is loaded if **either** path selects it:
 
-- **A preset** (recommended). Setting `VEECODE_PRESETS=...,kubernetes` flips the Kubernetes plugin from `disabled: true` to `disabled: false` and supplies its baseline `appConfig`. This is the curated fast path. See [Presets](./presets.md).
+- **A preset** (recommended). Setting `VEECODE_PRESETS=...,kubernetes` flips the Kubernetes plugin from `disabled: true` to `disabled: false` and supplies its baseline `appConfig`. This is the curated fast path. See [Presets](/devportal/v2/concepts/presets).
 - **An operator override.** Mount a `dynamic-plugins.yaml` with a top-level `plugins:` list to enable a bundled plugin or pull an external OCI/npm one that no preset covers.
 
 ```yaml
@@ -142,7 +142,7 @@ This isn't a checklist you complete once. It is a deliberate sequence.
 
 - Catalog populated — services, APIs, and resources registered via `catalog-info.yaml`
 - Software templates defined — teams can create new services following the organization's Golden Paths
-- Authentication and SCM configured via `VEECODE_PRESETS` — an identity preset (`github-auth`, `gitlab`, `keycloak`, …) sets the sign-in provider, and an SCM preset (`github`, `gitlab`, `azure`) wires catalog discovery and repository integration (see [Presets](./presets.md))
+- Authentication and SCM configured via `VEECODE_PRESETS` — an identity preset (`github-auth`, `gitlab`, `keycloak`, …) sets the sign-in provider, and an SCM preset (`github`, `gitlab`, `azure`) wires catalog discovery and repository integration (see [Presets](/devportal/v2/concepts/presets))
 
 The portal knows what exists. Engineers can create new services from opinionated templates. Value: reduced onboarding time and consistent project structure.
 
@@ -236,7 +236,7 @@ For plugins not in the bundled set, see [Finding Plugins](/devportal/plugins/fin
 
 ## References
 
-- [Presets](./presets.md) — how `VEECODE_PRESETS` sets Day-0 auth, SCM, and the curated plugin set
+- [Presets](/devportal/v2/concepts/presets) — how `VEECODE_PRESETS` sets Day-0 auth, SCM, and the curated plugin set
 - [Dynamic Plugins](./dynamic-plugins.md) — the load layer in depth: catalog, selection surfaces, OCI references
 - [The Catalog](./catalog.md) — entity kinds, ownership, and how `catalog-info.yaml` is processed
 - [Adding Plugins](/devportal/plugins/adding) — OCI and npm download configuration for plugins no preset covers

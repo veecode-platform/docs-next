@@ -128,6 +128,14 @@ const config = {
           },
           // Pages that exist only in the 2.x docs keep their old root URLs working.
           {
+            from: '/devportal/concepts/presets',
+            to: '/devportal/v2/concepts/presets'
+          },
+          {
+            from: '/devportal/installation-guide/docker-local/presets',
+            to: '/devportal/v2/installation-guide/docker-local/presets'
+          },
+          {
             from: '/devportal/migrating-from-v1',
             to: '/devportal/v2/migrating-from-v1'
           },

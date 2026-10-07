@@ -14,7 +14,51 @@ const root = process.cwd();
 const v3Dir = path.join(root, "devportal");
 const v2Dir = path.join(root, "versioned_docs", "version-v2");
 const config = JSON.parse(fs.readFileSync(path.join(root, "scripts", "v3-docs-check.json"), "utf8"));
-const markers = config.markers.map((m) => ({ name: m.name, re: new RegExp(m.pattern) }));
+const problems = [];
+const knownMarkerNames = new Set(config.markers.map((m) => m.name));
+for (const m of config.markers) {
+  if (/[gy]/.test(m.flags || "")) {
+    problems.push(`marker "${m.name}": flags "${m.flags}" must not contain "g" or "y" (stateful lastIndex leaks between files)`);
+  }
+}
+const safeFlags = (flags) => (flags || "").replace(/[gy]/g, "");
+const markers = config.markers.map((m) => ({ name: m.name, re: new RegExp(m.pattern, safeFlags(m.flags)) }));
+
+function isValidAllowEntry(entry) {
+  if (typeof entry === "string") return entry.length > 0;
+  if (entry && typeof entry === "object" && !Array.isArray(entry)) {
+    return (
+      typeof entry.reason === "string" &&
+      entry.reason.length > 0 &&
+      Array.isArray(entry.markers) &&
+      entry.markers.length > 0 &&
+      entry.markers.every((n) => typeof n === "string" && n.length > 0)
+    );
+  }
+  return false;
+}
+
+function allowedMarkers(entry) {
+  if (typeof entry === "string" && entry.length > 0) return markers.map((m) => m.name);
+  if (isValidAllowEntry(entry)) return entry.markers;
+  return [];
+}
+
+for (const [allowedPath, entry] of Object.entries(config.allow || {})) {
+  if (!isValidAllowEntry(entry)) {
+    problems.push(
+      `${allowedPath}: invalid "allow" entry in scripts/v3-docs-check.json; must be a non-empty string or an object with a non-empty string "reason" and a non-empty "markers" array`
+    );
+    continue;
+  }
+  if (typeof entry === "object") {
+    for (const name of entry.markers) {
+      if (!knownMarkerNames.has(name)) {
+        problems.push(`${allowedPath}: unknown marker "${name}" in "allow"; not defined in "markers"`);
+      }
+    }
+  }
+}
 
 function docs(dir) {
   const found = [];
@@ -28,16 +72,17 @@ function docs(dir) {
 
 const docId = (file, base) => path.relative(base, file).replace(/\.mdx?$/, "");
 const repoPath = (file) => path.relative(root, file);
-const problems = [];
 
 for (const file of docs(v3Dir)) {
   const text = fs.readFileSync(file, "utf8");
-  const hits = markers.filter((m) => m.re.test(text)).map((m) => m.name);
+  const hits = markers.filter((m) => { m.re.lastIndex = 0; return m.re.test(text); }).map((m) => m.name);
   const allowed = config.allow[repoPath(file)];
-  if (hits.length && !allowed) {
-    problems.push(`${repoPath(file)}: 2.x-only marker (${hits.join(", ")}) in a 3.x page`);
+  const exempted = allowedMarkers(allowed);
+  const unexempted = hits.filter((h) => !exempted.includes(h));
+  if (unexempted.length) {
+    problems.push(`${repoPath(file)}: 2.x-only marker (${unexempted.join(", ")}) in a 3.x page`);
   }
-  if (!hits.length && allowed) {
+  if (allowed !== undefined && isValidAllowEntry(allowed) && !hits.some((h) => exempted.includes(h))) {
     problems.push(`${repoPath(file)}: no 2.x marker left; remove it from "allow" in scripts/v3-docs-check.json`);
   }
 }
