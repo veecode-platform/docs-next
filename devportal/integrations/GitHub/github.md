@@ -14,6 +14,6 @@ GitHub connects to DevPortal 3.x in two independent parts. Sign-in lets users en
 
 ## Which combinations to use
 
-- Full GitHub setup: configure sign-in ([Sign in with GitHub](./github-auth.md)) and backend access ([GitHub backend integrations](./github-integrations.md)). One token with repository and organization read access covers both.
+- Full GitHub setup: configure sign-in ([Sign in with GitHub](./github-auth.md)) and backend access ([GitHub backend integrations](./github-integrations.md)). Sign-in uses a GitHub OAuth app; backend access uses a token or a GitHub App.
 - GitHub repositories with another identity: configure only backend access, and sign in through a different provider such as [Keycloak](../Keycloak/keycloak-auth.md). No GitHub OAuth App is needed.
 - GitHub identity without GitHub repositories: configure only sign-in and organization sync. No repository token is needed.

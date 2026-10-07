@@ -6,7 +6,7 @@ title: RBAC Permissions
 
 Role-Based Access Control (RBAC) is a method of managing access to system resources based on user roles. Instead of assigning permissions directly to individual users, roles are created with predefined permissions, and users are assigned to these roles. This approach simplifies permission management and enhances security by reducing the risk of unauthorized access.
 
-Each plugin defines its own permissions. The tables below list the permissions in the default install, grouped by plugin. Each entry shows the permission name, the policy action, and the resource type.
+Each plugin defines its own permissions. The tables below list the permissions in the default install, grouped by plugin. Each entry shows the permission name, the policy action, and the resource type. A dash means the permission has no resource type.
 
 A policy can also name a resource type, such as `catalog-entity`, to cover every permission of that type. The documented `basicPermissions` example uses `catalog-entity`.
 
@@ -19,7 +19,7 @@ These permissions control who can read and change roles and policies. Users and 
 | Permission | Policy action | Resource type | What it allows |
 | --- | --- | --- | --- |
 | `policy.entity.read` | `read` | `policy-entity` | Read roles and policies |
-| `policy.entity.create` | `create` | none | Create roles and policies |
+| `policy.entity.create` | `create` | — | Create roles and policies |
 | `policy.entity.delete` | `delete` | `policy-entity` | Delete roles and policies |
 | `policy.entity.update` | `update` | `policy-entity` | Update roles and policies |
 
@@ -33,9 +33,9 @@ These permissions control who can read and change roles and policies. Users and 
 | `scaffolder.template.step.read` | `read` | `scaffolder-template` | Read template steps |
 | `scaffolder.action.execute` | `use` | `scaffolder-action` | Run scaffolder actions |
 | `scaffolder.task.cancel` | `use` | `scaffolder-task` | Cancel scaffolder tasks |
-| `scaffolder.task.create` | `create` | none | Create scaffolder tasks |
+| `scaffolder.task.create` | `create` | — | Create scaffolder tasks |
 | `scaffolder.task.read` | `read` | `scaffolder-task` | Read scaffolder tasks |
-| `scaffolder.template.management` | `use` | none | Manage scaffolder templates |
+| `scaffolder.template.management` | `use` | — | Manage scaffolder templates |
 
 ---
 
@@ -44,14 +44,14 @@ These permissions control who can read and change roles and policies. Users and 
 | Permission | Policy action | Resource type | What it allows |
 | --- | --- | --- | --- |
 | `catalog.entity.read` | `read` | `catalog-entity` | Read catalog entities |
-| `catalog.entity.create` | `create` | none | Create catalog entities |
+| `catalog.entity.create` | `create` | — | Create catalog entities |
 | `catalog.entity.delete` | `delete` | `catalog-entity` | Delete catalog entities |
 | `catalog.entity.refresh` | `update` | `catalog-entity` | Refresh catalog entities |
-| `catalog.entity.validate` | `use` | none | Validate catalog entities |
-| `catalog.location.read` | `read` | none | Read catalog locations |
-| `catalog.location.create` | `create` | none | Create catalog locations |
-| `catalog.location.delete` | `delete` | none | Delete catalog locations |
-| `catalog.location.analyze` | `use` | none | Analyze catalog locations |
+| `catalog.entity.validate` | `use` | — | Validate catalog entities |
+| `catalog.location.read` | `read` | — | Read catalog locations |
+| `catalog.location.create` | `create` | — | Create catalog locations |
+| `catalog.location.delete` | `delete` | — | Delete catalog locations |
+| `catalog.location.analyze` | `use` | — | Analyze catalog locations |
 
 The Notifications plugin registers no permissions.
 

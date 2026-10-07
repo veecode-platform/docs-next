@@ -21,7 +21,7 @@ The 3.x image includes these sign-in providers, among others:
 
 There is no LDAP sign-in provider in the 3.x image. To use an LDAP directory, connect it through an OIDC provider such as Keycloak ([LDAP organization sync](./LDAP/ldap.md)).
 
-Each sign-in page shows the application configuration for the local stack and for the Helm chart, with placeholder credentials a verifier can replace.
+Each sign-in page shows the application configuration for the local stack and for the Helm chart, with placeholder credentials that you replace with your own.
 
 ## Organization sync and catalog discovery
 

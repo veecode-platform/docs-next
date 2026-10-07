@@ -134,8 +134,4 @@ curl http://localhost:7007/api/notifications/notifications \
   -H "Authorization: Bearer <user token>"
 ```
 
-The response reports the count and the notifications:
-
-```json
-{"totalCount": 1, "notifications": [{...}]}
-```
+The response is a JSON object with a `totalCount` field and a `notifications` array.

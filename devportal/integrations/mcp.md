@@ -53,10 +53,7 @@ Recreate the stack after changing the operator file so the installer picks the e
 
 ## Connect a client
 
-The MCP server exposes two endpoints on the portal host:
-
-- Streamable HTTP: `http(s)://<portal-host>/api/mcp-actions/v1`
-- SSE (legacy): `http(s)://<portal-host>/api/mcp-actions/v1/sse`
+The MCP server uses streamable HTTP at `http(s)://<portal-host>/api/mcp-actions/v1`.
 
 Check your MCP client's documentation for which endpoint style it needs. Authenticate with the static token in the `Authorization` header.
 
@@ -75,7 +72,6 @@ Example client configuration, with `<portal-host>` replaced by your portal addre
 }
 ```
 
-For a client that needs the legacy SSE endpoint, point it at `https://<portal-host>/api/mcp-actions/v1/sse` with the same header.
 
 ## Troubleshooting
 
