@@ -115,7 +115,7 @@ plugins:
             - scaffolder
 ```
 
-See [Adding Plugins](../plugins/adding.md#via-yaml-override) for how operator-mounted overrides interact with preset fragments. Not available on SaaS, where the `mcp` preset's default toolset is fixed.
+See [Adding Plugins](../plugins/adding.md#on-the-local-stack-the-operator-plugin-file) for how operator-mounted overrides interact with preset fragments. Not available on SaaS, where the `mcp` preset's default toolset is fixed.
 :::
 
 ### OAuth / DCR configuration (self-hosted)

@@ -65,7 +65,7 @@ plugins:
 Restart DevPortal after saving.
 
 :::note
-The `bs_<backstage-version>` segment must match your DevPortal instance. If your DevPortal is deployed via the `devportal-chart` Helm chart (0.1.21+), use `oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:{{inherit}}` instead (no `!` needed there) — see [Adding Plugins](./adding.md#oci-artifact-format) for the full distinction.
+The `bs_<backstage-version>` segment must match your DevPortal instance. If your DevPortal is deployed via the `devportal-chart` Helm chart (0.1.21+), use `oci://quay.io/veecode/immobiliarelabs-backstage-plugin-gitlab:{{inherit}}` instead (no `!` needed there) — see [Adding Plugins](./adding.md#find-the-package-reference) for the full distinction.
 :::
 
 ---
