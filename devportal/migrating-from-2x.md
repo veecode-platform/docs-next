@@ -19,12 +19,8 @@ The migration goes to a **fresh database**. Nothing is converted in place:
 This guide's procedure was followed end to end, command by command, with:
 
 - DevPortal 2.x: chart `veecode-devportal-platform` 0.5.2 (DevPortal 2.2.3), external PostgreSQL 16, the `recommended` and `keycloak` presets, Keycloak 26, one Ingress.
-- DevPortal 3.x: chart `devportal` 1.0.0-rc.1, which installs image 3.0.0-rc.2.
-- Kubernetes: a single-node k3s 1.31 cluster. The 3.x portal was reached through `kubectl port-forward`.
-
-The default image digest configured in chart 1.0.0 matches the digest used by the candidate run. The chart templates are unchanged between chart tags 1.0.0-rc.1 and 1.0.0. The release chart changes the chart version, app version, default image tag, and generated README and schema metadata. The complete procedure has not been rerun with chart 1.0.0.
-
-Step 5 targets chart 1.0.3 and image 3.0.3. The tested-with record above does not cover that release target.
+- DevPortal 3.x: chart `devportal` 1.0.3, which installs image 3.0.3.
+- Kubernetes: a single-node k3s v1.31.5+k3s1 cluster. The 3.x portal was reached through `kubectl port-forward`.
 
 Two parts were not run:
 
@@ -232,7 +228,7 @@ Backstage does not keep a plugin's data in the database named by `PG_DATABASE`. 
 
 The Keycloak client of your 2.x install must list the address of the 3.x portal among its redirect URIs. If the address is the same as in 2.x, nothing changes.
 
-Add the chart repository and install the release. The first start pulls the image and installs every default plugin. It took about 9 minutes on the test host, so the command waits for up to 20 minutes:
+Add the chart repository and install the release. The first start pulls the image and installs every default plugin. It took about 10 minutes on the test host, so the command waits for up to 20 minutes:
 
 ```bash
 helm repo add veecode https://veecode-platform.github.io/next-charts
@@ -295,7 +291,7 @@ kubectl -n "$NAMESPACE" exec -i pg-client -- sh -s < fingerprint.sh | diff v2-fi
 
 For a SQLite 2.x install, skip the fingerprint comparison. There are no PostgreSQL 2.x databases to compare, and the SQLite data was not copied.
 
-**Sign-in.** Open `http://localhost:7007`, choose **Sign In** on the OIDC card, and sign in through Keycloak as a user who signed in before. Repeat with a second user. If the sign-in fails right after the first start, wait a minute and try again. In the test the first attempt failed and the next one, about 40 seconds later, worked, because the catalog needs a short time to import the users from Keycloak.
+**Sign-in.** Open `http://localhost:7007`, choose **Sign In** on the OIDC card, and sign in through Keycloak as a user who signed in before. Repeat with a second user. If the sign-in fails right after the first start, wait a minute and try again.
 
 **Users and groups.** They appear in the catalog under Kind: User and Kind: Group, read again from Keycloak.
 
@@ -311,15 +307,20 @@ The command must print `404`.
 
 ## Step 7: Install the marketplace plugins and locations again
 
-Enable again each plugin listed in `marketplace-installs-2x.yaml`: open the **Marketplace** in the portal, find the plugin, and choose **Enable**. Leave the two entries that ship disabled with 3.x as they are, the Red Hat dynamic Home page and the theme: enabling the Home entry leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. The 3.x chart installs plugins when the pod starts, so restart the deployment. Then check that the file 3.x regenerates from its database lists the plugins:
+Install again each plugin listed in `marketplace-installs-2x.yaml`: choose **Marketplace** in the sidebar, which opens the **Extensions** page at `/marketplace`, search for the plugin on the **Catalog** tab, and choose **Install**. Leave the two entries that ship disabled with 3.x as they are, the Red Hat dynamic Home page and the theme: enabling the Home entry leaves the portal's pages empty, because it registers the same frontend API as the DevPortal home page. The 3.x chart installs plugins when the pod starts, so restart the deployment:
 
 ```bash
 kubectl -n "$NAMESPACE" rollout restart "deploy/$V3_RELEASE-developer-hub"
 kubectl -n "$NAMESPACE" rollout status "deploy/$V3_RELEASE-developer-hub" --timeout 20m
+```
+
+The restart took about 14 minutes on the test host. The `rollout status` command can stop early with `exceeded its progress deadline` while the new pod still installs plugins. Wait until the new pod shows `1/1` in `kubectl -n "$NAMESPACE" get pods`. Then check that the file 3.x regenerates from its database lists the plugins:
+
+```bash
 kubectl -n "$NAMESPACE" exec "deploy/$V3_RELEASE-developer-hub" -c backstage-backend -- cat /devportal-data/extensions-install.yaml | grep 'package:'
 ```
 
-The package references differ from the 2.x file, because 3.x names each plugin image by its digest. Each plugin you listed in step 1 appears again. The restart takes several minutes, and it ends the port-forward of step 6, so open it again afterwards.
+The package references differ from the 2.x file, because 3.x names each plugin image by its digest. Each plugin you listed in step 1 appears again. The restart also ends the port-forward of step 6, so open it again afterwards.
 
 Register again the locations you wrote down in step 1: open **Self-service**, choose **Import an existing Git repository**, enter the target and follow the wizard.
 
