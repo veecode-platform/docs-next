@@ -51,6 +51,8 @@ The frontend entry mounts `EntityKubernetesContent` as the Kubernetes tab. The t
 
 Add the same two package references under `global.dynamic.plugins` in your chart values. Keep the chart's default `kubernetesPlugin.rbac.enabled: true` so the chart service account keeps its read-only access, unless your cluster administrator provides equivalent access another way. When releases with the same name share a cluster across namespaces, set `kubernetesPlugin.rbac.namespaceQualifiedName: true`.
 
+The ClusterRole the chart creates lets the service account read pods, services, limit ranges, resource quotas, deployments, replica sets, stateful sets, daemon sets, jobs, cron jobs, ingresses and horizontal pod autoscalers. It does not cover config maps, so the Kubernetes tab shows a 403 error for config maps next to the workloads it lists.
+
 ---
 
 ## App configuration
@@ -73,7 +75,71 @@ kubernetes:
           serviceAccountToken: ${K8S_CLUSTER_TOKEN}
 ```
 
-On Kubernetes, put the same `kubernetes` block under `upstream.backstage.appConfig` and supply the token through a Secret referenced by the chart. See [Install DevPortal with Helm](../installation-guide/production-setup/setup.md) for the app-config and Secret pattern.
+### On Kubernetes, for the cluster the portal runs in
+
+On Kubernetes, put the `kubernetes` block under `upstream.backstage.appConfig`. To read the cluster the portal runs in, point the cluster entry at `https://kubernetes.default.svc` and give it a token for the chart's service account, `<release>-developer-hub`. Keep the token in the runtime Secret from [Install DevPortal with Helm](../installation-guide/production-setup/setup.md).
+
+The commands below use the namespace and release of that guide, `devportal`, so the service account is `devportal-developer-hub`. Set the namespace first, and change both names if your install uses others:
+
+```bash
+export NAMESPACE=devportal
+```
+
+```bash
+K8S_TOKEN=$(kubectl -n "$NAMESPACE" create token devportal-developer-hub --duration=86400s)
+kubectl -n "$NAMESPACE" patch secret veecode-runtime-secrets --type merge \
+  -p "{\"stringData\":{\"K8S_TOKEN\":\"$K8S_TOKEN\"}}"
+```
+
+The token expires after the duration you set. Create a new one and update the Secret before it does. A change to the Secret alone does not restart the portal, so restart the deployment after you update it.
+
+The backend must also trust the certificate of the cluster API, which a private CA usually signs. Put that CA in the chart's `caBundle`, which the setup guide describes in [Let the backend reach and trust Keycloak](../installation-guide/production-setup/setup.md#let-the-backend-reach-and-trust-keycloak). The chart mounts the bundle and points `NODE_EXTRA_CA_CERTS` at it. Read the cluster CA from the `kube-root-ca.crt` ConfigMap:
+
+```bash
+kubectl get configmap kube-root-ca.crt -n default -o jsonpath='{.data.ca\.crt}' > cluster-ca.crt
+```
+
+If `caBundle` is not set yet, create the ConfigMap from that file:
+
+```bash
+kubectl -n "$NAMESPACE" create configmap devportal-ca --from-file=ca.crt=cluster-ca.crt
+```
+
+If you already set `caBundle` for your identity provider, the `devportal-ca` ConfigMap exists. A bundle can hold several PEM certificates, one after another, so append the cluster CA to the file you created it from and replace the ConfigMap. Then restart the deployment, because the backend reads the bundle when it starts:
+
+```bash
+cat <your-ca-file> cluster-ca.crt > ca-bundle.crt
+kubectl -n "$NAMESPACE" create configmap devportal-ca --from-file=ca.crt=ca-bundle.crt \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
+
+Then add these values and upgrade the release:
+
+```yaml
+global:
+  veecode:
+    deployment:
+      caBundle:
+        kind: ConfigMap
+        name: devportal-ca
+        key: ca.crt
+upstream:
+  backstage:
+    appConfig:
+      kubernetes:
+        serviceLocatorMethod:
+          type: multiTenant
+        clusterLocatorMethods:
+          - type: config
+            clusters:
+              - name: in-cluster
+                url: https://kubernetes.default.svc
+                authProvider: serviceAccount
+                skipTLSVerify: false
+                serviceAccountToken: ${K8S_TOKEN}
+```
+
+The `caData` and `caFile` settings of a cluster entry had no effect in DevPortal 3.0.3: without the CA in `caBundle`, the request still failed with `self-signed certificate in certificate chain`.
 
 `serviceLocatorMethod` decides which clusters a component runs on: `multiTenant` assumes every component runs on all configured clusters, `singleTenant` assumes one cluster per component (selected per entity with the `backstage.io/kubernetes-cluster` annotation). `clusterLocatorMethods` decides where the cluster list comes from: `config` reads the `clusters` array shown above. Multiple clusters are supported — add entries to the `clusters` array.
 
