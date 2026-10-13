@@ -40,7 +40,7 @@ Run every command in one terminal session. Later steps use the shell variables t
 export NAMESPACE=devportal
 export DEVPORTAL_HOST=devportal.example.com
 export KEYCLOAK_HOST=keycloak.example.com
-export CHART_VERSION=1.0.3
+export CHART_VERSION=1.0.4
 export PORTAL_IMAGE_TAG=3.0.3
 
 export DB_PASSWORD="$(openssl rand -hex 16)"
@@ -604,8 +604,11 @@ test -s default-plugin-refs.txt
 curl -fsSLo mirror-plugins.sh \
   https://raw.githubusercontent.com/redhat-developer/rhdh-operator/refs/heads/release-1.10/.rhdh/scripts/mirror-plugins.sh
 export CATALOG_INDEX_SOURCE="${CATALOG_INDEX_REF#oci://}"
-export CATALOG_INDEX_MIRROR_REF="$MIRROR_REGISTRY/${CATALOG_INDEX_SOURCE#*/}"
-skopeo copy --all "docker://$CATALOG_INDEX_SOURCE" \
+case "$CATALOG_INDEX_SOURCE" in
+  *@sha256:*) export CATALOG_INDEX_MIRROR_REF="$MIRROR_REGISTRY/veecode/plugin-catalog-index:devportal-$CHART_VERSION" ;;
+  *) export CATALOG_INDEX_MIRROR_REF="$MIRROR_REGISTRY/${CATALOG_INDEX_SOURCE#*/}" ;;
+esac
+skopeo copy --all --preserve-digests "docker://$CATALOG_INDEX_SOURCE" \
   "docker://$CATALOG_INDEX_MIRROR_REF"
 
 bash mirror-plugins.sh \
@@ -652,7 +655,7 @@ export KEYCLOAK_IMAGE="$MIRROR_REGISTRY/keycloak/keycloak:26.3.3"
 
 Copy the `offline-bundle` directory, `values-mirror.yaml`, and `registries.conf` (created below) to the machine that reaches the cluster. There, set `OFFLINE_BUNDLE` to the bundle directory path, `MIRROR_REGISTRY` to the same registry name, and export the two image variables above before Step 1.
 
-The image contains the default plugin file (`dynamic-plugins.veecode.yaml`). The commands extract its OCI references, remove the `!subpath` suffix, and give the image references to RHDH's script with `--plugin-list`. Copy the chart's catalog index separately with Skopeo; the RHDH script reads Red Hat's index format. The script writes `rhdh-plugin-mirroring-summary.txt` with the plugin source-to-mirror mappings. If your values override the image or `global.catalogIndex.image`, use those references instead of the chart defaults above.
+The image contains the default plugin file (`dynamic-plugins.veecode.yaml`). The commands extract its OCI references, remove the `!subpath` suffix, and give the image references to RHDH's script with `--plugin-list`. Copy the chart's catalog index separately with Skopeo; the RHDH script reads Red Hat's index format. From chart 1.0.4 the chart reads the index by digest. The copy keeps that digest (`--preserve-digests`) and tags it `devportal-<chart version>` in the mirror, so a registry that removes untagged images keeps it. The script writes `rhdh-plugin-mirroring-summary.txt` with the plugin source-to-mirror mappings. If your values override the image or `global.catalogIndex.image`, use those references instead of the chart defaults above.
 
 This procedure assumes the connected machine can reach both Quay and the mirror registry. For a fully disconnected transfer, use RHDH's documented `--to-dir` and `--from-dir` flow for the default plugin list, and copy the chart index separately with Skopeo. To point the chart at a mirrored catalog index, see [Configure the plugin catalog index](./catalog-index.md).
 
