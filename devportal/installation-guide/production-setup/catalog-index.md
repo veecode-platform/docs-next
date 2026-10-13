@@ -4,18 +4,24 @@ sidebar_label: Plugin catalog index
 title: Configure the plugin catalog index
 ---
 
-The plugin catalog index is an image that lists the plugins shown on the **Extensions** page. At each start, the installer reads the plugin list in the index, `dynamic-plugins.default.yaml`, and the extension catalog entities from it. The chart reads the index from `global.catalogIndex.image`. The default is `quay.io/veecode/plugin-catalog-index:bs_1.52.0`.
+The plugin catalog index is an image that lists the plugins shown on the **Extensions** page. At each start, the installer reads the plugin list in the index, `dynamic-plugins.default.yaml`, and the extension catalog entities from it. The chart reads the index from `global.catalogIndex.image`. From chart 1.0.4 the default is pinned by digest, `quay.io/veecode/plugin-catalog-index@sha256:<digest>`, and each chart release re-pins it. Chart 1.0.3 and earlier point at the moving tag `quay.io/veecode/plugin-catalog-index:bs_1.52.0`, so the index a portal loads can change without a chart upgrade.
 
-This page covers how to pin an index tag, add extra indexes, mirror the index in a private registry, and check what the index loaded.
+This page covers how to move to another index, add extra indexes, mirror the index in a private registry, and check what the index loaded.
 
-## Pin a timestamped index tag
+## Move to another index
 
-Index tags with a timestamp, such as `bs_1.52.0_20260820T205531`, exist next to the default tag. Use one when an index update causes a problem and you need the portal to keep the earlier index. Set the tag in a values file:
+To run another index, set both `repository` and `tag` of `global.catalogIndex.image` in a values file. Use one of two forms:
+
+- **Another digest:** keep `repository: veecode/plugin-catalog-index@sha256` and set `tag` to the 64-character digest. The chart passes `quay.io/veecode/plugin-catalog-index@sha256:<digest>` to the installer.
+- **A tag:** set `repository: veecode/plugin-catalog-index` and `tag` to a tag. The registry publishes timestamped tags, such as `bs_1.52.0_20260820T205531`, for temporary pinning. Use one to keep an earlier index when an index update causes a problem.
+
+Set both keys in either form. The chart joins `registry/repository:tag`, so a `tag` alone keeps the `@sha256` repository and renders an invalid reference such as `quay.io/veecode/plugin-catalog-index@sha256:bs_1.52.0_20260820T205531`. The example below uses the tag form:
 
 ```yaml
 global:
   catalogIndex:
     image:
+      repository: veecode/plugin-catalog-index
       tag: bs_1.52.0_20260820T205531
 ```
 
@@ -28,11 +34,16 @@ helm upgrade devportal veecode/devportal --version "$CHART_VERSION" \
 
 Each upgrade took about 2 to 9 minutes to become ready. On the first start after an upgrade, the pod can restart while the plugins install, so keep the `--timeout 20m` headroom.
 
-To return to the default tag, set it back on the command line:
+To return to the chart's default index, read its repository and tag from the chart and set both back:
 
 ```bash
+DEFAULT_INDEX_REPO="$(helm show values veecode/devportal --version "$CHART_VERSION" | yq -r '.global.catalogIndex.image.repository')"
+DEFAULT_INDEX_TAG="$(helm show values veecode/devportal --version "$CHART_VERSION" | yq -r '.global.catalogIndex.image.tag')"
+
 helm upgrade devportal veecode/devportal --version "$CHART_VERSION" \
-  -n "$NAMESPACE" --reuse-values --set global.catalogIndex.image.tag=bs_1.52.0 \
+  -n "$NAMESPACE" --reuse-values \
+  --set-string global.catalogIndex.image.repository="$DEFAULT_INDEX_REPO" \
+  --set-string global.catalogIndex.image.tag="$DEFAULT_INDEX_TAG" \
   --wait --timeout 20m
 ```
 
@@ -50,7 +61,7 @@ global:
         tag: "bs_1.52.0_20260813T182849"
 ```
 
-An extra index adds its entries to the **Extensions** page only. It does not install plugins or change the installed plugins. With the default index, adding this extra index raised the plugin count on the **Extensions** page from 71 to 87 and the package count from 145 to 158. The number of loaded plugins stayed at 18.
+An extra index adds its entries to the **Extensions** page only. It does not install plugins or change the installed plugins. With the default index of chart 1.0.3, adding this extra index raised the plugin count on the **Extensions** page from 71 to 87 and the package count from 145 to 158. The number of loaded plugins stayed at 18.
 
 ## Mirror the index in a private registry
 
@@ -61,11 +72,11 @@ global:
   catalogIndex:
     image:
       registry: registry.example.com
-      repository: veecode/plugin-catalog-index
-      tag: bs_1.52.0
+      repository: veecode/plugin-catalog-index@sha256
+      tag: "<64-character digest of the copied index>"
 ```
 
-Use the tag you copied. The mirror has to meet three requirements:
+Use the digest you copied with the `@sha256` repository, as above. For a copied tag, set `repository: veecode/plugin-catalog-index` and `tag` to that tag. The mirror has to meet three requirements:
 
 - **TLS.** The installer cannot pull over plain HTTP. A mirror that serves HTTP only fails with `http: server gave HTTP response to HTTPS client`. The mirror must serve TLS with a certificate that the installer's system trust store accepts.
 - **Trust.** The `caBundle` value, described in [Let the backend reach and trust Keycloak](./setup.md#let-the-backend-reach-and-trust-keycloak), reaches the backend only. The installer does not read it, so chart values do not cover a certificate from a private CA for the mirror.
@@ -101,7 +112,7 @@ kubectl -n "$NAMESPACE" logs deployment/devportal-developer-hub -c install-dynam
 
 The log shows `Extracting catalog index from` followed by the image reference, and then `Extracted dynamic-plugins.default.yaml`. An extra index adds the line `Successfully extracted extensions catalog entities from extra index image`.
 
-Then count the entries that the Extensions API returns. The API needs a token. Guest sign-in provides one, so run this check on an install where guest sign-in is on. The production setup turns guest sign-in off. Forward the portal service first:
+Then count the entries that the Extensions API returns. The API needs a token. Guest sign-in provides one, so run this check on an install where guest sign-in is on, such as the [evaluation install](./setup.md#evaluate-without-ingress-or-an-identity-provider). The production setup sets it off, so the check does not work there. Forward the portal service first:
 
 ```bash
 kubectl -n "$NAMESPACE" port-forward svc/devportal-developer-hub 7007:7007

@@ -6,15 +6,15 @@ title: Install DevPortal on Kubernetes
 
 This page installs DevPortal 3.x on Kubernetes with the `devportal` Helm chart. The portal runs behind an Ingress with TLS, users sign in through an identity provider over OpenID Connect (OIDC), and guest sign-in is off. The steps use Keycloak as the identity provider and a PostgreSQL database that runs in the cluster, so you can follow them on an empty test cluster. [Replace the parts that are placeholders](#what-you-replace-for-your-environment) before you run the portal for real users.
 
-:::warning Guest sign-in is on by default
-The chart ships guest sign-in **enabled** and maps the guest identity to the `ADMIN` user (`user:default/admin`). Anyone who can reach the portal URL enters as an administrator, without a password. That is useful for a first look and dangerous for anything else. The single off switch is `global.veecode.guestAuth.enabled: false`, and [Step 6](#step-6-install-devportal) sets it. Never expose an installation with the default.
+:::warning Chart 1.0.3 and earlier turn guest sign-in on
+Chart 1.0.3 and earlier ship guest sign-in **enabled** and map the guest identity to the `ADMIN` user (`user:default/admin`). From chart 1.0.4 the chart ships it disabled. With guest sign-in on, anyone who can reach the portal URL enters as an administrator, without a password. That is useful for a first look and dangerous for anything else. The single off switch is `global.veecode.guestAuth.enabled: false`, and [Step 6](#step-6-install-devportal) sets it on every chart version. Never expose an installation with guest sign-in on.
 :::
 
 ## Before you start
 
 You need:
 
-- A Kubernetes cluster with an Ingress controller, and `kubectl` and Helm 3 pointed at it. The steps were followed on k3s 1.31 with its bundled Traefik controller (`className: traefik`) and Helm 3.20, with chart 1.0.0. Charts 1.0.1 to 1.0.3 change only the image tag, digest, and version metadata.
+- A Kubernetes cluster with an Ingress controller, and `kubectl` and Helm 3 pointed at it. The steps were followed on k3s 1.31 with its bundled Traefik controller (`className: traefik`) and Helm 3.20, with chart 1.0.0. Charts 1.0.1 to 1.0.3 change only the image tag, digest, and version metadata. Chart 1.0.4 changes two defaults: guest sign-in is off, and the plugin catalog index is pinned by digest.
 - Two DNS names that resolve to the Ingress controller: one for the portal and one for the identity provider. The steps use `devportal.example.com` and `keycloak.example.com`. The portal backend calls the identity provider's public name when a user signs out, so the cluster must resolve and reach that name too ([Step 6](#step-6-install-devportal) covers a cluster that cannot).
 - `openssl` and `curl` on your machine, and a browser that allows pop-ups from the portal: the sign-in button opens the identity provider in a pop-up window.
 - If the cluster cannot reach a public Helm repository or registry, prepare a local chart archive and mirror before Step 1 by following [Install without internet access](#install-without-internet-access).
@@ -354,7 +354,7 @@ EOF
 What the values do:
 
 `global.veecode.guestAuth.enabled: false`
-: Removes the guest sign-in and the `ADMIN` mapping.
+: Removes the guest sign-in and the `ADMIN` mapping. Chart 1.0.4 already defaults to this value. Set it anyway, so the install does not depend on the chart version.
 
 `upstream.ingress`
 : Creates an Ingress for `global.host` that serves TLS from the `devportal-tls` Secret. Set `className` to the class of your controller.
@@ -464,7 +464,7 @@ The portal stores the installation in its PostgreSQL database, in the `marketpla
 
 ## Evaluate without Ingress or an identity provider
 
-For a quick look on a laptop you can skip Ingress, TLS and the identity provider and keep guest sign-in. This is for evaluation only: guest sign-in signs everyone in as `ADMIN` (`user:default/admin`). Use a cluster that does not hold the installation above. The chart creates a cluster-scoped ClusterRole named `<release>-developer-hub-kubernetes-plugin`, for example `devportal-developer-hub-kubernetes-plugin`. The name does not include the namespace, so set `kubernetesPlugin.rbac.namespaceQualifiedName: true` when releases with the same name must share a cluster.
+For a quick look on a laptop you can skip Ingress, TLS and the identity provider and turn guest sign-in on. The values below set `global.veecode.guestAuth.enabled: true`, because chart 1.0.4 turns guest sign-in off by default. This is for evaluation only: guest sign-in signs everyone in as `ADMIN` (`user:default/admin`). Use a cluster that does not hold the installation above. The chart creates a cluster-scoped ClusterRole named `<release>-developer-hub-kubernetes-plugin`, for example `devportal-developer-hub-kubernetes-plugin`. The name does not include the namespace, so set `kubernetesPlugin.rbac.namespaceQualifiedName: true` when releases with the same name must share a cluster.
 
 Set the variables and create the namespace:
 
@@ -492,6 +492,10 @@ Save the values as `values-eval.yaml` and install the chart without `global.host
 
 ```bash
 cat > values-eval.yaml <<'EOF'
+global:
+  veecode:
+    guestAuth:
+      enabled: true
 upstream:
   backstage:
     extraEnvVarsSecrets:
@@ -578,7 +582,7 @@ The `install-dynamic-plugins` init container uses `skopeo` to pull the catalog i
 
 On a connected machine, install Docker, Helm, `yq` 4, Skopeo 1.20 or later, GNU `tar`, and `jq`. Make sure the machine can reach Quay and your mirror registry. Authenticate to both registries before you run the mirror script.
 
-Set the mirror registry name, then read the image and catalog index references from the selected chart. The image digest and catalog index tag come from the chart values, so the commands follow the chart version in Step 1.
+Set the mirror registry name, then read the image and catalog index references from the selected chart. The image digest and the catalog index reference come from the chart values, so the commands follow the chart version in Step 1.
 
 ```bash
 export MIRROR_REGISTRY=registry.example.com

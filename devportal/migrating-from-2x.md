@@ -42,8 +42,8 @@ Permissions also differ. See [Permissions are off in 3.x](#permissions-are-off-i
 
 Step 4 translates the settings this guide was tested with: external PostgreSQL, Keycloak sign-in and catalog locations. Any other setting in your 2.x values has no automatic translation. Map it by hand against the `values.yaml` of the 3.x chart.
 
-:::danger Guest sign-in is on by default in 3.x
-The 3.x chart turns guest sign-in on and maps every guest to the `admin` user. Anyone who can reach the portal URL gets an administrator identity without a password, even when the sign-in page shows only your identity provider. The values file in step 4 turns guest sign-in off and configures a real identity provider, and step 6 checks that the guest endpoint is gone. Do not expose the portal before both are in place.
+:::danger Chart 1.0.3 and earlier turn guest sign-in on
+Chart 1.0.3 and earlier turn guest sign-in on and map every guest to the `admin` user. From chart 1.0.4 the chart turns it off by default. With guest sign-in on, anyone who can reach the portal URL gets an administrator identity without a password, even when the sign-in page shows only your identity provider. The values file in step 4 turns guest sign-in off and configures a real identity provider, and step 6 checks that the guest endpoint is gone. Do not expose the portal before both are in place.
 :::
 
 ## Before you start
@@ -216,7 +216,7 @@ How the 2.x settings map:
 | `existingSecret` | `upstream.backstage.extraEnvVarsSecrets`, pointing at the Secret of step 3. |
 | `database.external.enabled: true` | Nothing to set. 3.x always uses your PostgreSQL, through the `PG_*` keys of that Secret. |
 | `appConfig.app`, `appConfig.backend`, `appConfig.catalog.locations` | The same keys under `upstream.backstage.appConfig`. |
-| (new in 3.x) | `global.veecode.guestAuth.enabled: false` turns guest sign-in off. |
+| (new in 3.x) | `global.veecode.guestAuth.enabled: false` turns guest sign-in off. Chart 1.0.4 defaults to this value; chart 1.0.3 and earlier need it set. |
 | (new in 3.x) | `backend.database.prefix` gives the 3.x release its own databases. |
 | (new in 3.x) | `startupProbe.failureThreshold: 30` gives the first start up to 10 minutes. The chart default allows about 90 seconds. |
 
