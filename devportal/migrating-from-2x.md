@@ -19,7 +19,7 @@ The migration goes to a **fresh database**. Nothing is converted in place:
 This guide's procedure was followed end to end, command by command, with:
 
 - DevPortal 2.x: chart `veecode-devportal-platform` 0.5.2 (DevPortal 2.2.3), external PostgreSQL 16, the `recommended` and `keycloak` presets, Keycloak 26, one Ingress.
-- DevPortal 3.x: chart `devportal` 1.0.4, which installs image 3.0.3.
+- DevPortal 3.x: chart `devportal` 1.0.3, which installs image 3.0.3. Chart 1.0.4 installs the same image and changes two defaults: guest sign-in is off, and the plugin catalog index is pinned by digest. The values file in step 4 sets guest sign-in explicitly, and the guide does not change the index.
 - Kubernetes: a single-node k3s v1.31.5+k3s1 cluster. The 3.x portal was reached through `kubectl port-forward`.
 
 Two parts were not run:
@@ -328,7 +328,7 @@ Register again the locations you wrote down in step 1: open **Self-service**, ch
 
 The 2.x chart runs with the permission framework on. Members of the `admins` group administer permissions, and users in other groups get a limited role. In the test, a user of the `developers` group got HTTP 403 when deleting a catalog entity, and could not list the roles that only an administrator sees.
 
-The 3.x chart ships with `permission.enabled: false`, so nothing is checked. In the test, the same user deleted the same catalog entity with HTTP 204. Any signed-in user can delete catalog entities, which only administrators could do on 2.x.
+The 3.x chart leaves permission checks off: its default configuration does not set `permission.enabled: true`, so nothing is checked. In the test, the same user deleted the same catalog entity with HTTP 204. Any signed-in user can delete catalog entities, which only administrators could do on 2.x.
 
 Roles and policies that you create at run time through the portal's permission API are stored in the 2.x database, so they do not carry over. The test created the role `role:default/d1-reviewers` on 2.x. On 3.x the permission API answers HTTP 404, so the role does not exist there.
 

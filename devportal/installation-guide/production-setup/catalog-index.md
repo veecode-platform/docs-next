@@ -15,7 +15,15 @@ To run another index, set both `repository` and `tag` of `global.catalogIndex.im
 - **Another digest:** keep `repository: veecode/plugin-catalog-index@sha256` and set `tag` to the 64-character digest. The chart passes `quay.io/veecode/plugin-catalog-index@sha256:<digest>` to the installer.
 - **A tag:** set `repository: veecode/plugin-catalog-index` and `tag` to a tag. The registry publishes timestamped tags, such as `bs_1.52.0_20260820T205531`, for temporary pinning. Use one to keep an earlier index when an index update causes a problem.
 
-Set both keys in either form. The chart joins `registry/repository:tag`, so a `tag` alone keeps the `@sha256` repository and renders an invalid reference such as `quay.io/veecode/plugin-catalog-index@sha256:bs_1.52.0_20260820T205531`. The example below uses the tag form:
+Set both keys in either form. A `tag` alone keeps the default `@sha256` repository, and the values schema rejects a tag that is not a 64-character digest there. Helm then stops before it changes the release:
+
+```text
+Error: values don't meet the specifications of the schema(s) in the following chart(s):
+devportal:
+- at '/global/catalogIndex/image/tag': 'bs_1.52.0_20260820T205531' does not match pattern '^[0-9a-f]{64}$'
+```
+
+The example below uses the tag form:
 
 ```yaml
 global:
@@ -25,27 +33,29 @@ global:
       tag: bs_1.52.0_20260820T205531
 ```
 
-Upgrade the release with the file:
+The commands on this page change the index of a release that already runs chart `$CHART_VERSION`. To move to another chart version as well, follow [Upgrade DevPortal 3.x](./upgrade.md) and add the file to the values of its Step 3.
+
+Save the values stored for the release, then upgrade with them and the file:
 
 ```bash
+helm get values devportal -n "$NAMESPACE" -o yaml > current-values.yaml
 helm upgrade devportal veecode/devportal --version "$CHART_VERSION" \
-  -n "$NAMESPACE" -f catalog-index-pin.yaml --reuse-values --wait --timeout 20m
+  -n "$NAMESPACE" -f current-values.yaml -f catalog-index-pin.yaml --wait --timeout 20m
 ```
 
 Each upgrade took about 2 to 9 minutes to become ready. On the first start after an upgrade, the pod can restart while the plugins install, so keep the `--timeout 20m` headroom.
 
-To return to the chart's default index, read its repository and tag from the chart and set both back:
+To return to the chart's default index, remove the two keys from the stored values and upgrade with the result:
 
 ```bash
-DEFAULT_INDEX_REPO="$(helm show values veecode/devportal --version "$CHART_VERSION" | yq -r '.global.catalogIndex.image.repository')"
-DEFAULT_INDEX_TAG="$(helm show values veecode/devportal --version "$CHART_VERSION" | yq -r '.global.catalogIndex.image.tag')"
-
+helm get values devportal -n "$NAMESPACE" -o yaml \
+  | yq 'del(.global.catalogIndex.image.repository, .global.catalogIndex.image.tag)' \
+  > current-values.yaml
 helm upgrade devportal veecode/devportal --version "$CHART_VERSION" \
-  -n "$NAMESPACE" --reuse-values \
-  --set-string global.catalogIndex.image.repository="$DEFAULT_INDEX_REPO" \
-  --set-string global.catalogIndex.image.tag="$DEFAULT_INDEX_TAG" \
-  --wait --timeout 20m
+  -n "$NAMESPACE" -f current-values.yaml --wait --timeout 20m
 ```
+
+The values you pass with `-f` replace the values stored for the release, so the release reads the index from the chart again, and each later chart release re-pins it. If you set the chart's current digest explicitly instead, the release keeps that digest after later chart upgrades.
 
 ## Add extra indexes
 
@@ -76,7 +86,7 @@ global:
       tag: "<64-character digest of the copied index>"
 ```
 
-Use the digest you copied with the `@sha256` repository, as above. For a copied tag, set `repository: veecode/plugin-catalog-index` and `tag` to that tag. The mirror has to meet three requirements:
+Use the digest you copied with the `@sha256` repository, as above. It is the hex after `@sha256:` in `CATALOG_INDEX_SOURCE`, and `--preserve-digests` keeps it in the mirror. For a copied tag, set `repository: veecode/plugin-catalog-index` and `tag` to that tag. The mirror has to meet three requirements:
 
 - **TLS.** The installer cannot pull over plain HTTP. A mirror that serves HTTP only fails with `http: server gave HTTP response to HTTPS client`. The mirror must serve TLS with a certificate that the installer's system trust store accepts.
 - **Trust.** The `caBundle` value, described in [Let the backend reach and trust Keycloak](./setup.md#let-the-backend-reach-and-trust-keycloak), reaches the backend only. The installer does not read it, so chart values do not cover a certificate from a private CA for the mirror.

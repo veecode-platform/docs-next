@@ -572,7 +572,7 @@ The image's default plugin file (`dynamic-plugins.veecode.yaml`) runs 20 digest-
 - The VeeCode home page, the global header and an About page.
 - The Marketplace, which is the **Extensions** page.
 - TechDocs, Notifications, Signals and Tech Radar.
-- The RBAC screens. The RBAC backend is part of the image, but permission checks are off because the chart sets `permission.enabled: false`. Every signed-in user can install plugins from the Marketplace.
+- The RBAC screens. The RBAC backend is part of the image, but permission checks are off: the default configuration does not set `permission.enabled: true`. Every signed-in user can install plugins from the Marketplace.
 
 The chart also creates a read-only ClusterRole and binding for the Kubernetes plugin (`kubernetesPlugin.rbac.enabled`, on by default). The image does not load the Kubernetes plugin by default. When releases with the same name share a cluster across namespaces, set `kubernetesPlugin.rbac.namespaceQualifiedName: true` so the cluster-scoped names include the release namespace.
 
