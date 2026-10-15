@@ -14,31 +14,32 @@ Release date: 2026-10-15
 
 - Backstage 1.54.9 replaces Backstage 1.52. The portal keeps the frontend system it uses in 3.0.x.
 - The 18 plugins enabled by default now come from the plugin catalog index instead of the image. A plugin update is published as a new index, so it does not need a new image. The versions are in [Default plugin versions](#default-plugin-versions).
-- Marketplace backend 0.3.1 and Marketplace frontend 0.3.2 are enabled by default. The YAML typed on the install screen is saved with the plugin's row.
+- Marketplace backend 0.3.1 and Marketplace frontend 0.3.2 are enabled by default.
 - The image is built on Red Hat UBI 10.2.
 
 ### Breaking changes and upgrade notes
 
 Check these before you upgrade. The full upgrade steps are on the [upgrade page](../installation-guide/production-setup/upgrade.md).
 
-- **Values file includes.** If `global.dynamic.includes` still lists `dynamic-plugins.veecode.yaml`, remove that entry and keep `dynamic-plugins.default.yaml`. The 3.1 image has no such file. The installer skips it with a warning.
+- **Values file includes.** If `global.dynamic.includes` still lists `/opt/app-root/src/dynamic-plugins.veecode.yaml`, remove that entry and keep `dynamic-plugins.default.yaml`. The 3.1 image has no such file. The installer skips it with a warning.
 - **Chart upgrades.** Do not move to chart 1.1.0 with `helm upgrade --reuse-values`. It reuses the values of the previous release, so the 3.0.3 image and the old catalog index stay in place. Pass explicit values, or use `--reset-then-reuse-values` (Helm 3.14 or later).
 - **Former local plugin paths.** Search `global.dynamic.plugins` and any mounted `dynamic-plugins.yaml` for `./dynamic-plugins/dist/`. Replace each entry with the plugin's `oci://` reference, or remove it. The installer skips these paths and still exits 0, so the plugin is missing without an error.
-- **Marketplace selections.** The upgrade does not convert the rows in `marketplace_installations` whose `package_name` starts with `./dynamic-plugins/dist/`. Reinstall each of those plugins from the Marketplace with its saved YAML, then remove the old row.
-- **RBAC pair.** RBAC backend 8.1.4 and RBAC frontend 2.3.1 move together. If you set the RBAC plugin versions yourself, use both versions. Backend 8 refuses the conditional-policy writes of frontend 1.52.4, and frontend 2.3.1 writes conditions that backend 7.12.5 refuses.
-- **Plugins that moved to a new major version.** Several default plugins moved to a new major version in the index, for example Argo CD 3.1.3, Tekton 4.0.5 and bulk import 9.1.1. If you override `pluginConfig` for one of them, compare your override with the default of the new version.
-- **Azure DevOps.** When `azureDevOps` is set, the backend requires `azureDevOps.pullRequestDashboard.organizations`, a list of entries with `organization` and `host`. Add it before the upgrade.
-- **Bulk import.** Bulk import backend 9.x requires short-lived GitHub App installation tokens for the Orchestrator import mode. It refuses a classic personal access token in that mode.
+- **Marketplace selections.** The upgrade does not convert the rows in `marketplace_installations` whose `package_name` starts with `./dynamic-plugins/dist/`. After the upgrade, wait until the Marketplace lists the 3.1 version of each of these plugins, then reinstall it from the Marketplace with its saved YAML. Before that, a reinstall stores the old path again. The Marketplace does not remove the old row. After the plugin loads from the new row, delete the old one from the `marketplace_installations` table in the Marketplace plugin's database, `backstage_plugin_extensions` with the default `backend.database.prefix` (in the portal's database when `pluginDivisionMode` is `schema`): `DELETE FROM marketplace_installations WHERE package_name = './dynamic-plugins/dist/<plugin>';`. If the two rows hold different `pluginConfig`, the install init container stops with `defined differently for 2 dynamic plugins`, so give the new row the saved YAML.
+- **RBAC pair.** RBAC backend 8.1.4 is in the image, and RBAC frontend 2.3.1 comes from the catalog index. They move together. If you pin the RBAC frontend in `global.dynamic.plugins` to an older version, remove the pin or use 2.3.1. Backend 8 refuses the conditional-policy writes of frontend 1.52.4, and frontend 2.3.1 writes conditions that backend 7.12.5 refuses.
+- **Plugins that moved to a new major version.** Several plugins in the catalog index moved to a new major version, for example Argo CD 3.1.3, Tekton 4.0.5 and bulk import 9.1.1. None of these three is enabled by default. Of the 18 plugins enabled by default, two moved to a new major version: the global header to 3.1.0 and the RBAC frontend to 2.3.1. If you override `pluginConfig` for a plugin that moved, compare your override with the default of the new version.
+- **Azure DevOps.** If you enable the plugin, the backend requires `azureDevOps.pullRequestDashboard.organizations`, a list of entries with `organization` and `host`. Add it before the upgrade.
+- **Bulk import.** If you enable bulk import, bulk import backend 9.x requires short-lived GitHub App installation tokens for the Orchestrator import mode. It refuses a classic personal access token in that mode.
 - **Derived images.** If your image or an init script is built on the DevPortal image and uses UBI 9 packages or paths, check them against UBI 10.
 
 ### Deprecated and removed features
 
-- The image no longer has the `dynamic-plugins/` directory. Plugins that 3.0.x shipped in it are OCI artifacts from now on, and they are disabled by default.
+- The image no longer has the `dynamic-plugins/` directory. The catalog index has an OCI artifact for 40 of the 41 plugins that 3.0.x shipped in it. 12 of those 40 are enabled by default, and the other 28 are disabled by default. The catalog index has no entry for `red-hat-developer-hub-backstage-plugin-extensions-backend`.
 - The image no longer has `dynamic-plugins.veecode.yaml`. It has `factory-plugins.yaml`, a list of the names of the plugins enabled by default. The plugin definitions come from the catalog index.
 
 ### Fixed issues
 
-- None.
+- The Marketplace saves the YAML typed on a plugin's install or edit page. Before, the portal stored the configuration already saved or the package's first example. An entry that comes without `pluginConfig` still gets the package's first example.
+- The Marketplace refuses YAML with a syntax error when you install a plugin or save its configuration. The install page shows the line and column of the first error.
 
 ### Fixed security issues
 
@@ -54,14 +55,14 @@ Use these values together. Pin the image by its digest.
 | Image | `docker.io/veecode/devportal:3.1.0@sha256:fe33373b7e5dc536f04d1878519bb53862a769b46869f78f829b198a30e5246b` |
 | Image digest | `sha256:fe33373b7e5dc536f04d1878519bb53862a769b46869f78f829b198a30e5246b` |
 | Chart | `devportal` 1.1.0 |
-| Chart checksum (SHA-256) | Not published yet. It is set when the `chart-v1.1.0` release is published. |
+| Chart checksum (SHA-256) | `061ab853c41cf05d5cc537d5c7c331290c6dd9c46cc756a6e6546a7acdc06a3e` |
 | Backstage version | 1.54.9 |
 | Plugin tag line | `bs_1.54.9` |
 | Catalog index | `quay.io/veecode/plugin-catalog-index:bs_1.54.9`, qualified at `sha256:26bd062a8fad8c204b1a175e775a4549d599a2a57acd849f083d6591ed2a917d` |
 | Catalog index tag for pinning | `quay.io/veecode/plugin-catalog-index:bs_1.54.9_20261015T183630` |
 | Qualified on | Kubernetes 1.35.0, PostgreSQL 16 (image `postgres:16`) |
 
-`bs_1.54.9` is the tag under which the plugins and the catalog index are published, and it names the Backstage version they are built for. The catalog index tag moves when the catalog is republished. During an incident, pin the timestamped tag above so that the marketplace stops changing.
+`bs_1.54.9` is the tag under which the plugins and the catalog index are published, and it names the Backstage version they are built for. The catalog index tag moves when the catalog is republished. The chart pins the catalog index by digest, so an installation keeps the same index until you move to a new chart version. To pin this index by its timestamped tag instead of its digest, set `global.catalogIndex.image.repository` to `veecode/plugin-catalog-index` and `global.catalogIndex.image.tag` to `bs_1.54.9_20261015T183630`.
 
 ### Backstage packages
 
@@ -141,6 +142,7 @@ The catalog index enables these 18 plugins. Protected plugins cannot be disabled
 - Image scanned: `docker.io/veecode/devportal@sha256:fe33373b7e5dc536f04d1878519bb53862a769b46869f78f829b198a30e5246b`
 - Scanner: Trivy `0.74.0`, database dated `2026-10-15`.
 - Critical vulnerabilities with a fix and no live exception: `0`.
+- Qualification run: `https://github.com/veecode-platform/devportal-chart/actions/runs/38808478011`.
 
 | Severity | Reported | With a fix | Accepted as an exception |
 | --- | ---: | ---: | ---: |
@@ -163,16 +165,16 @@ A release does not ship with a critical vulnerability that has a fix and no live
 | `CVE-2026-1526` | `undici` | HIGH | The fixes are major updates to 6.24.0 or 7.24.0. | 2026-12-30 |
 | `CVE-2026-2229` | `undici` | HIGH | The fixes are major updates to 6.24.0 or 7.24.0. | 2026-12-30 |
 | `CVE-2026-55553` | `urllib` | HIGH | The 4.9.1 fix is a major update, and the 2.44.1 fix would downgrade the installed version. This exception covers two findings. | 2026-12-30 |
-| `CVE-2025-66418` | `urllib3` | HIGH | The fix needs a newer pin in the Python requirements, which was not tested. | 2026-12-30 |
-| `CVE-2025-66471` | `urllib3` | HIGH | The fix needs a newer pin in the Python requirements, which was not tested. | 2026-12-30 |
-| `CVE-2026-21441` | `urllib3` | HIGH | The fix needs a newer pin in the Python requirements, which was not tested. | 2026-12-30 |
-| `CVE-2026-44431` | `urllib3` | HIGH | The fix needs a newer pin in the Python requirements, which was not tested. | 2026-12-30 |
-| `CVE-2026-97687` | `urllib3` | HIGH | The fix needs a newer pin in the Python requirements, which was not tested. | 2026-12-30 |
-| `CVE-2026-97689` | `urllib3` | HIGH | The fix needs a newer pin in the Python requirements, which was not tested. | 2026-12-30 |
+| `CVE-2025-66418` | `urllib3` | HIGH | `python/requirements.in` and `python/requirements-build.in` pin urllib3 2.2.2, so pip-tools cannot compile the fix. The hatchling and setuptools-scm build-tool pins may also need raising; this was not tested. | 2026-12-30 |
+| `CVE-2025-66471` | `urllib3` | HIGH | `python/requirements.in` and `python/requirements-build.in` pin urllib3 2.2.2, so pip-tools cannot compile the fix. The hatchling and setuptools-scm build-tool pins may also need raising; this was not tested. | 2026-12-30 |
+| `CVE-2026-21441` | `urllib3` | HIGH | `python/requirements.in` and `python/requirements-build.in` pin urllib3 2.2.2, so pip-tools cannot compile the fix. The hatchling and setuptools-scm build-tool pins may also need raising; this was not tested. | 2026-12-30 |
+| `CVE-2026-44431` | `urllib3` | HIGH | `python/requirements.in` and `python/requirements-build.in` pin urllib3 2.2.2, so pip-tools cannot compile the fix. The hatchling and setuptools-scm build-tool pins may also need raising; this was not tested. | 2026-12-30 |
+| `CVE-2026-97687` | `urllib3` | HIGH | `python/requirements.in` and `python/requirements-build.in` pin urllib3 2.2.2, so pip-tools cannot compile the fix. The hatchling and setuptools-scm build-tool pins may also need raising; this was not tested. | 2026-12-30 |
+| `CVE-2026-97689` | `urllib3` | HIGH | `python/requirements.in` and `python/requirements-build.in` pin urllib3 2.2.2, so pip-tools cannot compile the fix. The hatchling and setuptools-scm build-tool pins may also need raising; this was not tested. | 2026-12-30 |
 
 An exception expires on the date shown. After that date the finding counts again and blocks a release.
 
-### Scan of the plugins enabled by default
+### Plugins enabled by default
 
 The plugins enabled by default are separate artifacts. Each one is scanned by digest. This scan is a report and does not block a release.
 
@@ -199,9 +201,9 @@ The plugins enabled by default are separate artifacts. Each one is scanned by di
 
 ## Known limitations
 
-The limitations below carry over from 3.0.x unless the text says otherwise.
+The Home page and offline install limitations carry over from 3.0.x. The RBAC limitation is specific to 3.1.0. The Marketplace window was first observed in the upgrade to chart 1.1.0, and it was not checked on 3.0.x.
 
-- After an upgrade, the Marketplace can list the packages of the previous catalog index for up to 30 minutes. Installed packages keep the previous artifact until you reinstall them, and a former `./dynamic-plugins/dist/` entry is skipped during that window. Wait until the Marketplace shows the 3.1 versions before you install plugins.
+- After an upgrade, the Marketplace can list the packages of the previous catalog index for up to 30 minutes. A package installed from the Marketplace during that window keeps the previous artifact until you reinstall it, and a former `./dynamic-plugins/dist/` entry is skipped. Wait until the Marketplace shows the 3.1 versions before you install plugins.
 - The default plugins ship the Red Hat dynamic Home page entry disabled. Enabling it leaves the portal's pages empty. Keep it disabled. This was not re-tested on 3.1.0.
 - An offline install must mirror the catalog index as well as the plugin artifacts. This was not re-tested on 3.1.0.
 - RBAC backend 8.1.4 adds no database migration. An upgrade from a database written by RBAC backend 7.12.5 was not tested.
