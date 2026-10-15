@@ -26,7 +26,7 @@ Three parts were not run:
 
 - **SQLite.** The test used external PostgreSQL only. A 2.x install on SQLite differs in two ways that come from reading the charts, not from a run. The 2.x data lives on a volume that the chart creates, and `helm uninstall` of that release deletes the volume, so never uninstall such a release while you still need it. The 3.x chart always connects to PostgreSQL, so prepare that server before step 2. The data of the SQLite install does not move to it.
 - **An Ingress for 3.x.** Step 6 reaches the portal through a port-forward. Exposing 3.x through an Ingress follows the 3.x install guide.
-- **Chart 1.1.0 and DevPortal 3.1.0.** The test used chart 1.0.3 and image 3.0.3. Step 5 installs chart 1.1.0, and this procedure has not been run with it.
+- **The data steps with chart 1.1.0.** The full procedure ran with chart 1.0.3 and image 3.0.3. With chart 1.1.0, a fresh install with the step 4 values was run: the portal started and loaded the Keycloak catalog module. Moving 2.x data was not repeated with chart 1.1.0.
 
 ## What comes back and what does not
 

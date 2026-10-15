@@ -10,7 +10,7 @@ This page explains how to add a plugin to a DevPortal 3.x instance: through the 
 
 Decide which plugin you need and find its package reference first. Default plugins list their exact reference on their bundled page. Marketplace plugins expose their reference as a `Package` catalog entity. See [Find the package reference](#find-the-package-reference).
 
-Some plugins need configuration values before the portal starts. For example, enabling the Grafana package without `grafana.domain` set makes the backend log `Config must have required property 'domain' ... at /grafana` during startup while the health check still answers. Add the required settings to your app configuration before you enable such a plugin.
+Some plugins need configuration values before the portal starts. For example, enabling the Grafana package without `grafana.domain` set makes the backend log `Config must have required property 'domain' ... at /grafana` and stop at startup. Add the required settings to your app configuration before you enable such a plugin.
 
 ## Via Marketplace
 

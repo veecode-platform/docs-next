@@ -369,7 +369,7 @@ What the values do:
 : Lets the identity provider decide whether to ask for credentials or to skip the login prompt when the user has a session.
 
 `global.dynamic.plugins`
-: Enables the Keycloak catalog module, which the catalog index lists as disabled. The entry names the module by its digest in that index, so it runs the version the index gives. This entry has not been run on DevPortal 3.1.0 yet.
+: Enables the Keycloak catalog module, which the catalog index lists as disabled. The entry names the module by its digest in that index, so it runs the version the index gives.
 
 The `${...}` values are read from the runtime Secret when the portal starts. The catalog entry imports your Keycloak users and groups into the portal 15 seconds after it starts and then every 5 minutes, because the portal signs a user in only when it finds a matching user in its catalog.
 

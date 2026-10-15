@@ -28,7 +28,7 @@ plugins:
     disabled: false
 ```
 
-Mount the operator file and recreate the stack as described in [Configure dynamic plugins for the local stack](../installation-guide/docker-local/custom-plugins.md). Enabling the entry alone is not enough: set `grafana.domain` with the configuration below before you start the stack. Without it, the backend logs `Config must have required property 'domain'` at `/grafana`, but the healthcheck still returns 200 and the plugin still loads.
+Mount the operator file and recreate the stack as described in [Configure dynamic plugins for the local stack](../installation-guide/docker-local/custom-plugins.md). Enabling the entry alone is not enough: set `grafana.domain` with the configuration below before you start the stack. Without it, DevPortal 3.1.0 does not start: the backend logs `Config must have required property 'domain'` at `/grafana`, then `Backend startup failed`, and the readiness check keeps failing.
 
 ### On Kubernetes
 
@@ -38,7 +38,7 @@ Add the same package reference under `global.dynamic.plugins` in your chart valu
 
 ## App configuration
 
-The plugin requires `grafana.domain` and the Grafana proxy endpoint. The index plugin config sets `grafana.domain` from the `GRAFANA_DOMAIN` variable. Set the domain before you start the stack: without it, the backend logs `Config must have required property 'domain'` at `/grafana`, but the healthcheck still returns 200 and the plugin still loads.
+The plugin requires `grafana.domain` and the Grafana proxy endpoint. The index plugin config sets `grafana.domain` from the `GRAFANA_DOMAIN` variable. Set the domain before you start the portal. Without it, DevPortal 3.1.0 does not start: the backend logs `Config must have required property 'domain'` at `/grafana`, then `Backend startup failed`, and the readiness check keeps failing.
 
 On the local stack, add a configuration fragment such as `app-config.grafana.yaml`:
 
