@@ -13,14 +13,14 @@ This page covers how to move to another index, add extra indexes, mirror the ind
 To run another index, set both `repository` and `tag` of `global.catalogIndex.image` in a values file. Use one of two forms:
 
 - **Another digest:** keep `repository: veecode/plugin-catalog-index@sha256` and set `tag` to the 64-character digest. The chart passes `quay.io/veecode/plugin-catalog-index@sha256:<digest>` to the installer.
-- **A tag:** set `repository: veecode/plugin-catalog-index` and `tag` to a tag. The registry publishes timestamped tags, such as `bs_1.52.0_20260820T205531`, for temporary pinning. Use one to keep an earlier index when an index update causes a problem.
+- **A tag:** set `repository: veecode/plugin-catalog-index` and `tag` to a tag. The registry publishes timestamped tags, such as `bs_1.54.9_20261015T183630`, for temporary pinning. Use one to keep an earlier index when an index update causes a problem. From chart 1.1.0, pick a tag of the same Backstage line (`bs_1.54.9_...`): an index built for 3.0.x (`bs_1.52.0_...`) enables none of the default plugins, so the portal starts without them.
 
 Set both keys in either form. A `tag` alone keeps the default `@sha256` repository, and the values schema rejects a tag that is not a 64-character digest there. Helm then stops before it changes the release:
 
 ```text
 Error: values don't meet the specifications of the schema(s) in the following chart(s):
 devportal:
-- at '/global/catalogIndex/image/tag': 'bs_1.52.0_20260820T205531' does not match pattern '^[0-9a-f]{64}$'
+- at '/global/catalogIndex/image/tag': 'bs_1.54.9_20261015T183630' does not match pattern '^[0-9a-f]{64}$'
 ```
 
 The example below uses the tag form:
@@ -30,7 +30,7 @@ global:
   catalogIndex:
     image:
       repository: veecode/plugin-catalog-index
-      tag: bs_1.52.0_20260820T205531
+      tag: bs_1.54.9_20261015T183630
 ```
 
 The commands on this page change the index of a release that already runs chart `$CHART_VERSION`. To move to another chart version as well, follow [Upgrade DevPortal 3.x](./upgrade.md) and add the file to the values of its Step 3.
