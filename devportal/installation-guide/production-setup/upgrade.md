@@ -30,6 +30,116 @@ Chart 1.0.4 keeps image 3.0.3 and changes two defaults. Check your stored values
 
 If a 3.0.0 deployment outside this chart runs the image with SQLite, change its image reference to 3.0.3 (the digest is on the release sheet). The backup and restore steps in this guide do not apply to it.
 
+## Upgrade to chart 1.1.0
+
+Chart 1.1.0 installs DevPortal 3.1.0. If you upgrade to it from chart 1.0.x or from 3.0.x, read this section before Step 1. The steps stay the same, with the changes below.
+
+### What changes for you
+
+The plugins that the portal enables by default now come from the plugin catalog index, which the chart pins by digest. Chart 1.0.x read those plugins from a file in the image, `/opt/app-root/src/dynamic-plugins.veecode.yaml`. Image 3.1.0 no longer has that file. It keeps only a list of the default plugin names, `/opt/app-root/src/factory-plugins.yaml`, which the Marketplace uses to recognize them.
+
+A plugin update now reaches your portal through a new chart release, not a new image.
+
+In Step 1, set the target to chart 1.1.0, and set `CHART_FROM`, `IMAGE_FROM_VERSION`, and `IMAGE_FROM` to your current release:
+
+```bash
+export CHART_TO=1.1.0
+export IMAGE_TO_VERSION=3.1.0
+export IMAGE_TO=docker.io/veecode/devportal@sha256:fe33373b7e5dc536f04d1878519bb53862a769b46869f78f829b198a30e5246b
+```
+
+### Update the includes list
+
+Chart 1.1.0 includes only `dynamic-plugins.default.yaml`. Remove `/opt/app-root/src/dynamic-plugins.veecode.yaml` from `global.dynamic.includes`, because image 3.1.0 no longer has that file.
+
+Before:
+
+```yaml
+global:
+  dynamic:
+    includes:
+      - dynamic-plugins.default.yaml
+      - /opt/app-root/src/dynamic-plugins.veecode.yaml
+```
+
+After:
+
+```yaml
+global:
+  dynamic:
+    includes:
+      - dynamic-plugins.default.yaml
+```
+
+The saved values contain this list only if you set `includes` yourself, or if an earlier `--reuse-values` upgrade stored the 1.0.x defaults. Check the saved file:
+
+```bash
+grep -n -A3 'includes' "$BACKUP_DIR/values.yaml"
+```
+
+If the list contains the entry, prepare a copy for Step 3:
+
+1. Copy the saved values: `cp "$BACKUP_DIR/values.yaml" "$BACKUP_DIR/values-1.1.0.yaml"`.
+2. Remove the entry from `global.dynamic.includes` in the copy.
+3. In Step 3, pass `--values "$BACKUP_DIR/values-1.1.0.yaml"` in place of `values.yaml`.
+
+Keep `values.yaml` unchanged. Step 5 uses it to return to chart 1.0.x, and chart 1.0.x loads its default plugins through that entry. If the saved values have no `includes` list, chart 1.1.0 uses its own default, and Step 3 needs no change.
+
+### Do not use `--reuse-values`
+
+Do not add `--reuse-values` to the Step 3 command. It keeps the previous release's values, so the upgrade keeps the previous image and plugin index instead of the ones in chart 1.1.0. Pass the values file, as Step 3 does. If you prefer to reuse stored values, use `--reset-then-reuse-values` (Helm 3.14 or later), and check the includes list in the stored values first.
+
+### Update overrides of default plugins
+
+An override in `global.dynamic.plugins` keeps working after the upgrade. For a full digest reference, `disabled: true` still removes the plugin, and a full `pluginConfig` still replaces the plugin's index configuration. A digest reference still pins the build of that digest, though, so the plugin does not follow the index.
+
+Change each override of a default plugin as follows:
+
+1. Replace `@sha256:<digest>` with `:{{ "{{inherit}}" }}`, as the example below shows. Keep the `!<path>` suffix. `{{inherit}}` takes the version that the pinned index gives the plugin.
+2. Keep `disabled` and `pluginConfig` as they are.
+3. Remove any environment variable that points to `/opt/app-root/src/dynamic-plugins.veecode.yaml`. Chart 1.1.0 no longer sets one.
+
+The chart renders these values as templates, so write `{{inherit}}` with the escape shown in step 1. A bare `{{inherit}}` makes Helm fail with `function "inherit" not defined`.
+
+Before (chart 1.0.x):
+
+```yaml
+global:
+  dynamic:
+    plugins:
+      - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar@sha256:<digest>!backstage-community-plugin-tech-radar
+        disabled: true
+```
+
+After (chart 1.1.0):
+
+```yaml
+global:
+  dynamic:
+    plugins:
+      - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar:{{ "{{inherit}}" }}!backstage-community-plugin-tech-radar
+        disabled: true
+```
+
+### Marketplace behavior for default plugins
+
+Four default plugins are protected, and the Marketplace cannot disable them. If you disable one of them in the Marketplace, the portal ignores that change, and the startup log shows a warning. The protected plugins are:
+
+- `devportal-marketplace-backend`
+- `devportal-marketplace-frontend-dynamic`
+- `devportal-pending-changes-dynamic`
+- `red-hat-developer-hub-backstage-plugin-catalog-backend-module-extensions`
+
+You can disable the other default plugins from the Marketplace. The change takes effect after the portal restarts.
+
+### Roll back to chart 1.0.4
+
+Step 5 returns the portal to the chart in `CHART_FROM`. Rolling back to chart 1.0.4 with these steps was qualified on the DevPortal 3.1.0 release candidate. The qualification stopped the portal, restored the database backup, rolled back the chart, and checked the plugins after the restart.
+
+### Upgrade from 3.0.x for a security fix
+
+DevPortal 3.0.x includes `@backstage/plugin-scaffolder-backend` 4.0.1. That version is in the affected range of [GHSA-g2v8-7jhw-pp8p](https://github.com/advisories/GHSA-g2v8-7jhw-pp8p) (CVE-2026-106501), a critical sensitive-information exposure issue in the Scaffolder with a CVSS score of 9.6. DevPortal 3.1.0 includes `@backstage/plugin-scaffolder-backend` 4.1.0, which fixes the issue.
+
 ## Step 1: Prepare the release and backup directory
 
 Run these commands in one Bash session. They save the values stored for this release. Each chart version supplies its own defaults.
