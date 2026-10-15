@@ -40,7 +40,6 @@ On the local stack, put the equivalent entry under `plugins:` in the operator pl
 ```yaml
 includes:
   - dynamic-plugins.default.yaml
-  - /opt/app-root/src/dynamic-plugins.veecode.yaml
 plugins:
   - package: oci://quay.io/veecode/veecode-platform-plugin-veecode-homepage:{{inherit}}!veecode-platform-plugin-veecode-homepage
     disabled: false
@@ -63,7 +62,7 @@ plugins:
                 importName: VisitListener
 ```
 
-Keep the `VisitListener` mount point: it records visits, and without it the recently and top visited cards stay empty. `{{inherit}}` keeps the version that the default plugin file pins, so the override survives upgrades. Always keep the `!<plugin-path>` part after the version.
+Keep the `VisitListener` mount point: it records visits, and without it the recently and top visited cards stay empty. `{{inherit}}` keeps the version that the catalog index gives the plugin, so the override survives upgrades. Always keep the `!<plugin-path>` part after the version.
 
 ## Swap the home page
 

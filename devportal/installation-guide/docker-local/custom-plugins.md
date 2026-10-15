@@ -4,18 +4,17 @@ sidebar_label: Dynamic Plugins
 title: Configure dynamic plugins for the local stack
 ---
 
-The image contains a default plugin index and the default plugin file (`dynamic-plugins.veecode.yaml`). The local stack mounts an operator plugin file into the `install-dynamic-plugins` service, which merges its entries with Marketplace selections before installing plugins.
+The default plugins come from the plugin catalog index, not from the portal image. The image carries only their names, in `/opt/app-root/src/factory-plugins.yaml`. The local stack mounts an operator plugin file into the `install-dynamic-plugins` service, which merges its entries with Marketplace selections before installing plugins.
 
 The root `dynamic-plugins.yaml` is derived from the pinned chart. Do not edit it. Create a separate operator file for local additions.
 
 ## Add an operator plugin file
 
-Create `dynamic-plugins.local.yaml` in the `devportal-local` directory. Include the default plugin index and the default plugin file:
+Create `dynamic-plugins.local.yaml` in the `devportal-local` directory. Include the default plugin index:
 
 ```yaml
 includes:
   - dynamic-plugins.default.yaml
-  - /opt/app-root/src/dynamic-plugins.veecode.yaml
 plugins: []
 ```
 
@@ -39,17 +38,17 @@ The regex module adds the `regex:replace` action.
 
 ## Find plugin references
 
-Print the default plugin file from the running container:
+Print the default plugin names from the running container:
 
 ```bash
-docker compose exec devportal cat /opt/app-root/src/dynamic-plugins.veecode.yaml
+docker compose exec devportal cat /opt/app-root/src/factory-plugins.yaml
 ```
 
-The file lists the default plugins with their package references. Each Marketplace package is a `Package` catalog entity in the `rhdh` namespace. Copy its `spec.dynamicArtifact` value into a plugin entry.
+The file lists each default plugin by its repository and path. Their configuration is in the `dynamic-plugins.default.yaml` file of the catalog index. [What ships by default](../production-setup/setup.md#what-ships-by-default) shows how to extract it. Each Marketplace package is a `Package` catalog entity in the `rhdh` namespace. Copy its `spec.dynamicArtifact` value into a plugin entry.
 
 ## How the plugin list is assembled
 
-The `includes` list starts with `dynamic-plugins.default.yaml` and `/opt/app-root/src/dynamic-plugins.veecode.yaml`. The install service then places operator plugin entries before Marketplace selections. If both name the same plugin, the operator entry wins.
+The `includes` list holds `dynamic-plugins.default.yaml`, the default plugin file of the catalog index. The install service then places operator plugin entries before Marketplace selections. If both name the same plugin, the operator entry wins.
 
 ## Mount the operator plugin file with Compose
 

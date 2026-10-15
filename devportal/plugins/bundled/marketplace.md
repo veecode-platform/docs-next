@@ -35,7 +35,7 @@ Marketplace is the VeeCode plugin experience built on the Red Hat Developer Hub 
 
 ## Configuration
 
-The default plugin file (`dynamic-plugins.veecode.yaml`) enables all three packages and configures the frontend route and sidebar entry:
+The catalog index's default plugin file (`dynamic-plugins.default.yaml`) enables all three packages and configures the frontend route and sidebar entry:
 
 ```yaml
 pluginConfig:

@@ -24,7 +24,7 @@ The export writes `dynamic-plugins-root-dev/docker-compose.dynamic-plugins-root.
 
 ## Plugin entries
 
-On the local stack, customer plugins are added through an operator plugin file with a top-level `plugins:` list. The file starts with the default plugin index and the product plugin file under `includes:`, and each entry uses a full digest-pinned OCI reference. See [Configure dynamic plugins for the local stack](../../installation-guide/docker-local/custom-plugins.md) for the file and the Compose mount that activates it.
+On the local stack, customer plugins are added through an operator plugin file with a top-level `plugins:` list. The file starts with the default plugin index under `includes:`, and each entry uses a full digest-pinned OCI reference. See [Configure dynamic plugins for the local stack](../../installation-guide/docker-local/custom-plugins.md) for the file and the Compose mount that activates it.
 
 A published entry has this shape:
 

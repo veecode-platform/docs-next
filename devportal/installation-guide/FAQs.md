@@ -77,4 +77,4 @@ Open Marketplace after the catalog finishes loading and select a plugin to insta
 
 ### Do I need to copy the image's default plugins into chart values?
 
-No. The image ships its default plugins. Use chart values for additions or overrides. See [Disable a default plugin](./production-setup/setup.md#disable-a-default-plugin) for the override form.
+No. The plugin catalog index ships its default plugins. Use chart values for additions or overrides. See [Disable a default plugin](./production-setup/setup.md#disable-a-default-plugin) for the override form.

@@ -4,7 +4,7 @@ sidebar_label: Bundled Plugins
 title: Bundled Plugin Catalog
 ---
 
-DevPortal 3.x ships 20 digest-pinned OCI plugins baked into the portal image. They install from the default plugin file (`dynamic-plugins.veecode.yaml`) without any entry in your values: 18 are enabled by default and 2 ship disabled. The [production setup guide](../../installation-guide/production-setup/setup.md#what-ships-by-default) lists the same set from the install side.
+DevPortal 3.x enables 18 digest-pinned OCI plugins by default. They come from the catalog index's default plugin file (`dynamic-plugins.default.yaml`) and install without any entry in your values. The index also lists the stock Red Hat home page, disabled, and the legacy VeeCode theme is not a default. The [production setup guide](../../installation-guide/production-setup/setup.md#what-ships-by-default) lists the same set from the install side.
 
 ## Default plugins
 
@@ -14,7 +14,7 @@ DevPortal 3.x ships 20 digest-pinned OCI plugins baked into the portal image. Th
 | [VeeCode home page](./homepage.md) | Enabled | [Homepage](./homepage.md) |
 | [Global header and sidebar ordering](./global-header.md) | Enabled | [Global Header](./global-header.md) |
 | [RBAC screens](./rbac.md) | Enabled (permission checks are off by default) | [RBAC](./rbac.md) |
-| Legacy VeeCode theme (superseded by app-config branding) | Disabled | No page |
+| Legacy VeeCode theme (superseded by app-config branding) | Not a default | No page |
 | [About page](./about.md) | Enabled | [About](./about.md) |
 | About backend | Enabled | [About](./about.md) |
 | Extensions catalog provider (Marketplace loop) | Enabled | [Marketplace](./marketplace.md) |

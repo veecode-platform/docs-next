@@ -23,7 +23,6 @@ Add the index package reference to your operator file (`dynamic-plugins.local.ya
 ```yaml
 includes:
   - dynamic-plugins.default.yaml
-  - /opt/app-root/src/dynamic-plugins.veecode.yaml
 plugins:
   - package: oci://quay.io/veecode/backstage-community-plugin-grafana@sha256:f532f66d796de182d32cbe5f0eb7f0829cc31e61dac09f6cfed646ef6f8bcad3
     disabled: false
@@ -33,7 +32,7 @@ Mount the operator file and recreate the stack as described in [Configure dynami
 
 ### On Kubernetes
 
-Add the same package reference under `global.dynamic.plugins` in your chart values. The chart loads the default plugin file (`dynamic-plugins.veecode.yaml`) through `global.dynamic.includes` and takes customer plugin entries from `global.dynamic.plugins`.
+Add the same package reference under `global.dynamic.plugins` in your chart values. The chart loads the catalog index's default plugin file (`dynamic-plugins.default.yaml`) through `global.dynamic.includes` and takes customer plugin entries from `global.dynamic.plugins`.
 
 ---
 

@@ -37,7 +37,7 @@ global:
         disabled: false
 ```
 
-To turn off a default plugin instead, add an entry for that plugin with the `{{inherit}}` tag and the full `!<plugin path>` part, plus `disabled: true`. This example disables the Tech Radar frontend. The installer matches the override to the default plugin by registry, repository, and the plugin path after `!`; the tag is not part of the match, and `{{inherit}}` keeps the version the default plugin file pins. A tag or digest in an override sets that version instead, so a stale digest pins an older artifact. Write the tag as `{{ "{{inherit}}" }}` here because the chart renders this list as a template.
+To turn off a default plugin instead, add an entry for that plugin with the `{{inherit}}` tag and the full `!<plugin path>` part, plus `disabled: true`. This example disables the Tech Radar frontend. The installer matches the override to the default plugin by registry, repository, and the plugin path after `!`; the tag is not part of the match, and `{{inherit}}` takes the version the catalog index gives the plugin. A tag or digest in an override sets that version instead, so a stale digest pins an older artifact. Write the tag as `{{ "{{inherit}}" }}` here because the chart renders this list as a template.
 
 ```yaml
 global:
@@ -47,13 +47,13 @@ global:
         disabled: true
 ```
 
-If your override for a default plugin also sets `pluginConfig`, it replaces that plugin's whole `pluginConfig` instead of merging with it. Copy the complete `pluginConfig` block from the default plugin file and edit values in place. Each bundled page gives the override reference for its plugin.
+If your override for a default plugin also sets `pluginConfig`, it replaces that plugin's whole `pluginConfig` instead of merging with it. Copy the complete `pluginConfig` block from the catalog index's `dynamic-plugins.default.yaml` and edit values in place. Each bundled page gives the override reference for its plugin.
 
 Then upgrade the release. The production setup guide shows the full flow in [Disable a default plugin](../installation-guide/production-setup/setup.md#disable-a-default-plugin).
 
 ## Enable a plugin bundled in the image
 
-DevPortal 3.0.3 bundles 41 plugins under `/opt/app-root/src/dynamic-plugins/dist`. These bundled plugins are separate from the 20 default plugins. A `./dynamic-plugins/dist/...` entry enables a bundled plugin and does not override a default plugin; to disable or reconfigure a default plugin, use the OCI `{{inherit}}` form described in [Disable a default plugin](../installation-guide/production-setup/setup.md#disable-a-default-plugin). List their directories on the local stack with:
+DevPortal 3.0.3 bundles 41 plugins under `/opt/app-root/src/dynamic-plugins/dist`. These bundled plugins are separate from the 18 default plugins. A `./dynamic-plugins/dist/...` entry enables a bundled plugin and does not override a default plugin; to disable or reconfigure a default plugin, use the OCI `{{inherit}}` form described in [Disable a default plugin](../installation-guide/production-setup/setup.md#disable-a-default-plugin). List their directories on the local stack with:
 
 ```bash
 docker compose exec devportal ls /opt/app-root/src/dynamic-plugins/dist
@@ -95,10 +95,10 @@ plugins:
 
 ## Find the package reference
 
-For a default plugin, print the default plugin file from the running portal. It lists all 20 default plugins with their exact references:
+For a default plugin, print the list of default plugin names from the running portal. It lists all 18 default plugins by repository and path. The override reference for one of them is `oci://<repository>:{{inherit}}!<path>`. Print the list from the running portal:
 
 ```bash
-docker compose exec devportal cat /opt/app-root/src/dynamic-plugins.veecode.yaml
+docker compose exec devportal cat /opt/app-root/src/factory-plugins.yaml
 ```
 
 For a Marketplace plugin, read the reference from its `Package` catalog entity in the `rhdh` namespace: the `spec.dynamicArtifact` value is the digest-pinned OCI reference to use in a plugin entry. For example, the Grafana package entity carries:

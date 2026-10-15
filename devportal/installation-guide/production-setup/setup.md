@@ -527,7 +527,7 @@ The sign-in page offers **Guest** and a GitHub sign-in that needs an OAuth app t
 
 ## Disable a default plugin
 
-The default plugins ship in the DevPortal image's default plugin file (`dynamic-plugins.veecode.yaml`), not in the chart's `values.yaml`. When the same plugin is configured in several places, deploy configuration (chart values or operator-supplied app-config) wins over a Marketplace row, which wins over the default.
+The default plugins come from the plugin catalog index that the chart pins, not from the chart's `values.yaml`. When the same plugin is configured in several places, deploy configuration (chart values or operator-supplied app-config) wins over a Marketplace row, which wins over the default.
 
 The installer matches an override by registry, repository, and plugin path, not by tag or digest. Include the full `!<plugin path>` suffix. A tag or digest in an override sets the plugin version, so a stale digest can pin an older artifact. An override's `pluginConfig` replaces the default plugin's entire `pluginConfig`. Include every setting you want to keep.
 
@@ -567,7 +567,7 @@ After the rollout, sign in again and confirm Tech Radar is absent from **Install
 
 ## What ships by default
 
-The image's default plugin file (`dynamic-plugins.veecode.yaml`) runs 20 digest-pinned OCI plugins without an entry in your values: 18 enabled by default and 2 shipped disabled (the Red Hat dynamic Home page and the theme). The **Installed packages** tab lists them, together with the Keycloak module that `values.yaml` adds, and any marketplace rows you install:
+The catalog index that the chart pins enables 18 digest-pinned OCI plugins without an entry in your values. The index also lists the Red Hat dynamic Home page, disabled, and the legacy theme is no longer a default. The **Installed packages** tab lists the enabled plugins, together with the Keycloak module that `values.yaml` adds, and any marketplace rows you install:
 
 - The VeeCode home page, the global header and an About page.
 - The Marketplace, which is the **Extensions** page.
@@ -575,6 +575,17 @@ The image's default plugin file (`dynamic-plugins.veecode.yaml`) runs 20 digest-
 - The RBAC screens. The RBAC backend is part of the image, but permission checks are off: the default configuration does not set `permission.enabled: true`. Every signed-in user can install plugins from the Marketplace.
 
 The chart also creates a read-only ClusterRole and binding for the Kubernetes plugin (`kubernetesPlugin.rbac.enabled`, on by default). The image does not load the Kubernetes plugin by default. When releases with the same name share a cluster across namespaces, set `kubernetesPlugin.rbac.namespaceQualifiedName: true` so the cluster-scoped names include the release namespace.
+
+To read the configuration of a default plugin, extract the catalog index's `dynamic-plugins.default.yaml`. With `CHART_VERSION` set as in Step 1, run these commands on a connected machine with Helm, `yq` 4, and Docker. `docker cp` copies the file out of the index image without running anything inside it:
+
+```bash
+helm repo add veecode https://veecode-platform.github.io/next-charts
+helm show values veecode/devportal --version "$CHART_VERSION" > chart-values.yaml
+export CATALOG_INDEX_SOURCE="$(yq -r '"\(.global.catalogIndex.image.registry)/\(.global.catalogIndex.image.repository):\(.global.catalogIndex.image.tag)"' chart-values.yaml)"
+docker create --name devportal-index "$CATALOG_INDEX_SOURCE" true >/dev/null
+docker cp devportal-index:/dynamic-plugins.default.yaml .
+docker rm devportal-index >/dev/null
+```
 
 ## Install without internet access
 
@@ -595,10 +606,11 @@ export PORTAL_IMAGE="$(yq -r '"\(.upstream.backstage.image.registry)/\(.upstream
 export CATALOG_INDEX_REF="$(yq -r '"oci://\(.global.catalogIndex.image.registry)/\(.global.catalogIndex.image.repository):\(.global.catalogIndex.image.tag)"' chart-values.yaml)"
 test "$(yq -r '.upstream.backstage.image.tag' chart-values.yaml)" = "$PORTAL_IMAGE_TAG"
 
-docker run --rm --entrypoint cat "$PORTAL_IMAGE" \
-  /opt/app-root/src/dynamic-plugins.veecode.yaml > dynamic-plugins.veecode.yaml
-yq -r '.plugins[].package | select(test("^oci://")) | sub("!.*$"; "")' \
-  dynamic-plugins.veecode.yaml > default-plugin-refs.txt
+docker create --name devportal-index "${CATALOG_INDEX_REF#oci://}" true >/dev/null
+docker cp devportal-index:/dynamic-plugins.default.yaml dynamic-plugins.default.yaml
+docker rm devportal-index >/dev/null
+yq -r '.plugins[] | select(.disabled != true) | .package | select(test("^oci://")) | sub("!.*$"; "")' \
+  dynamic-plugins.default.yaml > default-plugin-refs.txt
 test -s default-plugin-refs.txt
 
 curl -fsSLo mirror-plugins.sh \
@@ -655,7 +667,7 @@ export KEYCLOAK_IMAGE="$MIRROR_REGISTRY/keycloak/keycloak:26.3.3"
 
 Copy the `offline-bundle` directory, `values-mirror.yaml`, and `registries.conf` (created below) to the machine that reaches the cluster. There, set `OFFLINE_BUNDLE` to the bundle directory path, `MIRROR_REGISTRY` to the same registry name, and export the two image variables above before Step 1.
 
-The image contains the default plugin file (`dynamic-plugins.veecode.yaml`). The commands extract its OCI references, remove the `!subpath` suffix, and give the image references to RHDH's script with `--plugin-list`. Copy the chart's catalog index separately with Skopeo; the RHDH script reads Red Hat's index format. From chart 1.0.4 the chart reads the index by digest. The copy keeps that digest (`--preserve-digests`) and tags it `devportal-<chart version>` in the mirror, so a registry that removes untagged images keeps it. The script writes `rhdh-plugin-mirroring-summary.txt` with the plugin source-to-mirror mappings. If your values override the image or `global.catalogIndex.image`, use those references instead of the chart defaults above.
+The catalog index holds the default plugin file (`dynamic-plugins.default.yaml`). The commands extract the OCI references of its enabled plugins, remove the `!subpath` suffix, and give them to RHDH's script with `--plugin-list`. Copy the chart's catalog index separately with Skopeo; the RHDH script reads Red Hat's index format. From chart 1.0.4 the chart reads the index by digest. The copy keeps that digest (`--preserve-digests`) and tags it `devportal-<chart version>` in the mirror, so a registry that removes untagged images keeps it. The script writes `rhdh-plugin-mirroring-summary.txt` with the plugin source-to-mirror mappings. If your values override the image or `global.catalogIndex.image`, use those references instead of the chart defaults above.
 
 This procedure assumes the connected machine can reach both Quay and the mirror registry. For a fully disconnected transfer, use RHDH's documented `--to-dir` and `--from-dir` flow for the default plugin list, and copy the chart index separately with Skopeo. To point the chart at a mirrored catalog index, see [Configure the plugin catalog index](./catalog-index.md).
 
