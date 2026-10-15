@@ -41,4 +41,4 @@ These pages from the 2.x bundled set are not default plugins in 3.x. They instal
 - [GitHub Actions](./github-actions.md): Marketplace plugin `github-actions`.
 - [Jenkins](./jenkins.md): Marketplace plugin `backstage-community-plugin-jenkins`.
 
-For plugins not listed here (Grafana, SonarQube, Kubernetes, and others), see [Finding Plugins](../finding.md) and [Adding Plugins](../adding.md). Grafana is an installable package in the default plugin index but has no Marketplace card on 3.0.3: enable it with a plugin entry and set `grafana.domain` before the portal starts. The Vault plugin is not available in 3.x at all; see [Backstage Plugins](../plugins.md#plugins-that-are-not-available-in-3x).
+For plugins not listed here (Grafana, SonarQube, Kubernetes, and others), see [Finding Plugins](../finding.md) and [Adding Plugins](../adding.md). Grafana is an installable package in the default plugin index but has no Marketplace card: enable it with a plugin entry and set `grafana.domain` before the portal starts. The Vault plugin is not available in 3.x at all; see [Backstage Plugins](../plugins.md#plugins-that-are-not-available-in-3x).

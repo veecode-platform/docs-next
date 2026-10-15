@@ -24,7 +24,7 @@ Add the index package reference to your operator file (`dynamic-plugins.local.ya
 includes:
   - dynamic-plugins.default.yaml
 plugins:
-  - package: oci://quay.io/veecode/backstage-community-plugin-grafana@sha256:f532f66d796de182d32cbe5f0eb7f0829cc31e61dac09f6cfed646ef6f8bcad3
+  - package: oci://quay.io/veecode/backstage-community-plugin-grafana@sha256:27e84e524b188b84bc46d35783e628c01d63d11293ec86454b34e08a333deceb
     disabled: false
 ```
 

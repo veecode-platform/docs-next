@@ -30,6 +30,8 @@ Marketplace is the VeeCode plugin experience built on the Red Hat Developer Hub 
 - Shows which plugins are installed
 - An **Install** selection is written to PostgreSQL and to `/devportal-data/extensions-install.yaml` at once; the card shows a pending state until the stack restarts
 - The **Installed packages** tab lists the packages the portal runs
+- Four default plugins are protected. The Marketplace cannot disable them: a disabled row for one of them is ignored, and the install log shows a warning.
+- The YAML you type on an install or edit page is saved. Invalid YAML is refused, and the page shows the line and column of the first error.
 
 ---
 

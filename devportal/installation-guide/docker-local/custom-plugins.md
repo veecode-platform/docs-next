@@ -28,7 +28,7 @@ This example enables the regex scaffolder module and disables the Tech Radar fro
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/backstage-community-plugin-scaffolder-backend-module-regex@sha256:e0f3e1f69cb6c1bccd538f8ed80e6b16b85f2540b8866c636225903bb76a0e35
+  - package: oci://quay.io/veecode/backstage-community-plugin-scaffolder-backend-module-regex@sha256:3b19c142968ab34c6180332156ba345e9bebbffd2ff79bef14d3d645b8f6c05d
     disabled: false
   - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar:{{inherit}}!backstage-community-plugin-tech-radar
     disabled: true
@@ -44,7 +44,7 @@ Print the default plugin names from the running container:
 docker compose exec devportal cat /opt/app-root/src/factory-plugins.yaml
 ```
 
-The file lists each default plugin by its repository and path. Their configuration is in the `dynamic-plugins.default.yaml` file of the catalog index. [What ships by default](../production-setup/setup.md#what-ships-by-default) shows how to extract it. Each Marketplace package is a `Package` catalog entity in the `rhdh` namespace. Copy its `spec.dynamicArtifact` value into a plugin entry.
+The file lists each default plugin by its repository and path. Their configuration is in the `dynamic-plugins.default.yaml` file of the catalog index. To extract that file on the local stack, copy the image reference from `CATALOG_INDEX_IMAGE` in the `install-dynamic-plugins` service of `docker-compose.yml`, then run the `docker create` and `docker cp` commands in [What ships by default](../production-setup/setup.md#what-ships-by-default) with that reference in place of the chart's index. Each Marketplace package is a `Package` catalog entity in the `rhdh` namespace. Copy its `spec.dynamicArtifact` value into a plugin entry.
 
 ## How the plugin list is assembled
 

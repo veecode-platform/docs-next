@@ -33,7 +33,7 @@ Add the plugin under `global.dynamic.plugins` in your values file, using a full 
 global:
   dynamic:
     plugins:
-      - package: oci://quay.io/veecode/backstage-community-plugin-github-actions@sha256:fe9cea3a11097339f85bab0bf095ecf1dc95b972194d41e4c9ca0e34c85ecebd
+      - package: oci://quay.io/veecode/backstage-community-plugin-github-actions@sha256:2b4ffde7809fced57ee77f1153d029bbdce1580f1cff926d8be4dafed25b4a72
         disabled: false
 ```
 
@@ -51,37 +51,31 @@ If your override for a default plugin also sets `pluginConfig`, it replaces that
 
 Then upgrade the release. The production setup guide shows the full flow in [Disable a default plugin](../installation-guide/production-setup/setup.md#disable-a-default-plugin).
 
-## Enable a plugin bundled in the image
+## Plugins that 3.0.x bundled in the image
 
-DevPortal 3.0.3 bundles 41 plugins under `/opt/app-root/src/dynamic-plugins/dist`. These bundled plugins are separate from the 18 default plugins. A `./dynamic-plugins/dist/...` entry enables a bundled plugin and does not override a default plugin; to disable or reconfigure a default plugin, use the OCI `{{inherit}}` form described in [Disable a default plugin](../installation-guide/production-setup/setup.md#disable-a-default-plugin). List their directories on the local stack with:
+DevPortal 3.0.3 bundled 41 plugins under `/opt/app-root/src/dynamic-plugins/dist`. The 3.1 image has no `dynamic-plugins/` directory. Plugins that 3.0.x shipped there are OCI artifacts from 3.1 on, and they are disabled by default. An entry with a `./dynamic-plugins/dist/...` path is skipped without an error, so the plugin is missing. Replace each such entry with the plugin's `oci://` reference from the Marketplace or the catalog index.
 
-```bash
-docker compose exec devportal ls /opt/app-root/src/dynamic-plugins/dist
-```
-
-To enable a bundled plugin on the local stack, add its relative path to the operator plugin file and set `disabled` to `false`:
-
-```yaml
-plugins:
-  - package: ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-github-dynamic
-    disabled: false
-```
-
-Apply the change by running `docker compose down` and then `docker compose up -d` with the same Compose files. On Kubernetes, put the same entry under `global.dynamic.plugins`:
+For example, the GitHub scaffolder module is an OCI artifact in the catalog index, disabled by default. On Kubernetes, enable it under `global.dynamic.plugins`:
 
 ```yaml
 global:
   dynamic:
     plugins:
-      - package: ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-github-dynamic
+      - package: oci://quay.io/veecode/backstage-plugin-scaffolder-backend-module-github@sha256:bb3f9763b14b6bd524b99b58e209a3b89d7fdf9ccadcb6d957f8d365c1d5a719
         disabled: false
 ```
 
-The [production setup guide's Keycloak catalog module example](../installation-guide/production-setup/setup.md#step-6-install-devportal) uses this path.
+On the local stack, add the same entry under `plugins:` in the operator plugin file, then apply it with `docker compose down` and `docker compose up -d` using the same Compose files:
+
+```yaml
+plugins:
+  - package: oci://quay.io/veecode/backstage-plugin-scaffolder-backend-module-github@sha256:bb3f9763b14b6bd524b99b58e209a3b89d7fdf9ccadcb6d957f8d365c1d5a719
+    disabled: false
+```
 
 The GitHub scaffolder module loads at startup without extra configuration and adds actions such as `publish:github` and `publish:github:pull-request`. Configure a GitHub integration token before you run those actions.
 
-The Marketplace offers the same upstream module in the `github-scaffolder-actions` collection as a digest-pinned OCI artifact. A bundled path does not require pulling that artifact from a registry, which helps when a cluster cannot reach the registry. The default plugin index lists none of the `./dynamic-plugins/dist` paths, so those paths do not appear there as installable entries. To change which catalog index the portal reads, see [Configure the plugin catalog index](../installation-guide/production-setup/catalog-index.md).
+The Marketplace lists the same upstream module as the `github-scaffolder-actions` plugin, backed by the digest-pinned OCI artifact above. The default plugin index has no `./dynamic-plugins/dist/...` entries. To change which catalog index the portal reads, see [Configure the plugin catalog index](../installation-guide/production-setup/catalog-index.md).
 
 ## On the local stack: the operator plugin file
 
@@ -95,7 +89,7 @@ plugins:
 
 ## Find the package reference
 
-For a default plugin, print the list of default plugin names from the running portal. It lists all 18 default plugins by repository and path. The override reference for one of them is `oci://<repository>:{{inherit}}!<path>`. Print the list from the running portal:
+For a default plugin, print the list of default plugin names from the running portal. It lists all 18 default plugins by repository and path. The override reference for one of them is `oci://<repository>:{{inherit}}!<path>`.
 
 ```bash
 docker compose exec devportal cat /opt/app-root/src/factory-plugins.yaml
@@ -104,7 +98,7 @@ docker compose exec devportal cat /opt/app-root/src/factory-plugins.yaml
 For a Marketplace plugin, read the reference from its `Package` catalog entity in the `rhdh` namespace: the `spec.dynamicArtifact` value is the digest-pinned OCI reference to use in a plugin entry. For example, the Grafana package entity carries:
 
 ```json
-{"metadata":{"name":"backstage-community-plugin-grafana","namespace":"rhdh"},"spec":{"dynamicArtifact":"oci://quay.io/veecode/backstage-community-plugin-grafana@sha256:f532f66d796de182d32cbe5f0eb7f0829cc31e61dac09f6cfed646ef6f8bcad3"}}
+{"metadata":{"name":"backstage-community-plugin-grafana","namespace":"rhdh"},"spec":{"dynamicArtifact":"oci://quay.io/veecode/backstage-community-plugin-grafana@sha256:27e84e524b188b84bc46d35783e628c01d63d11293ec86454b34e08a333deceb"}}
 ```
 
 ## Configuring credentials

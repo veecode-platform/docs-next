@@ -41,9 +41,9 @@ The installer matches an override entry to a default plugin by registry, reposit
 
 ## Default plugins and Marketplace
 
-[Default plugins](./bundled/index.md) ship in the image and need no download: the home page, the global header, the About page, Marketplace with the Extensions catalog provider, TechDocs, Notifications with Signals, Tech Radar, and the RBAC screens. Each bundled page names whether its plugin is a default plugin and gives the override reference for disabling it.
+[Default plugins](./bundled/index.md) come from the plugin catalog index, and the installer pulls each one as an OCI artifact when the portal starts: the home page, the global header, the About page, Marketplace with the Extensions catalog provider, TechDocs, Notifications with Signals, Tech Radar, and the RBAC screens. Each bundled page names whether its plugin is a default plugin and gives the override reference for disabling it.
 
-[Marketplace](./bundled/marketplace.md) is the in-portal plugin store; the sidebar item **Marketplace** opens the **Extensions** page at `/marketplace`. It reads the plugin catalog index image configured with the chart's `global.catalogIndex.image`, which on 3.0.3 lists 71 installable plugins. See [Finding Plugins](./finding.md).
+[Marketplace](./bundled/marketplace.md) is the in-portal plugin store; the sidebar item **Marketplace** opens the **Extensions** page at `/marketplace`. It reads the plugin catalog index image configured with the chart's `global.catalogIndex.image`. See [Finding Plugins](./finding.md).
 
 ## Plugin pages and plugin development
 

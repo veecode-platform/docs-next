@@ -16,7 +16,7 @@ The VeeCode homepage plugin provides the landing page for DevPortal. It mounts a
 
 `veecode-platform-plugin-veecode-homepage`
 
-The catalog index's default plugin file (`dynamic-plugins.default.yaml`) also lists the stock Red Hat Developer Hub home page package, but that entry is disabled in the index: enabling it alongside the VeeCode home page registers two factories for the same visits API and stops the portal at startup. Leave the stock entry disabled.
+The catalog index's default plugin file (`dynamic-plugins.default.yaml`) also lists the stock Red Hat Developer Hub home page package, but that entry is disabled in the index: enabling it alongside the VeeCode home page leaves the portal's pages empty, because both register the same frontend API. This was observed on 3.0.x and not re-tested on 3.1.0. Leave the stock entry disabled.
 
 ---
 

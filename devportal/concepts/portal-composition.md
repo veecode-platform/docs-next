@@ -10,7 +10,7 @@ A DevPortal installation is a service catalog and a way to create projects from 
 
 ## The four parts of a 3.x portal
 
-- **The image** ships the Backstage core with its static backend plugins (authentication, catalog, scaffolder, search, notifications) and the names of the default plugins, in `/opt/app-root/src/factory-plugins.yaml`. See [Dynamic Plugins](./dynamic-plugins.md).
+- **The image** ships the Backstage core with its static backend plugins (authentication, catalog, scaffolder, search, permissions) and the names of the default plugins, in `/opt/app-root/src/factory-plugins.yaml`. See [Dynamic Plugins](./dynamic-plugins.md).
 - **The chart** (`devportal`) includes the catalog index's default plugin file (`dynamic-plugins.default.yaml`) through `global.dynamic.includes`, adds operator plugins through the `global.dynamic.plugins` list, and carries operator configuration through `upstream.backstage.appConfig` and ordered `extraAppConfig` fragments. See [Configuration Hierarchy](./configuration-hierarchy.md).
 - **The catalog index image** supplies the default plugins with their configuration, and the installable plugins shown in the Marketplace UI. Marketplace selections are stored in PostgreSQL and applied when the portal restarts with the installer.
 - **The configuration fragments** set branding, authentication, catalog locations, and per-plugin backend settings. On the local stack you add a fragment as described in [Add a configuration fragment](../installation-guide/docker-local/custom-config.md).

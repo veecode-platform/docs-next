@@ -43,7 +43,7 @@ The `integrity:` field is **required for remote npm packages**. The installer do
 It is **not used** for:
 
 - OCI packages (`oci://...`) — these are validated by digest comparison.
-- Local paths (`./dynamic-plugins/dist/...`) — pre-bundled in the image; no download involved.
+- Local paths (`./dynamic-plugins/dist/...`), which the 3.1 image does not bundle; use an OCI reference instead.
 
 Expected format: `sha512-<base64>`. Two ways to generate it:
 

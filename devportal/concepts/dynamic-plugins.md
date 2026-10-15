@@ -12,9 +12,9 @@ Loading is step 1 of 3. A loaded plugin does nothing visible until two more step
 
 ## The default plugins
 
-The plugin catalog index that the chart pins enables 18 default plugins. The portal image carries only their names, in `/opt/app-root/src/factory-plugins.yaml`. The index also lists the stock Red Hat dynamic home page, disabled, because the VeeCode home page replaces it. The legacy VeeCode theme is not part of the defaults; Red Hat Developer Hub native theming through `app-config` replaces it. The enabled entries cover the VeeCode home page, the global header, the About page and its backend, the Marketplace backend and UI with the extensions catalog provider, TechDocs with its backend and addons, Notifications with its backend, Signals with its backend, Tech Radar with its backend, and the RBAC screens.
+The plugin catalog index that the chart pins enables 18 default plugins. The portal image carries only their names, in `/opt/app-root/src/factory-plugins.yaml`. The index also lists the stock Red Hat dynamic home page, disabled, because the VeeCode home page replaces it. The legacy VeeCode theme is not part of the defaults; Red Hat Developer Hub native theming through `app-config` replaces it. The enabled entries cover the VeeCode home page, the global header, the About page and its backend, the Marketplace backend and UI with the extensions catalog provider, TechDocs with its backend and addons, Notifications with its backend, Signals with its backend, Tech Radar with its backend, the RBAC screens, and the pending-changes indicator.
 
-The running portal lists what it installed in its log and at `/api/dynamic-plugins-info/loaded-plugins` once the backend is up. To see which default plugins a portal enables, read `/opt/app-root/src/factory-plugins.yaml` in the container. Their configuration is in the `dynamic-plugins.default.yaml` file of the catalog index.
+The running portal lists what it installed in its log and at `/api/dynamic-plugins-info/loaded-plugins` once the backend is up. To see which plugins the image treats as default plugins, read `/opt/app-root/src/factory-plugins.yaml` in the container. Their configuration is in the `dynamic-plugins.default.yaml` file of the catalog index.
 
 ## The default plugin index behind Marketplace
 
@@ -48,7 +48,7 @@ global:
 
 The installer matches overrides by registry, repository, and plugin path, not by tag or digest. A tag or digest in the override sets its version; `{{inherit}}` takes the version that the pinned catalog index gives the plugin, so the override follows each index release.
 
-If you set `pluginConfig` in an override for a default plugin, the installer replaces the whole block instead of merging it. Copy the complete block from the index's `dynamic-plugins.default.yaml` before editing values. [What ships by default](../installation-guide/production-setup/setup.md#what-ships-by-default) shows how to extract it.
+If you set `pluginConfig` in an override for a default plugin, the installer replaces the whole block instead of merging it. Copy the complete block from the index's `dynamic-plugins.default.yaml` before editing values. [What ships by default](../installation-guide/production-setup/setup.md#what-ships-by-default) shows how to extract it on Kubernetes. On the local stack, see [Find plugin references](../installation-guide/docker-local/custom-plugins.md#find-plugin-references).
 
 ## Local stack: the operator plugin file
 
@@ -56,7 +56,7 @@ On devportal-local you enable and disable plugins through an operator plugin fil
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/backstage-community-plugin-scaffolder-backend-module-regex@sha256:e0f3e1f69cb6c1bccd538f8ed80e6b16b85f2540b8866c636225903bb76a0e35
+  - package: oci://quay.io/veecode/backstage-community-plugin-scaffolder-backend-module-regex@sha256:3b19c142968ab34c6180332156ba345e9bebbffd2ff79bef14d3d645b8f6c05d
     disabled: false
   - package: oci://quay.io/veecode/backstage-community-plugin-tech-radar:{{inherit}}!backstage-community-plugin-tech-radar
     disabled: true

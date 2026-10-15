@@ -4,7 +4,7 @@ sidebar_label: Custom home plugin
 title: Custom home plugin
 ---
 
-The home page is the VeeCode homepage plugin, one of the default plugins, enabled at route `/` with page size props and a visit recorder on the `application/listener` mount point. The stock Red Hat Developer Hub dynamic home page also ships among the default plugins, but disabled: exactly one page may own `/`, and re-enabling the stock page alongside the VeeCode home breaks the boot. Change the home page by reconfiguring or replacing the VeeCode homepage entry, not by editing the image.
+The home page is the VeeCode homepage plugin, one of the default plugins, enabled at route `/` with page size props and a visit recorder on the `application/listener` mount point. The stock Red Hat Developer Hub dynamic home page also ships among the default plugins, but disabled: exactly one page may own `/`, and re-enabling the stock page alongside the VeeCode home leaves the portal's pages empty. This was observed on 3.0.x and not re-tested on 3.1.0. Change the home page by reconfiguring or replacing the VeeCode homepage entry, not by editing the image.
 
 ## Change the home page settings
 
