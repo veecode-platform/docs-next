@@ -68,10 +68,10 @@ global:
       - name: second-copy
         registry: quay.io
         repository: veecode/plugin-catalog-index
-        tag: "bs_1.52.0_20260813T182849"
+        tag: "bs_1.54.9_20261015T175921"
 ```
 
-An extra index adds its entries to the **Extensions** page only. It does not install plugins or change the installed plugins. With the default index of chart 1.0.3, adding this extra index raised the plugin count on the **Extensions** page from 71 to 87 and the package count from 145 to 158. The number of loaded plugins stayed at 18.
+Choose a tag from the same Backstage line as the portal. This example uses the published tag `bs_1.54.9_20261015T175921`, which resolves to `sha256:604546c2cb036908e699c50a46d997ef4bef11dd44ac819a46ac417bdac6ef31`, distinct from the default index pinned for chart 1.1.0. An extra index adds its entries to the **Extensions** page only. It does not install plugins or change the installed plugins. On DevPortal chart 1.1.0 and image 3.1.0, the **Extensions** API still returned 71 plugins and 146 packages after a 30-minute wait with this extra index; the default index returned the same totals. This run did not show additional entries.
 
 ## Mirror the index in a private registry
 
@@ -137,4 +137,4 @@ curl -s -H "Authorization: Bearer $TOKEN" http://localhost:7007/api/extensions/p
 curl -s -H "Authorization: Bearer $TOKEN" http://localhost:7007/api/extensions/packages | python3 -c 'import sys,json; print(json.load(sys.stdin)["totalItems"])'
 ```
 
-With the default index on chart 1.0.3 and image 3.0.3, the counts were 71 plugins and 145 packages. Compare the counts before and after a change to the index.
+With the default index on chart 1.1.0 and image 3.1.0, using `quay.io/veecode/plugin-catalog-index@sha256:26bd062a8fad8c204b1a175e775a4549d599a2a57acd849f083d6591ed2a917d`, the counts were 71 plugins and 146 packages. Compare the counts before and after a change to the index.
