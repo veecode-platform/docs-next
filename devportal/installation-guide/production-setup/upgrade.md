@@ -97,10 +97,10 @@ The 3.1.0 image has no `dynamic-plugins/` directory. An entry for a former `./dy
 grep -n './dynamic-plugins/dist/' "$BACKUP_DIR/values.yaml"
 kubectl --namespace "$NAMESPACE" exec deployment/devportal-db -- \
   psql -U devportal -d "${DB_PREFIX}extensions" -At \
-  -c "SELECT package_name FROM marketplace_installations WHERE package_name LIKE './dynamic-plugins/dist/%';"
+  -c "SELECT package_name, disabled, config_yaml FROM marketplace_installations WHERE package_name LIKE './dynamic-plugins/dist/%';"
 ```
 
-In `$BACKUP_DIR/values-1.1.0.yaml`, replace each entry in `global.dynamic.plugins` with the plugin's `oci://` reference, or remove it. Search any `dynamic-plugins.yaml` you mount as well. The query lists the Marketplace installations that still point to a former path. For each row it returns, follow the steps in the [3.1.0 release sheet](../../release-sheets/release-sheet-3-1-0.md).
+In `$BACKUP_DIR/values-1.1.0.yaml`, replace each entry in `global.dynamic.plugins` with the plugin's `oci://` reference, or remove it. Search any `dynamic-plugins.yaml` you mount as well. The query lists the Marketplace installations that still point to a former path, with whether each one is disabled and its saved YAML; keep that output. For each row it returns, follow the steps in the [3.1.0 release sheet](../../release-sheets/release-sheet-3-1-0.md).
 
 ### Do not use `--reuse-values`
 
