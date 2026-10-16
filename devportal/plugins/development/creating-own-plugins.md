@@ -35,42 +35,70 @@ yarn tsc
 yarn build:all
 ```
 
-## 3. Export the workspace
+## 3. Export each plugin
 
-Register each new package before you export. `yarn dev:dynamic` exports only the plugin directories listed in the `dev:dynamic` script in the workspace root `package.json`, and it needs a matching entry in the workspace `dynamic-plugins.yaml` for each one:
-
-1. Append the plugin directory to the `dev:dynamic` script arguments. For example, change `export-dev-dynamic.sh plugins/dummy plugins/dummy-backend` to `export-dev-dynamic.sh plugins/dummy plugins/dummy-backend plugins/my-back-plugin-backend`.
-2. Add the export entry to `dynamic-plugins.yaml`:
-
-```yaml
-plugins:
-  - package: ./dynamic-plugins/dist/internal-backstage-plugin-my-back-plugin-backend-dynamic
-    disabled: false
-```
-
-A backend entry has no `pluginConfig`.
-
-Then export the workspace packages as dynamic plugins:
+Set the path to the side-by-side `devportal-local` checkout from the workspace root, then export each plugin package with the Backstage CLI:
 
 ```bash
-yarn dev:dynamic
+export DEVPORTAL_LOCAL_DIR="$(cd ../../../devportal-local && pwd -P)"
+cd plugins/my-front-plugin
+npx --yes --package=@red-hat-developer-hub/cli@1.11.2 -- rhdh-cli plugin export --dev --dynamic-plugins-root "$DEVPORTAL_LOCAL_DIR/dynamic-plugins-src-dev"
 ```
 
-The command writes each plugin export under `dynamic-plugins-root-dev` in the workspace and prints the exact Compose command that loads the export into devportal-local.
+For a backend-only workspace, return to the workspace root and run the same command from its package directory, such as `plugins/my-back-plugin-backend`. The command writes each export under `devportal-local/dynamic-plugins-src-dev`.
 
 ## 4. Load the export in devportal-local
 
-From the `devportal-local` checkout, run the command `yarn dev:dynamic` prints:
+In the `devportal-local` checkout, create the directory for the local files:
+
+```bash
+mkdir -p dynamic-plugins-root-dev
+```
+
+Create `dynamic-plugins-root-dev/dynamic-plugins.local.yaml`. Add the default plugin index and each exported package. Use the directory name created under `dynamic-plugins-src-dev`:
+
+```yaml
+includes:
+  - dynamic-plugins.default.yaml
+plugins:
+  - package: ./dynamic-plugins-src/internal-backstage-plugin-my-front-plugin
+    disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          internal.backstage-plugin-my-front-plugin:
+            dynamicRoutes:
+              - path: /my-front-plugin
+                importName: MyFrontPluginPage
+                menuItem:
+                  icon: LibraryBooks
+                  text: My Plugin Page
+                  enabled: true
+  - package: ./dynamic-plugins-src/internal-backstage-plugin-my-back-plugin-backend-dynamic
+    disabled: false
+```
+
+Replace each sample package path with the exported directory name. A backend entry has no `pluginConfig`.
+
+Create `dynamic-plugins-root-dev/docker-compose.dynamic-plugins-root.local.yml` with these mounts:
+
+```yaml
+services:
+  install-dynamic-plugins:
+    volumes:
+      - ./dynamic-plugins-root-dev/dynamic-plugins.local.yaml:/opt/app-root/src/dynamic-plugins.operator.yaml:ro
+      - ./dynamic-plugins-src-dev:/opt/app-root/src/dynamic-plugins-src
+```
+
+Start the stack with all three Compose files:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.dynamic-plugins-root.yml -f dynamic-plugins-root-dev/docker-compose.dynamic-plugins-root.local.yml up -d
 ```
 
-The export writes `dynamic-plugins-root-dev/docker-compose.dynamic-plugins-root.local.yml` on every run.
+DevPortal 3.1 does not include `/opt/app-root/src/dynamic-plugins/`. The Compose mount supplies local exports at `/opt/app-root/src/dynamic-plugins-src/`, so the operator file must use `./dynamic-plugins-src/<exported-directory>`. An entry that still points to `./dynamic-plugins/dist/...` is skipped because that directory is absent.
 
-The override mounts `dynamic-plugins-root-dev` into the portal at `/opt/app-root/src/dynamic-plugins-root`, so the portal loads your export without rebuilding its image. The first start on a fresh database takes about two minutes while PostgreSQL and the plugin installer initialize. Open [http://localhost:7007](http://localhost:7007) and sign in as guest.
-
-After a frontend edit, run `yarn dev:dynamic` again and refresh the portal. After a backend edit, re-export and restart the portal so the backend process loads the new code.
+Open [http://localhost:7007](http://localhost:7007) and sign in as guest. After a frontend edit, export the package again and refresh the portal. After a backend edit, export the package again and restart the stack with the same Compose files.
 
 ## 5. Confirm the plugin loaded
 

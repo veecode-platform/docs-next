@@ -6,7 +6,7 @@ title: Configure dynamic plugins for the local stack
 
 The default plugins come from the plugin catalog index, not from the portal image. The image carries only their names, in `/opt/app-root/src/factory-plugins.yaml`. The local stack mounts an operator plugin file into the `install-dynamic-plugins` service, which merges its entries with Marketplace selections before installing plugins.
 
-The root `dynamic-plugins.yaml` is derived from the pinned chart. Do not edit it. Create a separate operator file for local additions.
+The root `dynamic-plugins.yaml` is derived from the pinned chart. Do not edit it. Create a separate operator file for local additions. Use OCI references for published plugins. For a workspace export, use the `./dynamic-plugins-src/<exported-directory>` path and mount `dynamic-plugins-src-dev` into `install-dynamic-plugins`; [Creating Your Own Plugin](../../plugins/development/creating-own-plugins.md) shows that flow.
 
 ## Add an operator plugin file
 
@@ -18,7 +18,7 @@ includes:
 plugins: []
 ```
 
-Replace `plugins: []` with the entries you need. Use a full digest-pinned OCI package reference to enable a plugin that is not a default plugin. To override a default plugin, use `oci://<registry>/<repository>:{{inherit}}!<plugin path>` with the full `!<plugin path>` suffix.
+Replace `plugins: []` with the entries you need. Use a full digest-pinned OCI package reference for a published plugin that is not in the default index. To override a default plugin, use `oci://<registry>/<repository>:{{inherit}}!<plugin path>` with the full `!<plugin path>` suffix.
 
 The installer matches an override by registry, repository, and plugin path, not by tag or digest. A tag or digest in an override sets the plugin version, so a stale digest can pin an older artifact. An override's `pluginConfig` replaces the default plugin's entire `pluginConfig`. Include every setting you want to keep.
 
