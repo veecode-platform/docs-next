@@ -37,15 +37,14 @@ yarn build:all
 
 ## 3. Export and start devportal-local
 
-Run the workspace helper from the workspace root:
+Run the workspace helper from the workspace root. Point it at the `devportal-local` checkout first: with the side-by-side clones, its own search finds the same checkout twice and stops with `Multiple devportal-local checkouts found`.
 
 ```bash
+export DEVPORTAL_LOCAL_DIR="$(cd ../../../devportal-local && pwd -P)"
 yarn dev:dynamic
 ```
 
-The helper's DevPortal 3.1 compatibility fix must be present in the `devportal-plugins` checkout; until then, use the manual fallback below.
-
-The helper exports the packages listed in the workspace's `dynamic-plugins.yaml` with the Red Hat Developer Hub CLI package `@red-hat-developer-hub/cli` (`rhdh-cli`). It writes exports to `devportal-local/dynamic-plugins-src-dev/`, creates `devportal-local/dynamic-plugins-root-dev/dynamic-plugins.local.yaml`, and creates `devportal-local/dynamic-plugins-root-dev/docker-compose.dynamic-plugins-root.local.yml`. The `devportal-local` checkout supplies `docker-compose.yml` and `docker-compose.dynamic-plugins-root.yml`. The helper prints the command to start the stack with all three Compose files; run it from the `devportal-local` directory:
+The helper exports the plugin directories it is given with the Red Hat Developer Hub CLI package `@red-hat-developer-hub/cli` (`rhdh-cli`). `yarn dev:dynamic` gives it the workspace's own plugin, `plugins/<workspace-name>`. It writes exports to `devportal-local/dynamic-plugins-src-dev/`, creates `devportal-local/dynamic-plugins-root-dev/dynamic-plugins.local.yaml`, and creates `devportal-local/dynamic-plugins-root-dev/docker-compose.dynamic-plugins-root.local.yml`. The `devportal-local` checkout supplies `docker-compose.yml` and `docker-compose.dynamic-plugins-root.yml`. The helper prints the command to start the stack with all three Compose files; run it from the `devportal-local` directory:
 
 ```bash
 docker compose -f docker-compose.yml \
@@ -53,11 +52,42 @@ docker compose -f docker-compose.yml \
   -f dynamic-plugins-root-dev/docker-compose.dynamic-plugins-root.local.yml up -d
 ```
 
-The `dynamic-plugins.local.yaml` operator file uses `./dynamic-plugins-src/<exported-directory>` for each exported package. DevPortal 3.1 does not include `/opt/app-root/src/dynamic-plugins/`; the local Compose override mounts `dynamic-plugins-src-dev` at `/opt/app-root/src/dynamic-plugins-src` for the installer. An entry that still points to `./dynamic-plugins/dist/...` is skipped because that directory is absent.
+The `dynamic-plugins.local.yaml` operator file uses `./dynamic-plugins-src/<exported-directory>` for each exported package. DevPortal 3.1 does not include `/opt/app-root/src/dynamic-plugins/`; the local Compose override mounts `dynamic-plugins-src-dev` at `/opt/app-root/src/dynamic-plugins-src` for the installer. An entry that still points to `./dynamic-plugins/dist/...` is skipped because that directory is absent: the installer logs `Skipping 1 local plugins (directories not found)` and the stack still starts.
 
-Unlike RHDH's local loop, which copies the export into `dynamic-plugins-root` without an installer, DevPortal 3.1 leaves exports in `dynamic-plugins-src-dev` for its installer to copy, because an export inside the plugin root would be loaded twice.
+The installer copies each export from `dynamic-plugins-src-dev` into `dynamic-plugins-root-dev`, the plugin root the portal reads, every time the stack starts.
 
-The end-to-end loop with DevPortal 3.1 has not yet been verified. After a frontend or backend edit, rerun `yarn dev:dynamic`, stop the stack with the same three Compose files, then run the helper's printed start command again. Do not use `-v` when stopping the stack.
+### Export a package added with `yarn new`
+
+`yarn dev:dynamic` exports only the workspace's own plugin. A package you add with `yarn new` is exported when you pass its directory as an argument. For example, for a backend plugin, from the workspace root:
+
+```bash
+yarn new --select backend-plugin --option pluginId=my-back-plugin
+```
+
+Then add an entry for its exported directory to the workspace's `dynamic-plugins.yaml`, after the existing entry:
+
+```yaml
+  - package: ./dynamic-plugins-src/internal-backstage-plugin-my-back-plugin-backend-dynamic
+    disabled: false
+```
+
+The directory name is the package name with `@` removed and `/` replaced by `-`. The `yarn new` backend package is `@internal/backstage-plugin-my-back-plugin-backend`, and its export keeps the `-dynamic` suffix. Check the name under `devportal-local/dynamic-plugins-src-dev/` after the first export.
+
+On every run, pass the package's directory after the workspace's own:
+
+```bash
+yarn dev:dynamic plugins/my-back-plugin-backend
+```
+
+`yarn` appends the argument to the script, so both packages export. When the argument and the YAML entry do not match, the helper behaves as follows:
+
+- An argument without the YAML entry stops with `Workspace dynamic plugin config has no package entry for @internal/backstage-plugin-my-back-plugin-backend-dynamic`.
+- The YAML entry without the argument stops with `Workspace dynamic plugin config references unexported workspace plugins: internal-backstage-plugin-my-back-plugin-backend. Pass every plugin directory listed in dynamic-plugins.yaml.`
+- No argument and no YAML entry exits without an error, and the package is missing from the export and from the operator file.
+
+### Edit and reload
+
+Change the plugin, rerun `yarn dev:dynamic plugins/my-back-plugin-backend`, stop the stack with the same three Compose files, and start it again with the printed command. A reload alone does not show the edit: the running portal still serves the copy the installer wrote when the stack last started. After the restart, the installer copies the new export into the portal and the served bundle has the new text. Verified for a frontend edit; the backend edit path was not run. Do not use `-v` when stopping the stack, because it deletes the PostgreSQL data volume.
 
 ## Manual fallback without the helper
 
@@ -74,6 +104,12 @@ Then run the Red Hat Developer Hub CLI from each plugin package directory, repla
 ```bash
 cd plugins/my-front-plugin
 npx --yes --package=@red-hat-developer-hub/cli@1.11.2 -- rhdh-cli plugin export --dev --dynamic-plugins-root "$DEVPORTAL_LOCAL_DIR/dynamic-plugins-src-dev"
+```
+
+From `devportal-local`, create the two directories first. Writing the operator file fails until `dynamic-plugins-root-dev` exists:
+
+```bash
+mkdir -p dynamic-plugins-root-dev dynamic-plugins-src-dev
 ```
 
 Create `dynamic-plugins-root-dev/dynamic-plugins.local.yaml` in `devportal-local`. Add the default plugin index and each exported package:
@@ -107,7 +143,7 @@ TOKEN=$(curl -s http://localhost:7007/api/auth/guest/refresh -H 'X-Requested-Wit
 curl -H "Authorization: Bearer $TOKEN" http://localhost:7007/api/dynamic-plugins-info/loaded-plugins
 ```
 
-This works while guest sign-in is on, which is the local stack default. If the token request fails right after the portal starts, wait a few seconds and run it again: the backend can answer 503 for a short time after `/healthcheck` returns 200.
+This works while guest sign-in is on, which is the local stack default. If the token request fails right after the portal starts, wait a few seconds and run it again.
 
 Your package appears in the list. Then confirm it runs: open the configured frontend route in the browser, request a scaffolded backend route such as `http://localhost:7007/api/my-back-plugin/todos`, or open `/create/actions` for a Scaffolder action module.
 

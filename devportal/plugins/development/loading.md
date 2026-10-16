@@ -8,7 +8,7 @@ Dynamic plugins can be loaded by VeeCode DevPortal at start time. They are usual
 
 ## Load a local export in devportal-local
 
-For a workspace export, run `yarn dev:dynamic` from the workspace root and follow [Creating Your Own Plugin](./creating-own-plugins.md). The helper uses `@red-hat-developer-hub/cli` (`rhdh-cli`), writes the operator file `dynamic-plugins-root-dev/dynamic-plugins.local.yaml` and Compose override `dynamic-plugins-root-dev/docker-compose.dynamic-plugins-root.local.yml`, and prints the command that uses them. Without the helper, create those two files as shown in the manual fallback on that page. The `devportal-local` checkout supplies `docker-compose.yml` and `docker-compose.dynamic-plugins-root.yml`.
+For a workspace export, run `yarn dev:dynamic` from the workspace root, with the directory of each package added with `yarn new` as an argument, and follow [Creating Your Own Plugin](./creating-own-plugins.md). The helper uses `@red-hat-developer-hub/cli` (`rhdh-cli`), writes the operator file `dynamic-plugins-root-dev/dynamic-plugins.local.yaml` and Compose override `dynamic-plugins-root-dev/docker-compose.dynamic-plugins-root.local.yml`, and prints the command that uses them. Without the helper, create those two files as shown in the manual fallback on that page. The `devportal-local` checkout supplies `docker-compose.yml` and `docker-compose.dynamic-plugins-root.yml`.
 
 The operator file points to `./dynamic-plugins-src/<exported-directory>`. The Compose override mounts `dynamic-plugins-src-dev` at `/opt/app-root/src/dynamic-plugins-src`. DevPortal 3.1 does not include `/opt/app-root/src/dynamic-plugins/`, so a bare `./dynamic-plugins/dist/...` entry is skipped.
 
