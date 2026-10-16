@@ -71,7 +71,7 @@ global:
         tag: "bs_1.54.9_20261015T175921"
 ```
 
-Choose a tag from the same Backstage line as the portal. This example uses the published tag `bs_1.54.9_20261015T175921`, which resolves to `sha256:604546c2cb036908e699c50a46d997ef4bef11dd44ac819a46ac417bdac6ef31`, distinct from the default index pinned for chart 1.1.0. An extra index adds its entries to the **Extensions** page only. It does not install plugins or change the installed plugins. On DevPortal chart 1.1.0 and image 3.1.0, the **Extensions** API still returned 71 plugins and 146 packages after a 30-minute wait with this extra index; the default index returned the same totals. This run did not show additional entries.
+Choose a tag from the same Backstage line as the portal: the packages in an index are built for its line (`bs_<backstage>`). An extra index adds its entries to the **Extensions** page only. It does not install plugins or change the installed plugins, and an entry that the default index already lists shows once. With chart 1.1.0 and image 3.1.0, the example tag `bs_1.54.9_20261015T175921` is an earlier publish of the same line as the default index, so it adds nothing: the **Extensions** page still listed 71 plugins and 146 packages after 30 minutes.
 
 ## Mirror the index in a private registry
 
