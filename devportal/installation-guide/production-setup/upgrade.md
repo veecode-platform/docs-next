@@ -100,7 +100,7 @@ kubectl --namespace "$NAMESPACE" exec deployment/devportal-db -- \
   -c "SELECT package_name, disabled, config_yaml FROM marketplace_installations WHERE package_name LIKE './dynamic-plugins/dist/%';"
 ```
 
-In `$BACKUP_DIR/values-1.1.0.yaml`, replace each entry in `global.dynamic.plugins` with the plugin's `oci://` reference, or remove it. Search any `dynamic-plugins.yaml` you mount as well. The query lists the Marketplace installations that still point to a former path, with whether each one is disabled and its saved YAML; keep that output. For each row it returns, follow the steps in the [3.1.0 release sheet](../../release-sheets/release-sheet-3-1-0.md).
+In `$BACKUP_DIR/values-1.1.0.yaml`, replace each entry in `global.dynamic.plugins` with the plugin's `oci://` reference, or remove it. Search any `dynamic-plugins.yaml` you mount as well. The query lists the Marketplace installations that still point to a former path, with whether each one is disabled and its saved YAML; keep that output. It assumes the default database split. When `pluginDivisionMode` is `schema`, the table is in a schema of the portal's database: run the query there, with the table qualified by the schema that `SELECT table_schema FROM information_schema.tables WHERE table_name = 'marketplace_installations';` returns. For each row it returns, follow the steps in the [3.1.0 release sheet](../../release-sheets/release-sheet-3-1-0.md).
 
 ### Do not use `--reuse-values`
 
