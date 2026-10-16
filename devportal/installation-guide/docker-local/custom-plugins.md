@@ -4,13 +4,17 @@ sidebar_label: Dynamic Plugins
 title: Configure dynamic plugins for the local stack
 ---
 
-The default plugins come from the plugin catalog index, not from the portal image. The image carries only their names, in `/opt/app-root/src/factory-plugins.yaml`. The local stack mounts an operator plugin file into the `install-dynamic-plugins` service, which merges its entries with Marketplace selections before installing plugins.
+The default plugins come from the plugin catalog index, not from the portal image. The image carries only their names, in `/opt/app-root/src/factory-plugins.yaml`. The local stack mounts an operator plugin file into the `install-dynamic-plugins` service, which merges its entries with Marketplace selections before installing plugins. The `devportal-local` checkout ships `docker-compose.yml` and `docker-compose.dynamic-plugins-root.yml`. You create `dynamic-plugins-root-dev/dynamic-plugins.local.yaml` and `dynamic-plugins-root-dev/docker-compose.dynamic-plugins-root.local.yml`; `yarn dev:dynamic` creates both for a workspace export.
 
-The root `dynamic-plugins.yaml` is derived from the pinned chart. Do not edit it. Create a separate operator file for local additions. Use OCI references for published plugins. For a workspace export, use the `./dynamic-plugins-src/<exported-directory>` path and mount `dynamic-plugins-src-dev` into `install-dynamic-plugins`; [Creating Your Own Plugin](../../plugins/development/creating-own-plugins.md) shows that flow.
+The root `dynamic-plugins.yaml` is derived from the pinned chart. Do not edit it. Use the separate operator file for local additions. Use OCI references for published plugins. For a workspace export, use the `./dynamic-plugins-src/<exported-directory>` path and mount `dynamic-plugins-src-dev` into `install-dynamic-plugins`; [Creating Your Own Plugin](../../plugins/development/creating-own-plugins.md) shows that flow.
 
 ## Add an operator plugin file
 
-Create `dynamic-plugins.local.yaml` in the `devportal-local` directory. Include the default plugin index:
+From the `devportal-local` directory, create the local directories and operator file. Include the default plugin index:
+
+```bash
+mkdir -p dynamic-plugins-root-dev dynamic-plugins-src-dev
+```
 
 ```yaml
 includes:
@@ -52,19 +56,20 @@ The `includes` list holds `dynamic-plugins.default.yaml`, the default plugin fil
 
 ## Mount the operator plugin file with Compose
 
-Create `docker-compose.plugins.yaml` in the same directory to mount your file at the operator config path:
+Create `dynamic-plugins-root-dev/docker-compose.dynamic-plugins-root.local.yml` to mount the operator file and local export directory:
 
 ```yaml
 services:
   install-dynamic-plugins:
     volumes:
-      - ./dynamic-plugins.local.yaml:/opt/app-root/src/dynamic-plugins.operator.yaml:ro
+      - ./dynamic-plugins-root-dev/dynamic-plugins.local.yaml:/opt/app-root/src/dynamic-plugins.operator.yaml:ro
+      - ./dynamic-plugins-src-dev:/opt/app-root/src/dynamic-plugins-src
 ```
 
-Start the local stack with both Compose files:
+Start the local stack with the two files shipped by `devportal-local` and the override you created:
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.plugins.yaml up -d
+docker compose -f docker-compose.yml -f docker-compose.dynamic-plugins-root.yml -f dynamic-plugins-root-dev/docker-compose.dynamic-plugins-root.local.yml up -d
 ```
 
 If you also use the overrides from [Add a configuration fragment](./custom-config.md) or [Add catalog entities](./custom-catalog.md), keep their `-f` flags in this command and in every later one, so their changes stay loaded.
@@ -72,8 +77,8 @@ If you also use the overrides from [Add a configuration fragment](./custom-confi
 To apply a change to the operator file, restart with the same Compose files. This keeps the named volumes, including PostgreSQL:
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.plugins.yaml down
-docker compose -f docker-compose.yml -f docker-compose.plugins.yaml up -d
+docker compose -f docker-compose.yml -f docker-compose.dynamic-plugins-root.yml -f dynamic-plugins-root-dev/docker-compose.dynamic-plugins-root.local.yml down
+docker compose -f docker-compose.yml -f docker-compose.dynamic-plugins-root.yml -f dynamic-plugins-root-dev/docker-compose.dynamic-plugins-root.local.yml up -d
 ```
 
 ## Plugins that need configuration

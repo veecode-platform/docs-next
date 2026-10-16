@@ -58,12 +58,7 @@ The plugin exposes a `/ping` route under its plugin id, `GET /api/my-back-plugin
 
 ## Load the plugin in DevPortal
 
-Export the package and start devportal-local as described in [Creating Your Own Plugin](./creating-own-plugins.md):
-
-```bash
-yarn tsc
-yarn build:all
-```
+Export the package, start devportal-local, and apply later edits as described in [Creating Your Own Plugin](./creating-own-plugins.md).
 
 Get a guest token, then confirm the package in the loaded plugins endpoint:
 

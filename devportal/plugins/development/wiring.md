@@ -29,7 +29,7 @@ plugins:
                   enabled: true
 ```
 
-The plugin id under `dynamicPlugins.frontend.<plugin-id>` is the npm package name with `@` removed and `/` replaced by `.`. The `package` value above points to the exported directory mounted by `devportal-local`. A published plugin uses its OCI reference instead. See [Loading a Dynamic Plugin](./loading.md) and [Configure dynamic plugins for the local stack](../../installation-guide/docker-local/custom-plugins.md) for the entry shapes.
+The plugin id under `dynamicPlugins.frontend.<plugin-id>` is the npm package name with `@` removed and `/` replaced by `.`. The `package` value above points to the exported directory under `devportal-local/dynamic-plugins-src-dev`. The `yarn dev:dynamic` helper creates and prints the Compose override that mounts it; without the helper, create the override as shown in [Creating Your Own Plugin](./creating-own-plugins.md). A published plugin uses its OCI reference instead. See [Loading a Dynamic Plugin](./loading.md) and [Configure dynamic plugins for the local stack](../../installation-guide/docker-local/custom-plugins.md) for the entry shapes.
 
 ## Routes, menu entries, and mount points
 

@@ -99,12 +99,7 @@ DevPortal attaches the exported dynamic module to its own Scaffolder plugin auto
 
 ## Test the action
 
-Export the package and start devportal-local as described in [Creating Your Own Plugin](./creating-own-plugins.md):
-
-```bash
-yarn tsc
-yarn build:all
-```
+Export the package, start devportal-local, and apply later edits as described in [Creating Your Own Plugin](./creating-own-plugins.md).
 
 Open the action list at http://localhost:3000/create/actions during host development, or at http://localhost:7007/create/actions against devportal-local, to check that the action is loaded:
 
