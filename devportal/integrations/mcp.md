@@ -12,7 +12,7 @@ The `mcp-actions-backend` module is a Marketplace plugin. Install it from the Ex
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/backstage-plugin-mcp-actions-backend:{{inherit}}
+  - package: oci://quay.io/veecode/backstage-plugin-mcp-actions-backend:{{inherit}}!backstage-plugin-mcp-actions-backend
     disabled: false
     pluginConfig:
       backend:
@@ -32,13 +32,13 @@ The tool sets for each domain come from separate Marketplace modules. Install th
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-software-catalog-mcp-extras:{{inherit}}
+  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-software-catalog-mcp-extras:{{inherit}}!red-hat-developer-hub-backstage-plugin-software-catalog-mcp-extras
     disabled: false
-  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-techdocs-mcp-extras:{{inherit}}
+  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-techdocs-mcp-extras:{{inherit}}!red-hat-developer-hub-backstage-plugin-techdocs-mcp-extras
     disabled: false
-  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-scaffolder-mcp-extras:{{inherit}}
+  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-scaffolder-mcp-extras:{{inherit}}!red-hat-developer-hub-backstage-plugin-scaffolder-mcp-extras
     disabled: false
-  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-kubernetes-mcp-extras:{{inherit}}
+  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-kubernetes-mcp-extras:{{inherit}}!red-hat-developer-hub-backstage-plugin-kubernetes-mcp-extras
     disabled: false
 ```
 
@@ -55,7 +55,7 @@ Recreate the stack after changing the operator file so the installer picks the e
 
 ## Connect a client
 
-The MCP server uses streamable HTTP at `http(s)://<portal-host>/api/mcp-actions/v1`. Check your MCP client's documentation for which endpoint style it needs.
+The MCP server serves only streamable HTTP, at `http(s)://<portal-host>/api/mcp-actions/v1`. `mcp-actions-backend` 0.2.0 removed the SSE (Server-Sent Events) endpoint `/api/mcp-actions/v1/sse`, so a client set up on that URL must move to `/api/mcp-actions/v1`.
 
 ### Authenticate with the static token
 
@@ -82,6 +82,8 @@ To have each user sign in with their own identity, see [Sign in as the user with
 
 With OAuth, each user signs in to DevPortal and approves the client on a consent page. The catalog and scaffolder tools then act with that user's identity and permissions. The Kubernetes tools read cluster resources with the credentials the portal has configured for each cluster. The TechDocs tools read with the portal's own service identity, so that user's permissions do not limit them. Per-user OAuth needs DevPortal 3.1 or later. The client configuration contains no token. The client opens the browser for sign-in and consent, then sends the access token it receives.
 
+The consent gives the client an access token that the portal's APIs accept, not only the MCP endpoint. The access token lasts one hour, and with `experimentalRefreshToken` enabled, a client that requests `offline_access` renews that token for up to `maxRotationLifetime` after sign-in. A lower `maxRotationLifetime` shortens the renewal window. To end a user's client sessions early, delete that user's rows from the `offline_sessions` table in the auth plugin's database, and the client must then sign in again once its current access token expires.
+
 ### Turn on OAuth in app config
 
 Add this block to the portal's app config. On Kubernetes, put it under `upstream.backstage.appConfig` in the chart values, as described in [Install DevPortal with Helm](../installation-guide/production-setup/setup.md). On the local stack, add it to the configuration fragment described in [Add configuration to the local stack](../installation-guide/docker-local/custom-config.md).
@@ -100,7 +102,7 @@ auth:
 
 Setting `allowedRedirectUriPatterns` replaces the default loopback patterns, so the list repeats the `localhost` and `127.0.0.1` patterns and adds the claude.ai callback. The loopback patterns accept any port and any path. Local clients need that: they pick a free port, and some, such as Codex, add an ID to the callback path. The claude.ai pattern serves claude.ai, Claude Desktop, and the other hosted Claude apps.
 
-The `experimentalRefreshToken` block lets clients renew their sign-in. By default, a refresh token lasts 30 days before rotation (`tokenLifetime`). A session lasts up to one year across rotations (`maxRotationLifetime`). A user holds one refresh token per client, up to 20 in total (`maxTokensPerUser`). A new sign-in with the same client replaces that user's earlier refresh token for it. With CIMD, every Claude Code installation uses the same client ID, so after a user signs in to Claude Code on a second machine, the first machine must sign in again once its access token expires. Refresh also needs the user's entity in the catalog. The local stack's guest sign-in maps to `user:default/admin`, which its catalog does not contain, so load that User entity as described in [Load User entities](../installation-guide/docker-local/custom-catalog.md#load-user-entities). Without it, the client asks for a new sign-in every hour.
+The `experimentalRefreshToken` block lets clients renew their sign-in. By default, a refresh token expires after 30 days without use (`tokenLifetime`). Each refresh replaces it with a new one. A session lasts up to one year across rotations (`maxRotationLifetime`). A user holds one refresh token per client, up to 20 in total (`maxTokensPerUser`). A new sign-in with the same client replaces that user's earlier refresh token for it. With CIMD, every Claude Code installation uses the same client ID, so after a user signs in to Claude Code on a second machine, the first machine must sign in again once its access token expires. Refresh also needs the user's entity in the catalog. The local stack's guest sign-in maps to `user:default/admin`, which its catalog does not contain, so load that User entity as described in [Load User entities](../installation-guide/docker-local/custom-catalog.md#load-user-entities). Without it, the client asks for a new sign-in every hour.
 
 ### Client ID Metadata Documents (recommended)
 
@@ -118,7 +120,7 @@ Enable the plugin with this entry. On the local stack, add it to the operator pl
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/backstage-plugin-auth:{{inherit}}
+  - package: oci://quay.io/veecode/backstage-plugin-auth:{{inherit}}!backstage-plugin-auth
     disabled: false
 ```
 
@@ -128,7 +130,7 @@ On Kubernetes, use this form in the chart values:
 global:
   dynamic:
     plugins:
-      - package: oci://quay.io/veecode/backstage-plugin-auth:{{ "{{inherit}}" }}
+      - package: oci://quay.io/veecode/backstage-plugin-auth:{{ "{{inherit}}" }}!backstage-plugin-auth
         disabled: false
 ```
 
@@ -161,7 +163,7 @@ auth:
     enabled: true
 ```
 
-Cursor connects through DCR. By default, the DCR redirect patterns accept loopback callbacks on any port and path, plus the Cursor callbacks `cursor://*` and `https://www.cursor.com/*`. Setting `allowedRedirectUriPatterns` replaces those defaults. The two Cursor wildcards accept any path on those hosts, and any client can register through DCR. To accept only the callbacks Cursor documents, list `cursor://anysphere.cursor-mcp/oauth/callback` and `https://www.cursor.com/agents/mcp/oauth/callback` next to the loopback patterns.
+Cursor connects through DCR. By default, the DCR redirect patterns accept loopback callbacks on any port and path, plus the Cursor callbacks `cursor://*` and `https://www.cursor.com/*`. Setting `allowedRedirectUriPatterns` replaces those defaults. The two Cursor wildcards accept any path on those hosts, and any client can register through DCR. Cursor's docs list two callbacks: the web callback `https://www.cursor.com/agents/mcp/oauth/callback` and the desktop loopback `http://localhost:8787/callback`. To accept only those, include the loopback patterns and add the web callback. Cursor staff named `cursor://anysphere.cursor-mcp/oauth/callback` on the Cursor forum. Add that URL to `allowedRedirectUriPatterns` if a Cursor client uses it.
 
 ## Troubleshooting
 
@@ -169,7 +171,7 @@ Cursor connects through DCR. By default, the DCR redirect patterns accept loopba
 - No tools listed: the extras modules are not installed or the stack was not recreated after adding them. Check the install service logs for their entries.
 - Connection refused on the local stack: use the published portal address and port (`DEVPORTAL_PORT`), not the container-internal address.
 - Browser shows `400 Failed to fetch client metadata` at the authorize URL: the portal cannot fetch the metadata URL that the client sent as `client_id`. The fetch fails on a non-2xx response, a redirect, a timeout of 10 seconds, or a DNS error. Check outbound HTTPS from the portal to the host in that URL.
-- `Invalid client_id URL` means the metadata host resolves to a private or non-public address, and the portal refuses that address.
+- `Invalid client_id URL` means the metadata host resolves to a private or non-public address, and the portal refuses that address. If the portal resolves the metadata host to a non-public address by design, such as with split-horizon DNS or an egress proxy, list the exact document URLs in `allowedClientIdPatterns`. A URL that matches an entry without wildcards skips the non-public address check. Setting `allowedClientIdPatterns` replaces the default patterns, so list each default you still need.
 - `Invalid client_id '<url>'` means the metadata URL matches no entry in `allowedClientIdPatterns`. Add a pattern for that URL, or remove the key to return to the defaults.
 - `Invalid redirect_uri`: the callback matches no pattern in `allowedRedirectUriPatterns`, so add one. When the message ends in `not registered in client metadata`, the client's own metadata document does not list that callback, and no portal setting fixes it.
 - Browser shows the portal's not-found page after sign-in when the `backstage-plugin-auth` plugin is not enabled. See [Enable the consent page](#enable-the-consent-page).
