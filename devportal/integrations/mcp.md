@@ -102,7 +102,7 @@ auth:
 
 Setting `allowedRedirectUriPatterns` replaces the default loopback patterns, so the list repeats the `localhost` and `127.0.0.1` patterns and adds the claude.ai callback. The loopback patterns accept any port and any path. Local clients need that: they pick a free port, and some, such as Codex, add an ID to the callback path. The claude.ai pattern serves claude.ai, Claude Desktop, and the other hosted Claude apps.
 
-The `experimentalRefreshToken` block lets clients renew their sign-in. By default, a refresh token expires after 30 days without use (`tokenLifetime`). Each refresh replaces it with a new one. A session lasts up to one year across rotations (`maxRotationLifetime`). A user holds one refresh token per client, up to 20 in total (`maxTokensPerUser`). A new sign-in with the same client replaces that user's earlier refresh token for it. With CIMD, every Claude Code installation uses the same client ID, so after a user signs in to Claude Code on a second machine, the first machine must sign in again once its access token expires. Refresh also needs the user's entity in the catalog. The local stack's guest sign-in maps to `user:default/admin`, which its catalog does not contain, so load that User entity as described in [Load User entities](../installation-guide/docker-local/custom-catalog.md#load-user-entities). Without it, the client asks for a new sign-in every hour.
+The `experimentalRefreshToken` block lets clients renew their sign-in. By default, a refresh token expires after 30 days without use (`tokenLifetime`). Each refresh replaces it with a new one. A session lasts up to one year across rotations (`maxRotationLifetime`). A user holds one refresh token per client, up to 20 in total (`maxTokensPerUser`). A new sign-in with the same client replaces that user's earlier refresh token for it. With CIMD, every Claude Code installation uses the same client ID, so after a user signs in to Claude Code on a second machine, the first machine must sign in again once its access token expires. Refresh also needs the user's entity in the catalog. The local stack's guest sign-in maps to `user:default/admin`, which its catalog does not contain, so load that User entity as described in [Load User entities](../installation-guide/docker-local/custom-catalog.md#load-user-entities). Without it, the client asks for a new sign-in each time its access token expires, every hour by default.
 
 ### Client ID Metadata Documents (recommended)
 
@@ -163,7 +163,7 @@ auth:
     enabled: true
 ```
 
-Cursor connects through DCR. By default, the DCR redirect patterns accept loopback callbacks on any port and path, plus the Cursor callbacks `cursor://*` and `https://www.cursor.com/*`. Setting `auth.experimentalDynamicClientRegistration.allowedRedirectUriPatterns` replaces those defaults. The `https://www.cursor.com/*` wildcard accepts any page on that host, and any client can register through DCR. Cursor registers three callbacks in one request, and the portal rejects the whole registration if any one of them matches no pattern: `cursor://anysphere.cursor-mcp/oauth/callback`, the web callback `https://www.cursor.com/agents/mcp/oauth/callback` and the desktop loopback `http://localhost:8787/callback`. Cursor's docs list the web and desktop callbacks, and Cursor staff listed all three on the [Cursor forum](https://forum.cursor.com/t/mcp-oauth-redirect-uri-mismatch-in-cursor-desktop/171867). To narrow the web wildcard, keep the loopback patterns and `cursor://*`, and replace `https://www.cursor.com/*` with the exact web callback:
+Cursor connects through DCR. By default, the DCR redirect patterns accept loopback callbacks on any port and path, plus the Cursor callbacks `cursor://*` and `https://www.cursor.com/*`. Setting `auth.experimentalDynamicClientRegistration.allowedRedirectUriPatterns` replaces those defaults. The `https://www.cursor.com/*` wildcard accepts any page on that host, and any client can register through DCR. Cursor registers three callbacks in one request, and the portal rejects the whole registration if any one of them matches no pattern: `cursor://anysphere.cursor-mcp/oauth/callback`, the web callback `https://www.cursor.com/agents/mcp/oauth/callback` and the desktop loopback `http://localhost:8787/callback`. Cursor's docs list the web and desktop callbacks, and Cursor staff listed all three on the [Cursor forum](https://forum.cursor.com/t/mcp-oauth-redirect-uri-mismatch-in-cursor-desktop/171867). To narrow the web wildcard, keep the `localhost` and `127.0.0.1` patterns and `cursor://*`, and replace `https://www.cursor.com/*` with the exact web callback:
 
 ```yaml
 auth:
@@ -176,7 +176,7 @@ auth:
       - 'https://www.cursor.com/agents/mcp/oauth/callback'
 ```
 
-A `cursor://` callback only reaches the Cursor app on the user's machine.
+`cursor://*` accepts any `cursor://` URL. Such a callback opens the app that the user's system registered for that scheme, not a web page.
 
 ## Troubleshooting
 
