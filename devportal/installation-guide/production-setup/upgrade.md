@@ -116,7 +116,7 @@ Change each override of a default plugin that stays enabled, in `$BACKUP_DIR/val
 2. Keep `disabled` and `pluginConfig` as they are.
 3. If your values replace `upstream.backstage.initContainers`, remove the `DEVPORTAL_FACE_FILE` variable from the `install-dynamic-plugins` container. Chart 1.1.0 no longer sets it. If the variable stays, the install logs a warning that it is no longer read.
 
-The chart renders these values as templates, so write `{{inherit}}` with the escape shown in the example below. A bare `{{inherit}}` makes Helm fail with `function "inherit" not defined`. After the upgrade, the `install-dynamic-plugins` container logs an `Inheriting version` line for each plugin you overrode. Check that each of those plugins still loads.
+The chart renders these values as templates, so write `{{inherit}}` with the escape shown in the example below. A bare `{{inherit}}` makes Helm fail with `function "inherit" not defined`. After the upgrade, the `install-dynamic-plugins` container logs an `Overriding dynamic plugin configuration` line for each plugin you overrode. Check that each of those plugins still loads.
 
 Before (chart 1.0.x):
 
