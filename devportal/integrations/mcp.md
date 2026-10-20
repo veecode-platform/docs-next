@@ -99,7 +99,7 @@ auth:
     maxTokensPerUser: 20
 ```
 
-The loopback patterns serve clients such as Claude Code, Codex, and Cursor. These clients open a local callback on a random port. The claude.ai pattern serves claude.ai and Claude Desktop connectors.
+The loopback patterns serve local clients such as Claude Code, which open a callback on a local port. The claude.ai pattern serves claude.ai and Claude Desktop connectors.
 
 The `experimentalRefreshToken` block lets clients refresh their sign-in. The values above set a 30-day token lifetime, a one-year maximum rotation lifetime, and up to 20 tokens per user.
 
@@ -129,11 +129,14 @@ On Kubernetes, write the tag as `{{ "{{inherit}}" }}` and nest the entry under `
 
 Once `mcp-actions-backend` is installed, the portal serves the OAuth discovery documents. The client finds the authorization server on its own, so you configure nothing else for discovery.
 
-With OAuth, the client configuration has no `Authorization` header. The client opens the browser for sign-in and consent. For Claude Code, run this command:
+With OAuth, the client configuration has no `Authorization` header. The client opens the browser for sign-in and consent. For Claude Code, run these two commands:
 
 ```shell
-claude mcp add --transport http devportal https://<portal-host>/api/mcp-actions/v1
+claude mcp add-json devportal '{"type":"http","url":"https://<portal-host>/api/mcp-actions/v1","oauth":{"scopes":"openid offline_access"}}' --scope user
+claude mcp login devportal
 ```
+
+The `oauth.scopes` value asks for `offline_access`, so the client gets a refresh token and stays signed in after the one-hour access token expires. `--scope user` makes the server available in every folder, while the default scope covers only the current folder. `claude mcp login` opens the browser for sign-in and the consent page, where the user approves with **Authorize**.
 
 claude.ai and Claude Desktop add the same URL as a custom connector.
 
@@ -150,6 +153,7 @@ auth:
     allowedRedirectUriPatterns:
       - 'http://127.0.0.1:*/callback'
       - 'http://localhost:*/callback'
+      - 'https://claude.ai/api/mcp/auth_callback'
 ```
 
 ## Troubleshooting
