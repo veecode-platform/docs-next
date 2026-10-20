@@ -4,7 +4,7 @@ sidebar_label: MCP Actions
 title: Expose DevPortal tools to AI clients
 ---
 
-MCP Actions runs an MCP server inside DevPortal 3.x that lets external AI clients use catalog, scaffolder, TechDocs, and Kubernetes tools. Clients can authenticate in one of two ways. A static token connects the client as one shared service identity. OAuth 2.1 signs each user in as their own DevPortal identity, so the tools run with that user's permissions. This page covers MCP Actions only.
+MCP Actions runs an MCP server inside DevPortal 3.x that lets external AI clients use catalog, scaffolder, TechDocs, and Kubernetes tools. Clients can authenticate in one of two ways. A static token connects the client as one shared service identity. OAuth 2.1 signs each user in as their own DevPortal identity, and the catalog and scaffolder tools act with that identity. This page covers MCP Actions only.
 
 ## Install the MCP server
 
@@ -80,7 +80,7 @@ To have each user sign in with their own identity, see [Sign in as the user with
 
 ## Sign in as the user with OAuth
 
-With OAuth, each user signs in to DevPortal and approves the client on a consent page. The tools then run with that user's permissions. Per-user OAuth needs DevPortal 3.1 or later. The client configuration contains no token. The client opens the browser for sign-in and consent, then sends the access token it receives.
+With OAuth, each user signs in to DevPortal and approves the client on a consent page. The catalog and scaffolder tools then act with that user's identity and permissions. The Kubernetes tools read cluster resources with the credentials the portal has configured for each cluster. The TechDocs tools read with the portal's own service identity, so that user's permissions do not limit them. Per-user OAuth needs DevPortal 3.1 or later. The client configuration contains no token. The client opens the browser for sign-in and consent, then sends the access token it receives.
 
 ### Turn on OAuth in app config
 
@@ -100,7 +100,7 @@ auth:
 
 Setting `allowedRedirectUriPatterns` replaces the default loopback patterns, so the list repeats the `localhost` and `127.0.0.1` patterns and adds the claude.ai callback. The loopback patterns accept any port and any path. Local clients need that: they pick a free port, and some, such as Codex, add an ID to the callback path. The claude.ai pattern serves claude.ai, Claude Desktop, and the other hosted Claude apps.
 
-The `experimentalRefreshToken` block lets clients renew their sign-in. By default, a refresh token lasts 30 days before rotation (`tokenLifetime`). A session lasts up to one year across rotations (`maxRotationLifetime`). Each user holds up to 20 refresh tokens (`maxTokensPerUser`). Refresh also needs the user's entity in the catalog.
+The `experimentalRefreshToken` block lets clients renew their sign-in. By default, a refresh token lasts 30 days before rotation (`tokenLifetime`). A session lasts up to one year across rotations (`maxRotationLifetime`). A user holds one refresh token per client, up to 20 in total (`maxTokensPerUser`). A new sign-in with the same client replaces that user's earlier refresh token for it. With CIMD, every Claude Code installation uses the same client ID, so after a user signs in to Claude Code on a second machine, the first machine must sign in again once its access token expires. Refresh also needs the user's entity in the catalog. The local stack's guest sign-in maps to `user:default/admin`, which its catalog does not contain, so load that User entity as described in [Load User entities](../installation-guide/docker-local/custom-catalog.md#load-user-entities). Without it, the client asks for a new sign-in every hour.
 
 ### Client ID Metadata Documents (recommended)
 
@@ -147,7 +147,7 @@ claude mcp login devportal
 
 The `oauth.scopes` value asks for `offline_access`, so the client gets a refresh token and stays signed in after the one-hour access token expires. `--scope user` makes the server available in every folder, while the default scope covers only the current folder. `claude mcp login` opens the browser for sign-in and the consent page, where the user approves with **Authorize**.
 
-claude.ai and Claude Desktop add the same URL as a custom connector. These hosted Claude apps reach the portal from Anthropic's servers, not from the user's machine. The portal's MCP endpoint and its `/api/auth` discovery must therefore accept connections from [Anthropic's published IP address ranges](https://platform.claude.com/docs/en/api/ip-addresses). Claude Code signs in from the user's machine.
+claude.ai and Claude Desktop add the same URL as a custom connector. These hosted Claude apps reach the portal from Anthropic's servers, not from the user's machine. The portal must therefore accept connections from [Anthropic's published IP address ranges](https://platform.claude.com/docs/en/api/ip-addresses) on `/api/mcp-actions`, on `/.well-known/` at the root of the portal host, where the discovery documents live, and on `/api/auth`, where the token endpoint receives every code exchange and refresh. Claude Code signs in from the user's machine.
 
 ### Dynamic Client Registration (deprecated)
 
@@ -161,7 +161,7 @@ auth:
     enabled: true
 ```
 
-Cursor connects through DCR. By default, the DCR redirect patterns accept loopback callbacks on any port and path, plus the Cursor callbacks `cursor://*` and `https://www.cursor.com/*`. Setting `allowedRedirectUriPatterns` replaces those defaults.
+Cursor connects through DCR. By default, the DCR redirect patterns accept loopback callbacks on any port and path, plus the Cursor callbacks `cursor://*` and `https://www.cursor.com/*`. Setting `allowedRedirectUriPatterns` replaces those defaults. The two Cursor wildcards accept any path on those hosts, and any client can register through DCR. To accept only the callbacks Cursor documents, list `cursor://anysphere.cursor-mcp/oauth/callback` and `https://www.cursor.com/agents/mcp/oauth/callback` next to the loopback patterns.
 
 ## Troubleshooting
 
@@ -170,6 +170,7 @@ Cursor connects through DCR. By default, the DCR redirect patterns accept loopba
 - Connection refused on the local stack: use the published portal address and port (`DEVPORTAL_PORT`), not the container-internal address.
 - Browser shows `400 Failed to fetch client metadata` at the authorize URL: the portal cannot fetch the metadata URL that the client sent as `client_id`. The fetch fails on a non-2xx response, a redirect, a timeout of 10 seconds, or a DNS error. Check outbound HTTPS from the portal to the host in that URL.
 - `Invalid client_id URL` means the metadata host resolves to a private or non-public address, and the portal refuses that address.
+- `Invalid client_id '<url>'` means the metadata URL matches no entry in `allowedClientIdPatterns`. Add a pattern for that URL, or remove the key to return to the defaults.
 - `Invalid redirect_uri`: the callback matches no pattern in `allowedRedirectUriPatterns`, so add one. When the message ends in `not registered in client metadata`, the client's own metadata document does not list that callback, and no portal setting fixes it.
 - Browser shows the portal's not-found page after sign-in when the `backstage-plugin-auth` plugin is not enabled. See [Enable the consent page](#enable-the-consent-page).
 - claude.ai cannot connect, but Claude Code can, when the portal does not accept connections from Anthropic's published IP address ranges.
