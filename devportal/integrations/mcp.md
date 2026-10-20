@@ -98,7 +98,7 @@ auth:
     enabled: true
 ```
 
-Setting `allowedRedirectUriPatterns` replaces the default loopback patterns, so the list repeats them and adds the claude.ai callback. The loopback patterns accept any port and any path. Local clients need that: they pick a free port, and some, such as Codex, add an ID to the callback path. The claude.ai pattern serves claude.ai, Claude Desktop, and the other hosted Claude apps.
+Setting `allowedRedirectUriPatterns` replaces the default loopback patterns, so the list repeats the `localhost` and `127.0.0.1` patterns and adds the claude.ai callback. The loopback patterns accept any port and any path. Local clients need that: they pick a free port, and some, such as Codex, add an ID to the callback path. The claude.ai pattern serves claude.ai, Claude Desktop, and the other hosted Claude apps.
 
 The `experimentalRefreshToken` block lets clients renew their sign-in. By default, a refresh token lasts 30 days before rotation (`tokenLifetime`). A session lasts up to one year across rotations (`maxRotationLifetime`). Each user holds up to 20 refresh tokens (`maxTokensPerUser`). Refresh also needs the user's entity in the catalog.
 
@@ -112,9 +112,9 @@ By default, `allowedClientIdPatterns` accepts documents from claude.ai, vscode.d
 
 ### Enable the consent page
 
-After sign-in, the browser opens the consent page at `/oauth2/authorize/<session>`. The frontend route comes from the `backstage-plugin-auth` plugin, which the catalog index ships disabled. Without it, the authorize redirect ends on a 404 page.
+After sign-in, the browser opens the consent page at `/oauth2/authorize/<session>`. The frontend route comes from the `backstage-plugin-auth` plugin, which the catalog index ships disabled. Without it, the authorize redirect ends on the portal's not-found page.
 
-Enable the plugin with this entry. On the local stack, add it to the operator plugin file. On Kubernetes, add it under `global.dynamic.plugins` in the chart values.
+Enable the plugin with this entry. On the local stack, add it to the operator plugin file.
 
 ```yaml
 plugins:
