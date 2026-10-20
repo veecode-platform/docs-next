@@ -12,7 +12,7 @@ The `mcp-actions-backend` module is a Marketplace plugin. Install it from the Ex
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/backstage-plugin-mcp-actions-backend@sha256:d4d24e08d7630eb352fa7e6dc1da797ebc4e667aba347575dd94d4bcde82e8e2
+  - package: oci://quay.io/veecode/backstage-plugin-mcp-actions-backend:{{inherit}}
     disabled: false
     pluginConfig:
       backend:
@@ -32,15 +32,17 @@ The tool sets for each domain come from separate Marketplace modules. Install th
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-software-catalog-mcp-extras@sha256:908e807eb7733d34cd5c1bb2061df41905ac8565c17ba46c7eea63c94c02ca5d
+  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-software-catalog-mcp-extras:{{inherit}}
     disabled: false
-  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-techdocs-mcp-extras@sha256:f8ddd8242bab97849548c5acdb212c98bd979b19948279122fc116d40f910947
+  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-techdocs-mcp-extras:{{inherit}}
     disabled: false
-  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-scaffolder-mcp-extras@sha256:43bed3ca2ed9f8b737d8c4a58f99260a35fc853013183969140e55cc3af62098
+  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-scaffolder-mcp-extras:{{inherit}}
     disabled: false
-  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-kubernetes-mcp-extras@sha256:1a75f47882b587fca47c5fb509814115c89ef6fcafa7f50e027e4abb041bbc4f
+  - package: oci://quay.io/veecode/red-hat-developer-hub-backstage-plugin-kubernetes-mcp-extras:{{inherit}}
     disabled: false
 ```
+
+The `{{inherit}}` tag installs the version that the catalog index of your DevPortal release ships. On Kubernetes, put the same entries under `global.dynamic.plugins` and write the tag as `{{ "{{inherit}}" }}`, as the example in [Upgrade DevPortal 3.x](../installation-guide/production-setup/upgrade.md) shows.
 
 The extras register their tools with the MCP server:
 
@@ -78,7 +80,7 @@ To have each user sign in with their own identity, see [Sign in as the user with
 
 ## Sign in as the user with OAuth
 
-With OAuth, each user signs in to DevPortal and approves the client on a consent page. The tools then run with that user's permissions. The client sends no `Authorization` header. It opens the browser for sign-in and consent instead.
+With OAuth, each user signs in to DevPortal and approves the client on a consent page. The tools then run with that user's permissions. Per-user OAuth needs DevPortal 3.1 or later. The client configuration contains no token. The client opens the browser for sign-in and consent, then sends the access token it receives.
 
 ### Turn on OAuth in app config
 
@@ -89,19 +91,16 @@ auth:
   clientIdMetadataDocuments:
     enabled: true
     allowedRedirectUriPatterns:
-      - 'http://127.0.0.1:*/callback'
-      - 'http://localhost:*/callback'
+      - 'http://127.0.0.1:*/*'
+      - 'http://localhost:*/*'
       - 'https://claude.ai/api/mcp/auth_callback'
   experimentalRefreshToken:
     enabled: true
-    tokenLifetime: { days: 30 }
-    maxRotationLifetime: { years: 1 }
-    maxTokensPerUser: 20
 ```
 
-The loopback patterns serve local clients such as Claude Code, which open a callback on a local port. The claude.ai pattern serves claude.ai and Claude Desktop connectors.
+Setting `allowedRedirectUriPatterns` replaces the default loopback patterns, so the list repeats them and adds the claude.ai callback. The loopback patterns accept any port and any path. Local clients need that: they pick a free port, and some, such as Codex, add an ID to the callback path. The claude.ai pattern serves claude.ai, Claude Desktop, and the other hosted Claude apps.
 
-The `experimentalRefreshToken` block lets clients refresh their sign-in. The values above set a 30-day token lifetime, a one-year maximum rotation lifetime, and up to 20 tokens per user.
+The `experimentalRefreshToken` block lets clients renew their sign-in. By default, a refresh token lasts 30 days before rotation (`tokenLifetime`). A session lasts up to one year across rotations (`maxRotationLifetime`). Each user holds up to 20 refresh tokens (`maxTokensPerUser`). Refresh also needs the user's entity in the catalog.
 
 ### Client ID Metadata Documents (recommended)
 
@@ -109,7 +108,7 @@ Client ID Metadata Documents (CIMD) is the recommended path. The client sends an
 
 Claude's document is `https://claude.ai/oauth/mcp-oauth-client-metadata`. Claude Code's document is `https://claude.ai/oauth/claude-code-client-metadata`. The portal must reach claude.ai over outbound HTTPS to fetch them.
 
-By default, `allowedClientIdPatterns` accepts documents from claude.ai, vscode.dev, the Codex documents on chatgpt.com, and the portal's own CLI document at `<portal-host>/api/auth/.well-known/oauth-client/cli.json`. Set `allowedClientIdPatterns` only to narrow that list.
+By default, `allowedClientIdPatterns` accepts documents from claude.ai, vscode.dev, the Codex documents on chatgpt.com, and the portal's own CLI document at `<portal-host>/api/auth/.well-known/oauth-client/cli.json`. Setting `allowedClientIdPatterns` replaces that list. The one exception is the portal's own CLI document, which the portal always adds back. Repeat the other defaults you want to keep.
 
 ### Enable the consent page
 
@@ -119,15 +118,25 @@ Enable the plugin with this entry. On the local stack, add it to the operator pl
 
 ```yaml
 plugins:
-  - package: oci://quay.io/veecode/backstage-plugin-auth:{{inherit}}!backstage-plugin-auth
+  - package: oci://quay.io/veecode/backstage-plugin-auth:{{inherit}}
     disabled: false
 ```
 
-On Kubernetes, write the tag as `{{ "{{inherit}}" }}` and nest the entry under `global.dynamic.plugins`. The `{{inherit}}` tag keeps the version the catalog index gives the plugin. The index entry already declares the `/oauth2/*` route, so do not add a `pluginConfig` block here. An override that sets `pluginConfig` replaces the index configuration.
+On Kubernetes, use this form in the chart values:
+
+```yaml
+global:
+  dynamic:
+    plugins:
+      - package: oci://quay.io/veecode/backstage-plugin-auth:{{ "{{inherit}}" }}
+        disabled: false
+```
+
+The `{{inherit}}` tag keeps the version the catalog index gives the plugin. The index entry already declares the `/oauth2/*` route, so do not add a `pluginConfig` block here. An override that sets `pluginConfig` replaces the index configuration.
 
 ### Connect with OAuth
 
-Once `mcp-actions-backend` is installed, the portal serves the OAuth discovery documents. The client finds the authorization server on its own, so you configure nothing else for discovery.
+With DevPortal 3.1, `mcp-actions-backend` serves the OAuth discovery documents when CIMD or Dynamic Client Registration (DCR) is on. The documents list the scopes clients should request. The client finds the authorization server on its own, so you configure nothing else for discovery.
 
 With OAuth, the client configuration has no `Authorization` header. The client opens the browser for sign-in and consent. For Claude Code, run these two commands:
 
@@ -138,7 +147,7 @@ claude mcp login devportal
 
 The `oauth.scopes` value asks for `offline_access`, so the client gets a refresh token and stays signed in after the one-hour access token expires. `--scope user` makes the server available in every folder, while the default scope covers only the current folder. `claude mcp login` opens the browser for sign-in and the consent page, where the user approves with **Authorize**.
 
-claude.ai and Claude Desktop add the same URL as a custom connector.
+claude.ai and Claude Desktop add the same URL as a custom connector. These hosted Claude apps reach the portal from Anthropic's servers, not from the user's machine. The portal's MCP endpoint and its `/api/auth` discovery must therefore accept connections from [Anthropic's published IP address ranges](https://platform.claude.com/docs/en/api/ip-addresses). Claude Code signs in from the user's machine.
 
 ### Dynamic Client Registration (deprecated)
 
@@ -150,18 +159,18 @@ Keep DCR on only for clients that cannot use CIMD. claude.ai and Claude Code pre
 auth:
   experimentalDynamicClientRegistration:
     enabled: true
-    allowedRedirectUriPatterns:
-      - 'http://127.0.0.1:*/callback'
-      - 'http://localhost:*/callback'
-      - 'https://claude.ai/api/mcp/auth_callback'
 ```
+
+Cursor connects through DCR. By default, the DCR redirect patterns accept loopback callbacks on any port and path, plus the Cursor callbacks `cursor://*` and `https://www.cursor.com/*`. Setting `allowedRedirectUriPatterns` replaces those defaults.
 
 ## Troubleshooting
 
 - Client gets `401 Unauthorized`: the `Authorization` header is missing or the token does not match `MCP_TOKEN`. Confirm the environment variable reached the backend.
 - No tools listed: the extras modules are not installed or the stack was not recreated after adding them. Check the install service logs for their entries.
 - Connection refused on the local stack: use the published portal address and port (`DEVPORTAL_PORT`), not the container-internal address.
-- Client gets `400 Failed to fetch client metadata`: the portal cannot reach the metadata URL that the client sent as its `client_id`. Check outbound HTTPS from the portal to that host.
-- Client gets `Invalid redirect_uri`: the callback address does not match any entry in `allowedRedirectUriPatterns`. Add a pattern for that address.
-- Browser shows a 404 after sign-in: the `backstage-plugin-auth` plugin is not enabled. See [Enable the consent page](#enable-the-consent-page).
+- Browser shows `400 Failed to fetch client metadata` at the authorize URL: the portal cannot fetch the metadata URL that the client sent as `client_id`. The fetch fails on a non-2xx response, a redirect, a timeout of 10 seconds, or a DNS error. Check outbound HTTPS from the portal to the host in that URL.
+- `Invalid client_id URL` means the metadata host resolves to a private or non-public address, and the portal refuses that address.
+- `Invalid redirect_uri`: the callback matches no pattern in `allowedRedirectUriPatterns`, so add one. When the message ends in `not registered in client metadata`, the client's own metadata document does not list that callback, and no portal setting fixes it.
+- Browser shows the portal's not-found page after sign-in when the `backstage-plugin-auth` plugin is not enabled. See [Enable the consent page](#enable-the-consent-page).
+- claude.ai cannot connect, but Claude Code can, when the portal does not accept connections from Anthropic's published IP address ranges.
 - Startup log shows a DCR deprecation warning: this is expected while `experimentalDynamicClientRegistration` is on. Turn DCR off when no client needs it.
