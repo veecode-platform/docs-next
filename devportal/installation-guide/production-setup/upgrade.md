@@ -30,6 +30,25 @@ Chart 1.0.4 keeps image 3.0.3 and changes two defaults. Check your stored values
 
 If a 3.0.0 deployment outside this chart runs the image with SQLite, change its image reference to 3.0.3 (the digest is on the release sheet). The backup and restore steps in this guide do not apply to it.
 
+## Upgrade to chart 1.1.1
+
+Chart 1.1.1 keeps DevPortal 3.1.0 and moves only the catalog index, to `bs_1.54.9_20261020T201546` (`sha256:b6e517e20575ec05618efb02ed86f8f4817403bf4763492a757516a0286008e9`). The new index fixes the MCP tools of scaffolder-mcp-extras, techdocs-mcp-extras and announcements-backend, which the index ships disabled. The [3.1.0 release sheet](../../release-sheets/release-sheet-3-1-0.md#fixed-issues) lists the fixes.
+
+From chart 1.1.0, replace the six release lines of Step 1 with these, since the image does not change:
+
+```bash
+export CHART_FROM=1.1.0
+export IMAGE_FROM_VERSION=3.1.0
+export IMAGE_FROM=docker.io/veecode/devportal@sha256:fe33373b7e5dc536f04d1878519bb53862a769b46869f78f829b198a30e5246b
+export CHART_TO=1.1.1
+export IMAGE_TO_VERSION=3.1.0
+export IMAGE_TO=docker.io/veecode/devportal@sha256:fe33373b7e5dc536f04d1878519bb53862a769b46869f78f829b198a30e5246b
+```
+
+If your values set `global.catalogIndex.image`, point it at the new index or remove the override. Otherwise the upgrade keeps your index.
+
+From chart 1.0.x or 3.0.x, follow [Upgrade to chart 1.1.0](#upgrade-to-chart-110) with `CHART_TO=1.1.1`. The two charts differ only in the catalog index.
+
 ## Upgrade to chart 1.1.0
 
 Chart 1.1.0 installs DevPortal 3.1.0. If you upgrade to it from chart 1.0.x or from 3.0.x, read this section before Step 1. The steps stay the same, with the changes below. VeeCode tested this upgrade from chart 1.0.4 only. Also read the [3.1.0 release sheet](../../release-sheets/release-sheet-3-1-0.md).
