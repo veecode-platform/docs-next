@@ -176,7 +176,7 @@ auth:
       - 'https://www.cursor.com/agents/mcp/oauth/callback'
 ```
 
-`cursor://*` accepts any `cursor://` URL. Such a callback opens the app that the user's system registered for that scheme, not a web page.
+`cursor://*` accepts any host and path under `cursor://`. Such a callback opens the app that the user's system registered for that scheme, not a web page.
 
 ## Troubleshooting
 
