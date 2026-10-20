@@ -40,7 +40,7 @@ Check these before you upgrade. The full upgrade steps are on the [upgrade page]
 
 - The Marketplace saves the YAML typed on a plugin's install or edit page. Before, the portal stored the configuration already saved or the package's first example. An entry that comes without `pluginConfig` still gets the package's first example.
 - The Marketplace refuses YAML with a syntax error when you install a plugin or save its configuration. The install page shows the line and column of the first error.
-- Chart 1.1.1 moves the catalog index to `bs_1.54.9_20261020T201546` and keeps image 3.1.0. The new index fixes the MCP tools of three plugins. The index ships these plugins disabled, so the fixes apply when you enable them:
+- Chart 1.1.1 moves the catalog index to `bs_1.54.9_20261020T201546` and keeps image 3.1.0. The new index fixes the MCP tools of three plugins. The index ships these plugins disabled, so the fixes apply when you enable them with an `{{inherit}}` entry in `global.dynamic.plugins`. A plugin enabled from the **Extensions** page keeps the artifact digest stored at its first install, so the new index does not reach it; this comes from the installer code and was not tested:
   - scaffolder-mcp-extras 0.4.5-veecode.1: `list-scaffolder-actions` and `validate-scaffolder` no longer fail with `Missing credentials`.
   - techdocs-mcp-extras 0.2.7-veecode.2: `fetch-techdocs` and `retrieve-techdocs-content` report the real build date. Chart 1.1.0 reported a date in the year +058772.
   - announcements-backend 0.28.2-veecode.1: `list-announcements`, `get-announcement` and `create-announcement` accept an announcement without `on_behalf_of`. Chart 1.1.0 failed with `Expected string, received null`. The REST API still returns `on_behalf_of: null` for such an announcement.
@@ -58,7 +58,7 @@ Use these values together. Pin the image by its digest.
 | --- | --- |
 | Image | `docker.io/veecode/devportal:3.1.0@sha256:fe33373b7e5dc536f04d1878519bb53862a769b46869f78f829b198a30e5246b` |
 | Image digest | `sha256:fe33373b7e5dc536f04d1878519bb53862a769b46869f78f829b198a30e5246b` |
-| Chart | `devportal` 1.1.1 (1.1.0 at release) |
+| Chart | `devportal` 1.1.1 (1.1.0 on 2026-10-15) |
 | Chart checksum (SHA-256) | `c011e1af3899aa4d5c7e13123071623a0e934a875a32d15484a7bfd21d4ac0bb` (1.1.1); `061ab853c41cf05d5cc537d5c7c331290c6dd9c46cc756a6e6546a7acdc06a3e` (1.1.0) |
 | Backstage version | 1.54.9 |
 | Plugin tag line | `bs_1.54.9` |
@@ -147,7 +147,7 @@ The catalog index enables these 18 plugins. Protected plugins cannot be disabled
 - Scanner: Trivy `0.74.0`, database dated `2026-10-15`.
 - Critical vulnerabilities with a fix and no live exception: `0`.
 - Qualification run: `https://github.com/veecode-platform/devportal-chart/actions/runs/38808478011`.
-- Chart 1.1.1: the qualification of the chart release, `https://github.com/veecode-platform/devportal-chart/actions/runs/39494912509`, scanned the same image with the database dated `2026-10-20`. It found `0` critical vulnerabilities with a fix and no live exception, and 11 high (9 with a fix), 51 medium and 7 low findings that no exception covers. The table below is the scan at release.
+- Chart 1.1.1: the qualification of the published package (`devportal-1.1.1.tgz`, SHA-256 `c011e1af…`), `https://github.com/veecode-platform/devportal-chart/actions/runs/39499796663`, scanned the same image with the database dated `2026-10-20`. It found `0` critical vulnerabilities with a fix and no live exception, and 11 high (9 with a fix), 51 medium and 7 low findings that no exception covers. The table below is the scan at release.
 
 | Severity | Reported | With a fix | Accepted as an exception |
 | --- | ---: | ---: | ---: |

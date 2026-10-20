@@ -45,9 +45,20 @@ export IMAGE_TO_VERSION=3.1.0
 export IMAGE_TO=docker.io/veecode/devportal@sha256:fe33373b7e5dc536f04d1878519bb53862a769b46869f78f829b198a30e5246b
 ```
 
-If your values set `global.catalogIndex.image`, point it at the new index or remove the override. Otherwise the upgrade keeps your index.
+If your values set `global.catalogIndex.image`, point it at the new index or remove the override. If you keep the override, the upgrade keeps the index it names. Without an override, the chart moves the portal to the new index. Do not add `--reuse-values` to the Step 3 command: it keeps the previous release's values, including the 1.1.0 index.
 
-From chart 1.0.x or 3.0.x, follow [Upgrade to chart 1.1.0](#upgrade-to-chart-110) with `CHART_TO=1.1.1`. The two charts differ only in the catalog index.
+An `{{inherit}}` entry in `global.dynamic.plugins` follows the new index by itself. A plugin enabled from the **Extensions** page is different: the installer reuses the artifact digest it stored when the plugin was first installed, so the new index does not reach it. This comes from the installer code and was not tested. To get the fixes for a plugin you enabled there, enable it with an `{{inherit}}` entry instead.
+
+The image does not change, so the image check in Step 4 passes before and after the upgrade. In Step 4, also check the index:
+
+```bash
+index=$(kubectl --namespace "$NAMESPACE" get "deployment/$RELEASE-developer-hub" \
+  -o jsonpath='{.spec.template.spec.initContainers[?(@.name=="install-dynamic-plugins")].env[?(@.name=="CATALOG_INDEX_IMAGE")].value}')
+printf '%s\n' "$index"
+test "$index" = "quay.io/veecode/plugin-catalog-index@sha256:b6e517e20575ec05618efb02ed86f8f4817403bf4763492a757516a0286008e9"
+```
+
+From chart 1.0.x or 3.0.x, follow [Upgrade to chart 1.1.0](#upgrade-to-chart-110) and read every chart 1.1.0 in that section as 1.1.1, including `CHART_TO` and the `--version` of `helm show values`. The two charts differ only in the catalog index.
 
 ## Upgrade to chart 1.1.0
 
