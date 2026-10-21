@@ -47,7 +47,7 @@ export IMAGE_TO=docker.io/veecode/devportal@sha256:726cc70543dd5a122e4ffcbc7fe97
 
 If your values set `global.catalogIndex.image`, point it at the new index or remove the override. If you keep the override, the upgrade keeps the index it names, and the Home page keeps homepage 1.0.3. Do not add `--reuse-values` to the Step 3 command: it keeps the previous release's values, including the 3.1.0 image and the previous index.
 
-In Step 4, the image check compares the portal with the 3.1.1 digest in `IMAGE_TO`. Also check the index:
+In Step 4, the image check compares the portal with the 3.1.1 digest in `IMAGE_TO`. Also check the index, unless you kept an override of `global.catalogIndex.image`:
 
 ```bash
 index=$(kubectl --namespace "$NAMESPACE" get "deployment/$RELEASE-developer-hub" \
@@ -56,7 +56,15 @@ printf '%s\n' "$index"
 test "$index" = "quay.io/veecode/plugin-catalog-index@sha256:6b30147c2146dda4bc8f607c04cc37135c02e41cc297a3bfcb4af78ef702aefa"
 ```
 
-From chart 1.0.x or 3.0.x, follow [Upgrade to chart 1.1.0](#upgrade-to-chart-110) and read every chart 1.1.0 in that section as 1.1.2, including `CHART_TO` and the `--version` of `helm show values`. Read image 3.1.0 as 3.1.1, and set `IMAGE_TO_VERSION=3.1.1` and `IMAGE_TO` to the 3.1.1 digest above.
+From chart 1.0.x or 3.0.x, follow [Upgrade to chart 1.1.0](#upgrade-to-chart-110), with these three Step 1 lines in place of the three lines that section gives:
+
+```bash
+export CHART_TO=1.1.2
+export IMAGE_TO_VERSION=3.1.1
+export IMAGE_TO=docker.io/veecode/devportal@sha256:726cc70543dd5a122e4ffcbc7fe9734f9b25366e39b775cd4a86e9c68f7c6f26
+```
+
+Read the other mentions of chart 1.1.0 and image 3.1.0 in that section as chart 1.1.2 and image 3.1.1, including the `--version` of `helm show values`. The sentences that say what VeeCode tested still describe chart 1.1.0 and image 3.1.0.
 
 ## Upgrade to chart 1.1.1
 
@@ -214,6 +222,8 @@ Step 5 returns the portal to the chart in `CHART_FROM`. VeeCode tested a rollbac
 ### Upgrade from 3.0.x for a security fix
 
 DevPortal 3.0.x includes `@backstage/plugin-scaffolder-backend` 4.0.1. That version is in the affected range of [GHSA-g2v8-7jhw-pp8p](https://github.com/advisories/GHSA-g2v8-7jhw-pp8p) (CVE-2026-106501), a critical sensitive-information exposure issue in the Scaffolder with a CVSS score of 9.6. DevPortal 3.1.0 includes `@backstage/plugin-scaffolder-backend` 4.1.0, which fixes the issue.
+
+The 3.0.x and 3.1.0 images also include `certifi` 2024.7.4 in the TechDocs Python environment. That version is in the affected range of [GHSA-6q48-6c7w-9gw2](https://github.com/advisories/GHSA-6q48-6c7w-9gw2), a critical issue published on 2026-10-20. DevPortal 3.1.1 includes `certifi` 2026.10.19, which fixes it, so upgrade to chart 1.1.2 to get both fixes.
 
 ## Step 1: Prepare the release and backup directory
 

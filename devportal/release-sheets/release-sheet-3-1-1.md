@@ -29,7 +29,7 @@ Release date: 2026-10-21
 
 ### Fixed security issues
 
-- GHSA-6q48-6c7w-9gw2, critical, in `certifi`, which the image's TechDocs Python environment uses. `certifi` bundled emSign root certificates whose intermediate CA keys were compromised. `certifi` moves from 2024.7.4 to 2026.10.19. The advisory has no CVE ID and was published on 2026-10-20, after 3.1.0 shipped.
+- GHSA-6q48-6c7w-9gw2, critical, in `certifi`, which the image's TechDocs Python environment uses. `certifi` bundled emSign root certificates whose intermediate CA keys were compromised. `certifi` moves from 2024.7.4 to 2026.10.19. The advisory has no CVE ID and was published on 2026-10-20, after 3.1.0 shipped. The 3.0.x images include the same `certifi` version.
 
 3.1.1 changes only `certifi` against 3.1.0.
 
@@ -130,6 +130,7 @@ The catalog index enables these 18 plugins. Protected plugins cannot be disabled
 - Scanner: Trivy `0.74.0`, database dated `2026-10-21`.
 - Critical vulnerabilities with a fix and no live exception: `0`.
 - Qualification run: `https://github.com/veecode-platform/devportal-chart/actions/runs/39664942005`.
+- Chart 1.1.2: the qualification of the published package (`devportal-1.1.2.tgz`, SHA-256 `980a4be7…`), `https://github.com/veecode-platform/devportal-chart/actions/runs/39673522641`, installed the same image and catalog index with the same database. It found the same counts as the table below.
 
 | Severity | Reported | With a fix | Accepted as an exception |
 | --- | ---: | ---: | ---: |
